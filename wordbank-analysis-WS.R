@@ -18,38 +18,7 @@ all <- read_csv("Wordbank-WS-191105.csv",
 # (but fine on modern machines)
 rotation <- "promax"
 
-#
-# Functions
-#
-
-score.produces <- function(v) {
-
-  # Apply identical() over character array to compare against "produces" and
-  # not choke on `NA`
-  TF <- sapply(v, function(x) identical(as.character(x), "produces"))
-
-  return(TF)
-
-}
-
-score.complexity <- function(v) {
-
-  # Dummy code "complex" as 1 and "simple" as 0
-  # Missing would also be 0 acc. to the manual 2e
-  score <- ifelse(v == "complex", 1, 0)
-  return(score)
-
-}
-
-score.SONy <- function(v) {
-
-  # Score {often, 2}, {sometimes, 1}, {not yet, 0}
-  score <- ifelse(v == "often", 2,
-                  ifelse(v == "sometimes"), 1, 0)
-
-  return(score)
-
-}
+source("wordbank-functions.R")
 
 ################################################################################
 # Extract demographics
@@ -133,18 +102,6 @@ all.merge <- merge(words.grouped, morph.grouped) %>%
 ################################################################################
 # Factor analysis
 ################################################################################
-
-# A function to apply the factor analysis over a given # of factors, so that
-# they can be saved as a list
-apply.FA <- function(data, factors, rotate = "oblimin", n.iter = 1000) {
-
-  x <- data %>%
-        select(-data_id) %>%
-        fa(nfactors = factors, rotate = rotate, n.iter = n.iter)
-
-  return(x)
-
-}
 
 # Max.factors is the most I want to do, it's max_interpretable + 1
 max.factors <- 5
@@ -296,4 +253,20 @@ ggplot(RMSEA, aes(x = n, y = RMSEA)) +
 all.lex <- all.merge %>%
             select(data_id, matches("^[a-z]", ignore.case = FALSE)) %>%
             mutate(mean = select(., -matches("data_id")) %>% 
-                     rowMeans(.))
+                     rowMeans(.)) %>%
+            add_column(age = all.demo$age, .after = "data_id")
+
+bcp.lex <- BCP.data %>%
+            select(-matches("^[A-Z]", ignore.case = FALSE)) %>%
+            mutate(mean = select(., -matches("demo.")) %>% 
+                     rowMeans(.)) 
+
+ggplot(NULL) +
+  geom_point(data = all.lex,
+              aes(x = age, y = mean),
+              position = position_jitter(width = 0.4, height = 0), 
+              alpha = 0.1)+
+  geom_point(data = bcp.lex,
+             aes(x = demo.age_bin, y = mean),
+             position = position_jitter(width = 0.4, height = 0), 
+             color = "red")
