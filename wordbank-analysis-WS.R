@@ -12,7 +12,7 @@ library(viridis)
 library(ggExtra)
 
 # This is large, so it takes a while!
-all <- read_csv("Wordbank-WS-191105.csv",
+all <- read_csv("data/Wordbank-WS-191105.csv",
                 col_types = cols(.default = "f", age = "i"))
 
 # Kyle says Promax is orthogonal, followed by an oblique correction
@@ -190,7 +190,7 @@ ggplot(plot.FA2.summary, aes(x = age, y = mean, color = factor,
 
 # Try stuff
 
-BCP.data <- read_csv("BCP-scores-191107.csv")
+BCP.data <- read_csv("BCP-scores-191112.csv")
 
 BCP.estimate <- factor.scores(BCP.data[, -(1:2)],
                               factor.analyses[[2]],
@@ -281,7 +281,17 @@ ggplot(NULL) +
   geom_point(data = bcp.lex,
              aes(x = demo.age_bin, y = mean),
              position = position_jitter(width = 0.4, height = 0),
-             color = "red")
+             color = "red") +
+  stat_quantile(data = all.lex,
+                aes(x = age, y = mean),
+                size = 1.5, alpha = 0.5,
+                quantiles = c(0.25, 0.75),
+                formula = y ~ bs(x, df=4))+
+  stat_quantile(data = bcp.lex,
+                aes(x = demo.age_bin, y = mean),
+                size = 1.5, alpha = 0.5, color = "red",
+                quantiles = c(0.25, 0.75),
+                formula = y ~ bs(x, df=4))
 
 ################################################################################
 # Can we estimate SYNTAX categories from lexicosyntactic categories

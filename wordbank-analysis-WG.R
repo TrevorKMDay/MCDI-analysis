@@ -108,8 +108,9 @@ values <- factor.analyses[[3]]$scores %>%
 
 values.demo <- cbind.data.frame(g.demo, values)
 
-ggplot(values.demo, aes(x = lexical, y = MR3, color = age)) +
+ggplot(values.demo, aes(x = lexical, y = MR2, color = age)) +
   geom_point(alpha = 0.5) +
   geom_abline(slope = 1, intercept = 0, color = "black", size = 2,
               alpha = 0.5) +
-  scale_color_viridis()
+  scale_color_viridis() +
+  geom_smooth(method = "lm")

@@ -2,27 +2,28 @@
 # Functions
 #
 
-score.produces <- function(v, score.understands = FALSE) {
+score.produces <- function(v, score.understands = FALSE,
+                           produces = "produces") {
 
   # Apply identical() over character array to compare against "produces" and
   # not choke on `NA`
   if (!score.understands) {
-    vals <- sapply(v, function(x) identical(as.character(x), "produces"))
+    vals <- sapply(v, function(x) identical(as.character(x), produces))
   } else {
     vals <- ifelse(is.na(v), 0,
                  ifelse(v == "understands", 1,
-                        ifelse(v == "produces", 2, NA)))
+                        ifelse(v == produces, 2, NA)))
   }
 
   return(vals)
 
 }
 
-score.complexity <- function(v) {
+score.complexity <- function(v, cx = "complex") {
 
   # Dummy code "complex" as 1 and "simple" as 0
   # Missing would also be 0 acc. to the manual 2e
-  score <- ifelse(v == "complex", 1, 0)
+  score <- ifelse(v == cx, 1, 0)
   return(score)
 
 }
