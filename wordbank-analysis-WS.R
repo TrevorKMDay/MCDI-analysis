@@ -4,10 +4,12 @@ if(.Platform$OS.type == "unix") {
   setwd("G:/My Drive/Research/MCDI/MCDI-analysis/")
 }
 
+library(broom)
 library(tidyverse)
 library(tidyselect)
 library(psych)
 library(viridis)
+library(ggExtra)
 
 # This is large, so it takes a while!
 all <- read_csv("Wordbank-WS-191105.csv",
@@ -95,9 +97,19 @@ syntax.grouped <- syntax %>%
 
 ## Merge ##
 
-# NOTE: check this still works
+# By default, fa() had been imputing missing values in COMPLEXITY as the median
+# rather than 0, which would be what we expect. Do that replacement here.
+# all.merge <- merge(words.grouped, morph.grouped) %>%
+#                merge(syntax.grouped) %>%
+#                 mutate(COMPLEXITY = replace(COMPLEXITY, is.na(COMPLEXITY), 0))
+
+# Remove everyone with COMPLEXITY as NA (that means the whole section was
+# skipped and so the values are inaccurate.)
 all.merge <- merge(words.grouped, morph.grouped) %>%
-               merge(syntax.grouped)
+                merge(syntax.grouped) %>%
+                filter(!is.na(.$COMPLEXITY))
+
+keep <- !is.na(syntax.grouped$COMPLEXITY)
 
 ################################################################################
 # Factor analysis
@@ -146,7 +158,7 @@ fa.parallel(all.merge[, -1], fa = "fa")
 
 scores.FA2 <- factor.analyses[[2]]$scores
 
-plot.FA2.wide <- cbind.data.frame(all.demo, scores.FA2)
+plot.FA2.wide <- cbind.data.frame(all.demo[keep, ], scores.FA2)
 plot.FA2 <- plot.FA2.wide%>%
               pivot_longer(starts_with("MR"),
                            names_to = "factor", values_to = "value")
@@ -206,7 +218,7 @@ ggplot(NULL) +
               aes(x = age, y = value),
               color = "blue", width = 0.3, height = 0,
               alpha = 0.1) +
-  geom_point(data = BCP.scores, 
+  geom_point(data = BCP.scores,
              aes(x = demo.age_bin, y = value),
              color = "red")
 
@@ -222,7 +234,7 @@ ggplot(plot.FA2.wide, aes(x = MR1, y = MR2)) +
   scale_color_viridis() +
   geom_abline(slope = 1, intercept = 0, color = "black", size = 2,
               alpha = 0.5) +
-  labs(x = "Lexical score", y = "Syntax score") 
+  labs(x = "Lexical score", y = "Syntax score")
 
 ggplot(plot.FA2.wide, aes(x = MR1, y = MR2)) +
   geom_point(alpha = 0.5, aes(color = age)) +
@@ -244,7 +256,7 @@ RMSEA <- sapply(factor.analyses, function(x) x$RMSEA) %>%
           select(-confidence) %>%
           add_column(n = 1:5, .before = 1)
 
-ggplot(RMSEA, aes(x = n, y = RMSEA)) + 
+ggplot(RMSEA, aes(x = n, y = RMSEA)) +
   geom_point() +
   geom_errorbar(aes(ymin = lower,  ymax = upper), width = 0.1)
 
@@ -252,21 +264,121 @@ ggplot(RMSEA, aes(x = n, y = RMSEA)) +
 
 all.lex <- all.merge %>%
             select(data_id, matches("^[a-z]", ignore.case = FALSE)) %>%
-            mutate(mean = select(., -matches("data_id")) %>% 
+            mutate(mean = select(., -matches("data_id")) %>%
                      rowMeans(.)) %>%
-            add_column(age = all.demo$age, .after = "data_id")
+            add_column(age = all.demo[keep, ]$age, .after = "data_id")
 
 bcp.lex <- BCP.data %>%
             select(-matches("^[A-Z]", ignore.case = FALSE)) %>%
-            mutate(mean = select(., -matches("demo.")) %>% 
-                     rowMeans(.)) 
+            mutate(mean = select(., -matches("demo.")) %>%
+                     rowMeans(.))
 
 ggplot(NULL) +
   geom_point(data = all.lex,
               aes(x = age, y = mean),
-              position = position_jitter(width = 0.4, height = 0), 
+              position = position_jitter(width = 0.4, height = 0),
               alpha = 0.1)+
   geom_point(data = bcp.lex,
              aes(x = demo.age_bin, y = mean),
-             position = position_jitter(width = 0.4, height = 0), 
+             position = position_jitter(width = 0.4, height = 0),
              color = "red")
+
+################################################################################
+# Can we estimate SYNTAX categories from lexicosyntactic categories
+################################################################################
+
+# Get the relevant columns
+# Remove anyone who has NA values in COMPLEXITY because they didn't fill out the
+#  last section
+est.syntax <- all.merge %>%
+                select(data_id, time_words, pronouns,
+                       question_words, locations, quantifiers, helping_verbs,
+                       connecting_words, matches("^[WC]", ignore.case = FALSE)) %>%
+                add_column(age = all.demo[keep, ]$age, .after = "data_id")
+
+# syntax$COMPLEXITY[is.na(syntax$COMPLEXITY)] <- 0
+
+SYNTAX <- c("WORD_FORMS_NOUNS", "WORD_FORMS_VERBS",
+            "WORD_ENDINGS_NOUNS", "WORD_ENDINGS_VERBS",
+            "COMPLEXITY")
+formula <- paste0("~ age + time_words + pronouns + question_words + locations",
+                  "+ quantifiers + helping_verbs + connecting_words")
+
+# Provide estimations for each of the 5 syntax categories in a list
+estimations <- lapply(SYNTAX,
+                      function(x) lm(data = est.syntax,
+                                      formula = paste(x, formula)) %>%
+                                    augment() )
+
+for (i in 1:length(estimations)) {
+
+  x <- estimations[[i]]
+
+  plot <- ggplot(x, aes(x = age, y = .resid)) +
+            geom_point(position = position_jitter(width = 0.4, height = 0),
+                       alpha = 0.2) +
+            scale_y_continuous(limits = c(-1, 1)) +
+            geom_smooth(method = "lm") +
+            labs(x = "Age (mo)", y = "Residual", title = SYNTAX[i])
+
+  margins <- ggMarginal(plot, margins = "both", type = "density")
+
+  dir.create("recapitulateSYNTAX", showWarnings = FALSE)
+
+  png(paste0("recapitulateSYNTAX/", SYNTAX[i], ".png"),
+      width = 10, height = 7, units = "in", res = 300)
+  print(margins)
+  dev.off()
+
+}
+
+estimations.value <- sapply(estimations,
+                            function(x) x$.fitted,
+                            simplify = TRUE)
+colnames(estimations.value) <- paste0(SYNTAX)
+
+# Recapitulate factor scores
+syntax.fit <- all.merge %>%
+                select(-matches("^[WC]", ignore.case = FALSE)) %>%
+                cbind.data.frame(., estimations.value) %>%
+                mutate_all(function(x) replace(x, x<0, 0))
+
+
+# Compare the reapplication of the model
+syntax.fa <- factor.scores(syntax.fit[, -1],
+                            factor.analyses[[2]],
+                            method = "Bartlett",
+                            impute = "mean")
+
+syntax.fa.scores <- as_tibble(syntax.fa$scores)
+colnames(syntax.fa.scores) <- c("MR1.refit", "MR2.refit")
+syntax.fa.scores <- add_column(.data = syntax.fa.scores,
+                               data_id = est.syntax$data_id,
+                               .before = 1)
+
+model.compare <- left_join(plot.FA2.wide, syntax.fa.scores) %>%
+                  mutate(MR1.diff = MR1 - MR1.refit,
+                         MR2.diff = MR2 - MR2.refit,
+                         MR1.err = MR1.diff / MR1,
+                         MR2.err = MR2.diff / MR2) %>%
+                  select(data_id, age, MR1.err, MR2.err) %>%
+                  pivot_longer(c(MR1.err, MR2.err), names_to = "err",
+                               values_to = "value") %>%
+                  right_join(all.merge)
+
+ggplot(model.compare, aes(x = age, y = abs(value), color = COMPLEXITY)) +
+  geom_point(position = position_jitter(width = 0.4), alpha = 0.75) +
+  facet_grid(rows = vars(err), scales = "free") +
+  scale_color_viridis() +
+  scale_y_log10() +
+  geom_hline(aes(yintercept = 1)) +
+  labs(x = "Age (mo)", y = "log(Error)")
+
+model.compare %>%
+    filter(err == "MR1.err", abs(value) > 50)
+
+# Compare a de novo model
+syntax.fa.2 <- fa(syntax.fit[, -1], nfactors = 2, rotate = "oblimin")
+
+fa.diagram(syntax.fa.2)
+
