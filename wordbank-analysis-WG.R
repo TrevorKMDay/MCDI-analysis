@@ -27,11 +27,13 @@ g.demo <- gestures %>%
 mean(g.demo$age)
 sd(g.demo$age)
 
-table(g.demo$sex,
-      useNA = "always")
+table.sex <- table(g.demo$sex, useNA = "always")
+sex.missing <- table.sex[length(table.sex)]
+table.sex / (nrow(g.demo) - sex.missing) 
 
-table(g.demo$mom_ed,
-      useNA = "always")
+table.mom <- table(g.demo$mom_ed, useNA = "always")
+mom.missing <- table.mom[length(table.mom)]
+table.mom / (nrow(g.demo) - mom.missing)
 
 wg.mom_ed <- table(g.demo$mom_ed)
 

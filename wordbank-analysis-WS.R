@@ -12,6 +12,7 @@ library(viridis)
 library(ggExtra)
 library(corrplot)
 library(gridExtra)
+library(ggrepel)
 
 # This is large, so it takes a while!
 sentences.file <- "data/Wordbank-WS-191105.RDS"
@@ -62,6 +63,12 @@ words <- all %>%
           filter(type == "word") %>%
           mutate(produces = score.produces(value))
 
+words.n <- words %>%
+            group_by(data_id, category) %>%
+            summarise(sum = sum(produces)) %>%
+            pivot_wider(c(data_id), names_from = category,
+                        values_from = sum)
+
 # For each ID, count the number of responses in each category, then convert
 # that to a proportion and spread to wide, keeping only ID and 22 columns
 words.grouped <- words %>%
@@ -101,6 +108,12 @@ morphology <- all %>%
                                    "word_endings_verbs")) %>%
                 mutate(produces = score.produces(value))
 
+morph.n <- morphology %>%
+            group_by(data_id, age, type) %>%
+            summarise(sum = sum(produces))  %>%
+            pivot_wider(c(data_id, age), names_from = type,
+                        values_from = sum)
+
 morph.grouped <- morphology %>%
                   group_by(data_id, age, type) %>%
                   summarise(n = n(), sum = sum(produces)) %>%
@@ -128,6 +141,10 @@ ggplot(pivot_longer(data = morph.grouped,
 syntax <- all %>%
             filter(type == "complexity") %>%
             mutate(complexity = score.complexity(value))
+
+syntax.n <- syntax %>%
+              group_by(data_id) %>%
+              summarise(COMPLEXITY = sum(complexity))
 
 # n is constant, but just calculate instead of hardcode
 syntax.grouped <- syntax %>%
@@ -199,7 +216,7 @@ fa.parallel.plot <- all.merge %>%
                       select(-data_id, -age) %>%
                       fa.parallel(fa = "fa")
 
-png("fa_parallel.png", width = 10, height = 6, res = 300, units = "in")
+png("plots/fa_parallel.png", width = 10, height = 6, res = 300, units = "in")
 all.merge %>%
   select(-data_id, -age) %>%
   fa.parallel(fa = "fa")
@@ -222,7 +239,9 @@ ggplot(rmsea, aes(x = factor, y = RMSEA)) +
 
 scores.FA2 <- factor.analyses[[2]]$scores
 
-plot.FA2.wide <- cbind.data.frame(all.demo, scores.FA2)
+plot.FA2.wide <- cbind.data.frame(all.demo, scores.FA2) %>%
+                  as_tibble()
+
 plot.FA2 <- plot.FA2.wide %>%
               pivot_longer(starts_with("MR"),
                            names_to = "factor", values_to = "value")
@@ -259,18 +278,124 @@ ribbon <- ggplot(plot.FA2.summary, aes(x = age, y = mean, color = factor,
 
 smear <- ggplot(plot.FA2.wide, aes(x = MR1, y = MR2, color = age)) +
           scale_color_viridis() +
-          geom_point(alpha = 0.25) + 
+          geom_point(alpha = 0.5) +
           labs(x = "Lexical", y = "Syntactic", color = "Age (mo.)") +
-          geom_abline() +
-          theme(legend.position = "bottom")
+          geom_abline(linetype = "longdash", color = "red", size = 1) +
+          theme(legend.position = "bottom") +
+          geom_smooth(method = "lm", formula = y ~ poly(x, 2), color = "black",
+                      size = 1)
 
-png("lags.png", width = 10, height = 5, units = "in", res = 300)
-grid.arrange(ribbon, smear, nrow = 1)
+scores.poly.model <- lm(MR2 ~ 1 + MR1 + I(MR1^2), data = plot.FA2.wide)
+scores.exp.model <- lm(MR2 ~ exp(MR1), data = plot.FA2.wide)
+
+# Lower is better
+AIC(scores.poly.model)
+AIC(scores.exp.model)
+
+png("plots/lags.png", width = 12, height = 5, units = "in", res = 300)
+grid.arrange(ribbon + labs(title = "(a)"),
+             smear + labs(title = "(b)"), nrow = 1)
 dev.off()
 
-smear + 
+# Lowest (0%) and highest (100%)
+smear +
   geom_label_repel(aes(label = ifelse(plot.FA2.wide$data_id %in% c(130423,
                                                                   134553),
                                      plot.FA2.wide$data_id, "")),
                    color = "black")
 
+################################################################################
+# Other metrics
+
+total.words <- words.n %>%
+                  ungroup() %>%
+                  mutate(total = select(., -data_id) %>% rowSums(),
+                         gt200 = total >= 200) %>%
+                  select(data_id, total, gt200)
+
+plot.FA2.wide2 <- merge(plot.FA2.wide, total.words)
+
+ggplot(plot.FA2.wide2, aes(x = MR1, y = MR2, color = total)) +
+  scale_color_viridis() +
+  geom_point(alpha = 0.5) +
+  labs(x = "Lexical", y = "Syntactic", color = "Total words",
+       title = "Lexical v. syntactic ability, colored by total words") +
+  geom_abline() +
+  theme(legend.position = "bottom")
+
+ggplot(plot.FA2.wide2, aes(x = MR1, y = MR2, color = gt200)) +
+  geom_point(alpha = 0.5) +
+  labs(x = "Lexical", y = "Syntactic", color = "Knows >= 200 words",
+       title = "Lexical v. syntactic ability, colored by words >= 200") +
+  geom_abline() +
+  theme(legend.position = "bottom")
+
+################################################################################
+# One-weight
+
+count <- merge(words.n, morph.n) %>%
+          merge(syntax.n) %>%
+          select(data_id, age, everything()) %>%
+          rename(WORD_FORMS_NOUNS = word_forms_nouns,
+                 WORD_FORMS_VERBS = word_forms_verbs,
+                 WORD_ENDINGS_NOUNS = word_endings_nouns,
+                 WORD_ENDINGS_NOUNS = word_endings_nouns) %>%
+          mutate(COMPLEXITY = replace(COMPLEXITY, is.na(COMPLEXITY), 0))
+
+lexical <- colnames(count)[2:17]
+syntactic <- colnames(count)[18:29]
+one.weight <- count %>%
+                mutate(lex = select(., one_of(lexical)) %>% rowSums(),
+                       syn = select(., one_of(syntactic)) %>% rowSums()) %>%
+                select(data_id, age, lex, syn)
+
+png("plots/1w-smear.png", width = 6, height = 5, units = "in", res = 300)
+
+ggplot(one.weight, aes(x = lex, y = syn, color = age)) +
+  scale_color_viridis() +
+  geom_point(alpha = 0.3) +
+  labs(x = "Lexical", y = "Syntactic", color = "Age (mo.)") +
+  geom_abline(slope = 221 / 596, color = "red", linetype = "longdash",
+              size = 1) +
+  theme(legend.position = "bottom") +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), color = "black")
+
+dev.off()
+
+w1.poly.model <- lm(syn ~ 1 + lex + I(lex ^2), data = one.weight)
+w1.exp.model <- lm(syn ~ a*exp(b+lex), data = one.weight2)
+
+# Lower is better; poly is a clear better fit
+AIC(w1.poly.model)
+AIC(w1.exp.model)
+
+aic <- matrix(NA, 2, 2)
+rownames(aic) <- c("scores", "ones")
+colnames(aic) <- c("poly2", "exp")
+
+aic[1, 1] <- AIC(scores.poly.model)
+aic[1, 2] <- AIC(scores.exp.model)
+aic[2, 1] <- AIC(w1.poly.model)
+aic[2, 2] <- AIC(w1.exp.model)
+
+coxtest(scores.poly.model, scores.exp.model)
+coxtest(w1.poly.model, w1.exp.model)
+
+coxtest(scores.poly.model, w1.poly.model)
+coxtest(scores.exp.model, w1.exp.model)
+
+################################################################################
+# How long until 50% acquired?
+
+all.merge <- select(all.merge, data_id, age, everything())
+
+l15 <- all.merge[, 1:17] %>%
+        mutate(avg = rowMeans(select(., -data_id, -age)))
+l7 <- all.merge[, c(1:2, 18:25)] %>%
+  mutate(avg = rowMeans(select(., -data_id, -age)))
+
+lm.l15 <- lm(avg ~ age, data = l15)
+lm.l7  <- lm(avg ~ age, data = l7)
+
+l15_age50 <- (.5 - lm.l15$coefficients[1]) / lm.l15$coefficients[2]
+l7_age50 <- (.5 - lm.l7$coefficients[1]) / lm.l7$coefficients[2]

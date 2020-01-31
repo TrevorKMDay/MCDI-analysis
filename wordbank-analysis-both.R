@@ -124,6 +124,10 @@ s.words.shd <- sentences.words %>%
                           perc = sum / n) %>%
                 ungroup()
 
+s.words.shd.n <- s.words.shd %>%
+                  pivot_wider(c(data_id, age), values_from = sum,
+                              names_from = category)
+
 sentences.words.sc <- sentences.words %>%
                         mutate(says = score.produces(value)) %>%
                         group_by(data_id, age, category) %>%
@@ -162,8 +166,19 @@ gw.as.sent.wide <- gw.as.sent %>%
                             WORD_ENDINGS_VERBS = 0,
                             COMPLEXITY = 0) %>%
                     add_column(instrument = "WG", .before = 1)
-              
-sentences.scored <- readRDS("WG-scored.rds") %>%
+
+gw.as.sent.count <- gw.as.sent %>%
+                      pivot_wider(c(data_id, age),
+                                  names_from = "category", values_from = sum) %>%
+                      mutate(connecting_words = 0,
+                             WORD_FORMS_NOUNS = 0,
+                             WORD_FORMS_VERBS = 0,
+                             WORD_ENDINGS_NOUNS = 0,
+                             WORD_ENDINGS_VERBS = 0,
+                             COMPLEXITY = 0) %>%
+                      add_column(instrument = "WG", .before = 1)
+
+sentences.scored <- readRDS("WS-scored.rds") %>%
                       add_column(instrument = "WS", .before = 1)
 
 # Bind together. Use sentences first to coerce into correct order w/ bind_rows
@@ -177,13 +192,13 @@ two.factor <- factor.analyses[[2]]
 # Estimate scores
 all.scores <- factor.scores(select(all.together, -data_id, -age, -instrument),
                             two.factor,
-                            method = "Bartlett") 
+                            method = "Bartlett")
 
 all.scores.summary <- all.scores$scores %>%
                         as_tibble() %>%
-                        add_column(data_id = all.together$data_id, 
+                        add_column(data_id = all.together$data_id,
                                    .before = 1) %>%
-                        add_column(age = all.together$age, 
+                        add_column(age = all.together$age,
                                    .after = "data_id") %>%
                         add_column(instrument = as.factor(all.together$instrument),
                                    .after = "age")
@@ -191,16 +206,88 @@ all.scores.summary <- all.scores$scores %>%
 ass.WG <- filter(all.scores.summary, instrument == "WG")
 ass.WS <- filter(all.scores.summary, instrument == "WS")
 
-smear <- ggplot(all.scores.summary, 
-                 aes(x = MR1, y = MR2, color = instrument,
-                     shape = instrument)) +
-            scale_shape_manual(values = c(16, 4)) +
-            geom_point(alpha = 0.5) +
-            labs(x = "Lexical", y = "Syntactic",
-                 color = "Instrument", shape = "Instrument") +
-            geom_abline() +
-            theme(legend.position = "bottom")
+# smear <- 
+  
+ggplot(all.scores.summary, aes(x = MR1, y = MR2)) +
+  scale_shape_manual(values = c(16, 4)) +
+  geom_point(alpha = 0.5, aes(color = instrument, shape = instrument)) +
+  labs(x = "Lexical", y = "Syntactic",
+       color = "Instrument", shape = "Instrument") +
+  geom_abline() +
+  theme(legend.position = "bottom") +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2))
 
-png("both-smear.png", width = 10, height = 5, units = "in", res = 300)
+joint.poly.model <- lm(MR2 ~ 1 + MR1 + I(MR1^2), data = all.scores.summary)
+
+ggplot(all.scores.summary, aes(x = MR1, y = MR2)) +
+  scale_shape_manual(values = c(16, 4)) +
+  geom_point(alpha = 0.5, aes(color = instrument, shape = instrument)) +
+  labs(x = "Lexical", y = "Syntactic",
+       color = "Instrument", shape = "Instrument") +
+  geom_abline() +
+  theme(legend.position = "bottom") +
+  stat_function(fun = function(x) { joint.poly.model$coefficients[1] +
+                                    joint.poly.model$coefficients[2] * x + 
+                                    joint.poly.model$coefficients[3] * x^2
+                                  })
+
+png("plots/both-smear.png", width = 10, height = 5, units = "in", res = 300)
 smear
 dev.off()
+
+##
+
+# One-weight
+sent.count <- readRDS("WS-count.rds") %>%
+                add_column(instrument = "WS", .before = 1)
+
+lexical <- colnames(sent.count)[4:18]
+syntactic <- colnames(sent.count)[19:30]
+count <- bind_rows(sent.count, gw.as.sent.count) %>%
+          mutate(lex = select(., one_of(lexical)) %>% rowSums(),
+                 syn = select(., one_of(syntactic)) %>% rowSums()) %>%
+          select(data_id, age, instrument, lex, syn)
+
+ggplot(count, aes(x = lex, y = syn)) +
+  scale_shape_manual(values = c(16, 4)) +
+  geom_point(alpha = 0.3, aes(color = instrument, shape = instrument)) +
+  labs(x = "Lexical", y = "Syntactic",
+       color = "Instrument", shape = "Instrument") +
+  geom_abline(slope = 221 / 566, color = "red", linetype = "longdash",
+              size = 1) +
+  theme(legend.position = "bottom") +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2)) 
+
+both.1w.poly <- lm(syn ~ poly(lex, 2), data = count)
+
+#
+# Demographics
+#
+
+# Raw model
+lex.age <- lm(lex ~ 1 + age, data = count)
+syn.age <- lm(syn ~ 1 + age, data = count)
+
+g.demo <- gestures %>%
+            select(data_id, age, sex, mom_ed) %>%
+            unique()
+
+s.demo <- sentences %>%
+          select(data_id, age, sex, mom_ed) %>%
+          unique()
+
+gs.demo <- bind_rows(g.demo, s.demo)
+
+mom_ed_levels <- c("Primary", "Some Secondary", "Secondary", "Some College",
+                   "College", "Some Graduate", "Graduate")
+
+mom_ed_levels_n <- c(5, 8, 12, 14, 16, 18, 20)
+
+count.demo <- merge(count, gs.demo, by = c("data_id", "age")) %>%
+                mutate_at("mom_ed", as.character) %>%
+                add_column(mom_ed_n = mom_ed_levels_n[match(.$mom_ed, 
+                                                            mom_ed_levels)])
+
+
+lex.control <- lm(lex ~ 1 + age + sex + mom_ed_n, data = count.demo)
+syn.control <- lm(syn ~ 1 + age + sex + mom_ed_n, data = count.demo)
