@@ -13,6 +13,9 @@ library(viridis)
 gestures <- read_csv("data/Wordbank-WG-191105.csv",
                       col_types = cols(.default = "f", age = "i"))
 
+# filter(gestures, data_id == gestures$data_id[1]) %>%
+#   write_csv("data/g_dict.csv")
+
 source("wordbank-functions.R")
 
 ################################################################################

@@ -206,8 +206,8 @@ all.scores.summary <- all.scores$scores %>%
 ass.WG <- filter(all.scores.summary, instrument == "WG")
 ass.WS <- filter(all.scores.summary, instrument == "WS")
 
-# smear <- 
-  
+# smear <-
+
 ggplot(all.scores.summary, aes(x = MR1, y = MR2)) +
   scale_shape_manual(values = c(16, 4)) +
   geom_point(alpha = 0.5, aes(color = instrument, shape = instrument)) +
@@ -227,7 +227,7 @@ ggplot(all.scores.summary, aes(x = MR1, y = MR2)) +
   geom_abline() +
   theme(legend.position = "bottom") +
   stat_function(fun = function(x) { joint.poly.model$coefficients[1] +
-                                    joint.poly.model$coefficients[2] * x + 
+                                    joint.poly.model$coefficients[2] * x +
                                     joint.poly.model$coefficients[3] * x^2
                                   })
 
@@ -256,7 +256,7 @@ ggplot(count, aes(x = lex, y = syn)) +
   geom_abline(slope = 221 / 566, color = "red", linetype = "longdash",
               size = 1) +
   theme(legend.position = "bottom") +
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2)) 
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2))
 
 both.1w.poly <- lm(syn ~ poly(lex, 2), data = count)
 
@@ -285,9 +285,74 @@ mom_ed_levels_n <- c(5, 8, 12, 14, 16, 18, 20)
 
 count.demo <- merge(count, gs.demo, by = c("data_id", "age")) %>%
                 mutate_at("mom_ed", as.character) %>%
-                add_column(mom_ed_n = mom_ed_levels_n[match(.$mom_ed, 
+                add_column(mom_ed_n = mom_ed_levels_n[match(.$mom_ed,
                                                             mom_ed_levels)])
 
 
 lex.control <- lm(lex ~ 1 + age + sex + mom_ed_n, data = count.demo)
 syn.control <- lm(syn ~ 1 + age + sex + mom_ed_n, data = count.demo)
+
+#
+# How much does WGasWS underestimate WS?
+#
+
+# Score as if all words not in gestures were 0
+sent.words_WG <- sentences.words %>%
+                  mutate(value = replace(value,
+                                         !(definition %in% all.g.words),
+                                         NA))
+
+# Perc
+sent.words_WG.sc <- score.WS(sent.words_WG)[[2]]
+
+sen.merge.plot <- sen.merge %>%
+                    select(data_id, age, category, starts_with("perc.")) %>%
+                    pivot_longer(-c(data_id, age, category))
+
+ggplot(sen.merge.plot, aes(x = age, y = value, color = name)) +
+  stat_smooth(method = "lm", fullrange = TRUE) +
+  facet_wrap(vars(category)) +
+  scale_x_continuous(limits = c(10, 30)) +
+  theme(legend.position = "bottom")
+
+ggplot(sen.merge, aes(x = age, y = perc.gestures - perc.complete)) +
+  geom_point(alpha = 0.01) +
+  geom_abline() +
+  stat_smooth(fullrange = TRUE, method = "lm") +
+  scale_x_continuous(limits = c(10, NA)) +
+  facet_wrap_paginate(vars(category), nrow = 1, ncol = 1, page = 22)
+
+lm.cat <- function(estimates, cat) {
+
+  x <- estimates %>%
+        filter(category == as.character(cat)) %>%
+        mutate(diff = perc.gestures - perc.complete)
+
+  print(x[1,])
+
+  lm.1 <- lm(diff ~ age, data = x)
+
+  return(lm.1)
+
+}
+
+lm.result <- function(lm, x) {
+
+  b <- unname(lm$coefficients[1])
+  m <- unname(lm$coefficients[2])
+
+  y <- m * x + b
+
+  return(y)
+
+}
+
+relationships <- lapply(levels(sen.merge$category),
+                        function(x) lm.cat(sen.merge, x))
+
+names(relationships) <- levels(sen.merge$category)
+
+# For each category, estimate the difference between scores using linear
+# regression at 10 and 16 months
+est.10_16 <- sapply(relationships,
+                    function(x) lm.result(x, c(10, 16)))

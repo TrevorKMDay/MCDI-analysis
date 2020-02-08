@@ -10,10 +10,11 @@ library(psych)
 library(viridis)
 
 source("wordbank-functions.R")
-names <- read_excel("mcdi-sections.xlsx", sheet = 1)
+names <- read_excel("data/mcdi-sections.xlsx", sheet = 1)
 
 # mcdi_all <- read_csv("bcp-mcdi-103019.csv")
-mcdi_all <- read_csv("data/bcp-UMNUNC-mcdi-191112.csv")
+# mcdi_all <- read_csv("data/bcp-UMNUNC-mcdi-191112.csv")
+mcdi_all <- read_csv("data/bcp-UMNUNC-mcdi-200131.csv")
 
 educ_raw <- read_csv("data/BCP-education-191121.csv")
 colnames(educ_raw) <- c("Identifiers", "CandID", "p1.educ", "p1.rel", "p2.educ",

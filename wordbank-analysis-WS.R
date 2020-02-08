@@ -172,6 +172,21 @@ saveRDS(all.merge, "WG-scored.rds")
 # keep <- !is.na(syntax.grouped$COMPLEXITY)
 
 ################################################################################
+# Split half
+################################################################################
+
+set.seed(55455)
+
+all.merge1 <- all.demo %>%
+                mutate(sex = fct_explicit_na(sex, na_level = "Missing"),
+                        mom_ed = fct_explicit_na(mom_ed, na_level = "Missing")) %>%
+                group_by(age, sex, mom_ed) %>%
+                sample_frac(.5)
+
+efa.half <- all.merge1$data_id
+cfa.half <- all.merge$data_id[!(all.merge$data_id %in% efa.half)]
+
+################################################################################
 # Factor analysis
 ################################################################################
 

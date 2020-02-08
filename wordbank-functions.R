@@ -59,7 +59,7 @@ apply.FA <- function(data, factors, rotate = "oblimin", n.iter = 1000) {
 # Drop "in" because more kids use "inside"
 score.GasS <- function(gestures, sc.understands = FALSE) {
 
-  mapping <- read_csv("sharedwords.csv")
+  mapping <- read_csv("data/sharedwords.csv")
 
   scored <- gestures %>%
               filter(definition != "in") %>%
@@ -73,42 +73,108 @@ score.GasS <- function(gestures, sc.understands = FALSE) {
                         perc = sum / n) %>%
               rename(category = s.category) %>%
               ungroup()
+  
+  cw <- scored %>%
+          select(data_id, age) %>%
+          unique() %>%
+          add_column(category = "connecting_words") %>%
+          add_column(n = 5) %>%
+          add_column(sum = 0) %>%
+          add_column(perc = 0)
+  
+  scored2 <- bind_rows(scored, cw) %>%
+              arrange(data_id, age, category)
 
-  return(scored)
+  return(scored2)
 
 }
 
 score.WS <- function(sentences) {
 
-  scored <- sentences %>%
+  # Score non-complexity
+  scored1 <- sentences %>%
               filter(type != "complexity") %>%
               mutate(says = score.produces(value),
-                     category = as.character(category))
-
-  scored2 <- scored %>%
+                     category = as.character(category)) %>%
                 group_by(data_id, age, type, category) %>%
                 summarise(n = n(),
                           sum = sum(says),
                           perc = sum / n) %>%
-                ungroup() %>%
-                select(-c(n, sum))
+                ungroup()
 
-  scored3 <- sentences %>%
-              filter(type == "complexity") %>%
-              mutate(says = score.complexity(value)) %>%
-              group_by(data_id, age, type) %>%
-              summarise(n = n(),
-                        sum = sum(says),
-                        perc = sum / n) %>%
-              ungroup() %>%
-              select(-c(n, sum))
+  # Score complexity
+  scored.cx <- sentences %>%
+                filter(type == "complexity") %>%
+                mutate(says = score.complexity(value)) %>%
+                group_by(data_id, age, type) %>%
+                summarise(n = n(),
+                          sum = sum(says),
+                          perc = sum / n) %>%
+                ungroup()
 
-  scored4 <- bind_rows(scored2, scored3) %>%
+  scored3 <- bind_rows(scored1, scored.cx) %>%
               arrange(data_id, age, type, category)
 
-  cat.NA = which(is.na(scored4$category))
-  scored4$category[cat.NA] <- toupper(scored4$type[cat.NA])
+  # Only words has subcategories, so copy categories over and use those
+  cat.NA <- which(is.na(scored3$category))
+  scored3$category[cat.NA] <- scored3$type[cat.NA]
 
-  return(scored4)
+  # Drop old label
+  scored4 <- scored3 %>%
+              select(-type)
 
+  # Spread raw numbers
+  scored5.raw <- scored4 %>%
+                  pivot_wider(c(data_id, age), names_from = "category",
+                              values_from = sum)
+
+  # Spread percent
+  scored5.perc <- scored4 %>%
+                    pivot_wider(c(data_id, age), names_from = "category",
+                                values_from = perc)
+
+  scored5 <- list(scored5.raw, scored5.perc)
+
+  # Return both raw numbers and percentages
+  return(scored5)
+
+}
+
+score.WG <- function(gestures, inventory.only = TRUE, sc.understands = FALSE) {
+  
+  # inventory.only : only score words, not gestures
+  # sc.understands : if FALSE, treat understands only as the same as doesn't
+  #                   understand
+  
+  if (inventory.only){
+  
+    scored1 <- gestures %>%
+                  mutate(says = score.produces(value,
+                                               score.understands = sc.understands),
+                         category = as.character(category)) %>%
+                  group_by(data_id, age, type, category) %>%
+                  summarise(n = n(),
+                            sum = sum(says),
+                            perc = sum / n) %>%
+                  ungroup()
+    
+    scored2.raw <- scored1 %>%
+                    pivot_wider(c(data_id, age), names_from = "category",
+                                values_from = sum)
+    
+    # Spread percent
+    scored2.perc <- scored1 %>%
+                      pivot_wider(c(data_id, age), names_from = "category",
+                                  values_from = perc)
+    
+    scored2 <- list(scored2.raw, scored2.perc)
+    
+    return(scored2)
+  
+  } else {
+    
+    return(NA)
+    
+  }
+  
 }
