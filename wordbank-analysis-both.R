@@ -10,16 +10,40 @@ library(corrplot)
 library(psych)
 
 source("wordbank-functions.R")
+max_size <- c(566, 221)
 
-# Are all words in Gestures a subset of the words in Sentences?
+# Loading RDS is faster, so do that if available
 
-# This is large, so it takes a while!
-gestures <- read_csv("data/Wordbank-WG-191105.csv",
-                     col_types = cols(.default = "f", age = "i"))
+wg_rds <- "data/Wordbank-WG-191105.RDS"
+if (file.exists(wg_rds)) {
+  
+  gestures <- readRDS(wg_rds)
+  
+} else {
+  
+  # This is large, so it takes a while!
+  gestures <- read_csv("data/Wordbank-WG-191105.csv",
+                        col_types = cols(.default = "f", age = "i"))
+  
+  saveRDS(gestures, wg_rds)
+  
+}
 
-# This is large, so it takes a while!
-sentences <- read_csv("data/Wordbank-WS-191105.csv",
-                col_types = cols(.default = "f", age = "i"))
+
+ws_rds <- "data/Wordbank-WS-191105.RDS"
+if (file.exists(ws_rds)) {
+  
+  sentences <- readRDS(ws_rds)
+  
+} else {
+
+  # This is large, so it takes a while!
+  sentences <- read_csv("data/Wordbank-WS-191105.csv",
+                  col_types = cols(.default = "f", age = "i"))
+  
+  saveRDS(sentences, ws_rds)
+
+}
 
 gestures.words <- gestures %>%
                     filter(type == "word")
@@ -183,10 +207,11 @@ sentences.scored <- readRDS("WS-scored.rds") %>%
 
 # Bind together. Use sentences first to coerce into correct order w/ bind_rows
 all.together <- bind_rows(sentences.scored, gw.as.sent.wide) %>%
-                  select(instrument, data_id, age, everything())
+                  select(instrument, data_id, age, everything()) %>%
+                  as_tibble
 
 # Load in analysis trained on WS only
-factor.analyses <- readRDS("FA1000.RDS")
+factor.analyses <- readRDS("data/FA1000-WS-100.RDS")
 two.factor <- factor.analyses[[2]]
 
 # Estimate scores
@@ -231,9 +256,9 @@ ggplot(all.scores.summary, aes(x = MR1, y = MR2)) +
                                     joint.poly.model$coefficients[3] * x^2
                                   })
 
-png("plots/both-smear.png", width = 10, height = 5, units = "in", res = 300)
-smear
-dev.off()
+# png("plots/both-smear.png", width = 10, height = 5, units = "in", res = 300)
+# smear
+# dev.off()
 
 ##
 
@@ -248,15 +273,20 @@ count <- bind_rows(sent.count, gw.as.sent.count) %>%
                  syn = select(., one_of(syntactic)) %>% rowSums()) %>%
           select(data_id, age, instrument, lex, syn)
 
+png("plots/bothsmear-presentation.png", width = 7.5, height = 5, res = 96, 
+    units = "in")
+
 ggplot(count, aes(x = lex, y = syn)) +
   scale_shape_manual(values = c(16, 4)) +
   geom_point(alpha = 0.3, aes(color = instrument, shape = instrument)) +
   labs(x = "Lexical", y = "Syntactic",
        color = "Instrument", shape = "Instrument") +
-  geom_abline(slope = 221 / 566, color = "red", linetype = "longdash",
-              size = 1) +
-  theme(legend.position = "bottom") +
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2))
+  geom_abline(slope = max_size[2] / max_size[1], 
+              color = "red", linetype = "longdash", size = 1) +
+  theme(legend.position = "none") +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), color = "black")
+
+dev.off()
 
 both.1w.poly <- lm(syn ~ poly(lex, 2), data = count)
 
@@ -281,12 +311,18 @@ gs.demo <- bind_rows(g.demo, s.demo)
 mom_ed_levels <- c("Primary", "Some Secondary", "Secondary", "Some College",
                    "College", "Some Graduate", "Graduate")
 
+# Approximations in yearss
 mom_ed_levels_n <- c(5, 8, 12, 14, 16, 18, 20)
+
+# Whether mom finished college (HS v. not is very low: 200 vs 2000)
+mom_bachelors <- c(FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE)
 
 count.demo <- merge(count, gs.demo, by = c("data_id", "age")) %>%
                 mutate_at("mom_ed", as.character) %>%
                 add_column(mom_ed_n = mom_ed_levels_n[match(.$mom_ed,
-                                                            mom_ed_levels)])
+                                                            mom_ed_levels)],
+                           mom_bachelors = mom_HS[match(.$mom_bachelors, 
+                                                        mom_ed_levels)])
 
 
 lex.control <- lm(lex ~ 1 + age + sex + mom_ed_n, data = count.demo)
@@ -319,8 +355,10 @@ ggplot(sen.merge, aes(x = age, y = perc.gestures - perc.complete)) +
   geom_point(alpha = 0.01) +
   geom_abline() +
   stat_smooth(fullrange = TRUE, method = "lm") +
-  scale_x_continuous(limits = c(10, NA)) +
-  facet_wrap_paginate(vars(category), nrow = 1, ncol = 1, page = 22)
+  scale_x_continuous(limits = c(8, NA)) +
+  facet_wrap(vars(category))
+
+
 
 lm.cat <- function(estimates, cat) {
 
@@ -347,12 +385,83 @@ lm.result <- function(lm, x) {
 
 }
 
-relationships <- lapply(levels(sen.merge$category),
-                        function(x) lm.cat(sen.merge, x))
+relationships <- sapply(levels(sen.merge$category),
+                        function(x) coef(lm.cat(sen.merge, x))) %>%
+                  t() %>%
+                  data.frame() %>%
+                  add_column(name = levels(sen.merge$category),
+                             .before = 1)
 
-names(relationships) <- levels(sen.merge$category)
+png("plots/error-presentation.png", width = 7.5, height = 5, res = 96, 
+    units = "in")
+
+ggplot(sen.merge, aes(x = age, y = perc.gestures - perc.complete)) +
+  geom_abline(data = relationships,
+              aes(intercept = X.Intercept., slope = age, color = name,
+                  linetype = name),
+              size = 1, alpha = 0.5) +
+  scale_x_continuous(limits = c(8, 16)) +
+  scale_y_continuous(limits = c(-1, 1)) +
+  scale_color_manual(values = rep(hue_pal()(5), each = 5)[1:22]) +
+  scale_linetype_manual(values = rep(1:5, length.out = 22)) +
+  theme(legend.position = "right") +
+  labs(x = "Age (mo.)", y = "%WG - %WS")
+
+dev.off()
 
 # For each category, estimate the difference between scores using linear
 # regression at 10 and 16 months
 est.10_16 <- sapply(relationships,
                     function(x) lm.result(x, c(10, 16)))
+
+################################################################################
+
+median.ed <- median(count.demo$mom_ed_n, na.rm = TRUE)
+mom.hi <- count.demo$mom_ed_n >= median.ed
+
+all <- bind_rows(sent.count, gw.as.sent.count) %>%
+        select(data_id, age, instrument,
+               everything(),
+               -starts_with("W"), -COMPLEXITY) %>%
+        as_tibble() %>%
+        mutate(SUM = select(., -data_id, -age, -instrument) %>% rowSums()) %>%
+        inner_join(count.demo) %>%
+        select(data_id, age, instrument, sex, mom_ed, mom_ed_n,
+               everything()) %>%
+        add_column(mom_ed_hi = mom.hi, .after = "mom_ed_n")
+
+png("plots/Wordbank-trends-presentation.png", width = 5.5, height = 5, 
+    res = 300,
+    units = "in")
+
+ggplot(drop_na(all), aes(x = age, y = SUM, color = sex)) +
+  geom_jitter(width = 0.25, alpha = 0.1) +
+  geom_smooth(aes(linetype = mom_ed_hi), na.rm = TRUE) +
+  scale_y_continuous(limits = c(0, 680)) +
+  scale_x_continuous(limits = c(5, 40)) +
+  labs(x = "Age (mo.)", y = "Words known", color = "Sex", 
+       linetype = "Mom ed (high)") +
+  theme(legend.position = "bottom")
+
+dev.off()
+
+#
+#
+#
+
+sent.count <- read_rds("data/WS-scored.rds")[[1]]
+
+all.n <- bind_rows(gw.as.sent.count, sent.count) %>%
+          select(-COMPLEXITY, -starts_with("W")) %>%
+          mutate(SUM = rowSums(.[, -(1:3)]))
+
+png("plots/words-presentation.png", width = 6, height = 5, units = "in",
+    res = 300)
+
+ggplot(all.n, aes(x = age, y = SUM)) +
+  geom_boxplot(aes(group = age), outlier.alpha = 0) +
+  geom_jitter(width = .3, alpha = 0.1) +
+  labs(x = "Age (mo)", y = "Words") +
+  geom_smooth()
+
+dev.off()

@@ -7,12 +7,19 @@ if(.Platform$OS.type == "unix") {
 library(broom)
 library(tidyverse)
 library(tidyselect)
-library(psych)
+
+# Plotting functions
+# Cite if used in final
 library(viridis)
 library(ggExtra)
 library(corrplot)
 library(gridExtra)
 library(ggrepel)
+library(ggridges)
+
+# Substantive packages (to cite)
+library(psych)
+library(lavaan)
 
 # This is large, so it takes a while!
 sentences.file <- "data/Wordbank-WS-191105.RDS"
@@ -49,7 +56,7 @@ table(all.demo$sex, useNA = "always")
 table(all.demo$mom_ed,
       useNA = "always")
 
-ws.mom_ed <- table(all.demo$mom_ed)
+ws.mom_ed <- table(all.demo$mom_ed, useNA = "always")
 
 length(unique(all.demo$data_id)) == nrow(all.demo)
 
@@ -65,7 +72,7 @@ words <- all %>%
 
 words.n <- words %>%
             group_by(data_id, category) %>%
-            summarise(sum = sum(produces)) %>%
+            dplyr::summarise(sum = sum(produces)) %>%
             pivot_wider(c(data_id), names_from = category,
                         values_from = sum)
 
@@ -73,7 +80,7 @@ words.n <- words %>%
 # that to a proportion and spread to wide, keeping only ID and 22 columns
 words.grouped <- words %>%
                   group_by(data_id, category) %>%
-                  summarise(n = n(), sum = sum(produces)) %>%
+                  dplyr::summarise(n = n(), sum = sum(produces)) %>%
                   mutate(score = sum / n) %>%
                   pivot_wider(c(data_id),
                               names_from = category, values_from = score) %>%
@@ -85,7 +92,7 @@ saveRDS(words.grouped, "words-grouped.RDS")
 
 lex.corr <- cor(select(words.grouped, -data_id))
 
-png("corrplot.png", width = 6, height = 5, units = "in", res = 300)
+png("plots/corrplot.png", width = 6, height = 5, units = "in", res = 300)
 
 corrplot(lex.corr, method = "color",
           is.corr = FALSE,
@@ -97,7 +104,7 @@ corrplot(lex.corr, method = "color",
 dev.off()
 
 ################################################################################
-# For the syntactic categories, score separately (different metrics)
+# For the structural categories, score separately (different metrics)
 ################################################################################
 
 # Morphological categories
@@ -110,13 +117,13 @@ morphology <- all %>%
 
 morph.n <- morphology %>%
             group_by(data_id, age, type) %>%
-            summarise(sum = sum(produces))  %>%
+            dplyr::summarise(sum = sum(produces)) %>%
             pivot_wider(c(data_id, age), names_from = type,
                         values_from = sum)
 
 morph.grouped <- morphology %>%
                   group_by(data_id, age, type) %>%
-                  summarise(n = n(), sum = sum(produces)) %>%
+                  dplyr::summarise(n = n(), sum = sum(produces)) %>%
                   mutate(score = sum / n) %>%
                   pivot_wider(c(data_id, age), names_from = type,
                               values_from = score)
@@ -149,7 +156,7 @@ syntax.n <- syntax %>%
 # n is constant, but just calculate instead of hardcode
 syntax.grouped <- syntax %>%
                     group_by(data_id) %>%
-                    summarise(n = n(), sum = sum(complexity)) %>%
+                    dplyr::summarise(n = n(), sum = sum(complexity)) %>%
                     mutate(COMPLEXITY = sum / n) %>%
                     select(-n, -sum)
 
@@ -161,7 +168,9 @@ all.merge <- merge(words.grouped, morph.grouped) %>%
               merge(syntax.grouped) %>%
               mutate(COMPLEXITY = replace(COMPLEXITY, is.na(COMPLEXITY), 0))
 
-saveRDS(all.merge, "WG-scored.rds")
+out <- list(count, all.merge)
+
+saveRDS(out, "data/WS-scored.rds")
 
 # Remove everyone with COMPLEXITY as NA (that means the whole section was
 # skipped and so the values are inaccurate.)
@@ -175,25 +184,70 @@ saveRDS(all.merge, "WG-scored.rds")
 # Split half
 ################################################################################
 
+# Zip code for UMN
 set.seed(55455)
 
+# We need to do the split-half with sex/mom ed present to balance them
 all.merge1 <- all.demo %>%
                 mutate(sex = fct_explicit_na(sex, na_level = "Missing"),
-                        mom_ed = fct_explicit_na(mom_ed, na_level = "Missing")) %>%
+                        mom_ed = fct_explicit_na(mom_ed,
+                                                 na_level = "Missing")) %>%
                 group_by(age, sex, mom_ed) %>%
                 sample_frac(.5)
 
-efa.half <- all.merge1$data_id
-cfa.half <- all.merge$data_id[!(all.merge$data_id %in% efa.half)]
+# Everyone in all.merge1; everyone not
+efa.half.ID <- all.merge1$data_id
+cfa.half.ID <- all.merge$data_id[!(all.merge$data_id %in% efa.half.ID)]
+
+efa.half <- filter(all.merge, data_id %in% efa.half.ID)
+cfa.half <- filter(all.merge, data_id %in% cfa.half.ID)
+
+# Test for differences
+efa.demo <- all.demo %>%
+              filter(data_id %in% efa.half.ID)
+
+cfa.demo <- all.demo %>%
+              filter(data_id %in% cfa.half.ID)
+
+# Age
+t.test(efa.demo$age, cfa.demo$age)
+
+# Sex
+
+efa.sex <- efa.demo %>%
+            mutate(sex = fct_explicit_na(sex, na_level = "Missing")) %>%
+            group_by(sex) %>%
+            dplyr::summarize(n = n())
+
+cfa.sex <- cfa.demo %>%
+            mutate(sex = fct_explicit_na(sex, na_level = "Missing")) %>%
+            group_by(sex) %>%
+            dplyr::summarize(n = n())
+
+chisq.test(efa.sex$n, cfa.sex$n)
+
+# Mother's education
+
+efa.mom <- efa.demo %>%
+            mutate(mom_ed = fct_explicit_na(mom_ed, na_level = "Missing")) %>%
+            group_by(mom_ed) %>%
+            dplyr::summarize(n = n())
+
+cfa.mom <- cfa.demo %>%
+              mutate(mom_ed = fct_explicit_na(mom_ed, na_level = "Missing")) %>%
+              group_by(mom_ed) %>%
+              dplyr::summarize(n = n())
+
+chisq.test(efa.mom$n, cfa.mom$n)
 
 ################################################################################
-# Factor analysis
+# Exploratory factor analysis
 ################################################################################
 
 # Max.factors is the most I want to do, it's max_interpretable + 1
 max.factors <- 5
 
-FA1000 <- "FA1000.RDS"
+FA1000 <- "FA1000-WS-050.RDS"
 if (file.exists(FA1000)) {
 
   # If the 1,000-iteration analysis has been run and saved, load it,
@@ -205,19 +259,19 @@ if (file.exists(FA1000)) {
   # ... actually run FAs with default method/iterations
   factor.analyses <- lapply(1:max.factors,
                             function(x)
-                              apply.FA(select(all.merge, -age),
+                              apply.FA(select(efa.half, -age),
                                        factors = x))
 
   # and save it
-  saveRDS(factor.analyses, file = "FA1000.RDS")
+  saveRDS(factor.analyses, file = FA1000)
 
 }
 
 # Display plots
 for(i in 1:max.factors) {
 
-  png(paste0("factors", i, ".png"), width = 5, height = 5, units = "in",
-      res = 300)
+  png(paste0("plots/WS-factors-", i, ".png"), width = 5, height = 5,
+      units = "in", res = 300)
 
   print( fa.diagram(factor.analyses[[i]]) )
 
@@ -227,12 +281,12 @@ for(i in 1:max.factors) {
 
 # This is psych's built-in method for estimating factors (and princ. comp.,
 # but I left those out)
-fa.parallel.plot <- all.merge %>%
+fa.parallel.plot <- efa.half %>%
                       select(-data_id, -age) %>%
                       fa.parallel(fa = "fa")
 
 png("plots/fa_parallel.png", width = 10, height = 6, res = 300, units = "in")
-all.merge %>%
+efa.half %>%
   select(-data_id, -age) %>%
   fa.parallel(fa = "fa")
 dev.off()
@@ -248,40 +302,163 @@ ggplot(rmsea, aes(x = factor, y = RMSEA)) +
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
   scale_y_continuous(limits = c(0, NA))
 
+#
+# At this point, we have the model
+#
+
+# Model assumptions
+
+efa.half.long <- efa.half %>%
+                  pivot_longer(-c(data_id, age))
+
+ggplot(efa.half.long, aes(x = value, y = name, fill = name)) +
+  geom_density_ridges2(alpha = 0.5) +
+  theme_ridges() +
+  theme(legend.position = "none")
+
+efa.half.l.list <- split(efa.half.long, f = efa.half.long$name)
+efa.half.l.list.test <- sapply(efa.half.l.list, function(x)
+                                shapiro.test(x$value)$p.value)
+
+## All are non-normal, according to Shapiro-Wilk test
+
 ################################################################################
+# Confirmatory factor analysis
+################################################################################
+
+# CFA doesn't seem to like the bootstrapped intervals, so redo it
+# mod2 <- structure.diagram(factor.analyses[[2]], cut = .9, errors = TRUE)
+
+fa_2fac <- fa(select(efa.half, -data_id, -age), 2, rotate = "Promax",
+           weight = NULL)
+model_2fac <- structure.diagram(fa_2fac, cut = 0.6, errors = TRUE)
+
+nobs <- list(nrow(cfa.half), nrow(efa.half))
+
+mcdi.cfa.1 <- cfa(model = model_2fac$lavaan,
+                  data = cfa.half %>%
+                          select(-data_id, -age),
+                  sample.nobs = nobs)
+
+summary(mcdi.cfa.1, fit.measures = TRUE)
+
+# Robust indicator, which should be done, regardless of if it improves fit
+mcdi.cfa.1r <- cfa(model = model_2fac$lavaan,
+                    data = select(cfa.half, -c(data_id, age)),
+                    estimator = "MLR",
+                    sample.nobs = nobs)
+
+summary(mcdi.cfa.1r, fit.measures = TRUE)
+
+# Now look at modification indices
+
+mix <- modificationIndices(mcdi.cfa.1r, sort. = TRUE)
+# WFV/complexity is high: ~1500
+
+lexical <- paste("MR1 =~ + ", paste(colnames(efa.half)[2:16],
+                                    collapse = " + "))
+syntax  <- paste("MR2 =~ + ", paste(colnames(efa.half[c(17:23, 25:29)]),
+                                collapse = " + "))
+mrcorr <- "MR2 ~~ MR1"
+
+wfv.c <- "WORD_FORMS_VERBS ~~ COMPLEXITY"
+
+# Fix 1st high MI value
+model.intercorr <- noquote(c(lexical, syntax, mrcorr, wfv.c))
+mcdi.cfa.2 <- cfa(model = model.intercorr,
+                  data = select(cfa.half, -data_id, -age),
+                  estimator = "MLR",
+                  sample.nobs = nobs)
+
+summary(mcdi.cfa.2, fit.measures = TRUE)
+
+mix2 <- modificationIndices(mcdi.cfa.2, sort. = TRUE)
+
+# Fix next round of high MI
+model.ic.2 <- noquote(c(lexical, syntax, mrcorr, wfv.c,
+                        "WORD_ENDINGS_NOUNS ~~ WORD_ENDINGS_VERBS",
+                        "action_words ~ descriptive_words"))
+
+mcdi.cfa.3 <- cfa(model = model.ic.2,
+                  data = select(cfa.half, -data_id, -age),
+                  estimator = "MLR",
+                  sample.nobs = nobs)
+
+summary(mcdi.cfa.3, fit.measures = TRUE)
+
+# Fixing MI doesn't do much
+
+# Demean?
+score.avg <- cfa.half %>%
+              select(-data_id, -age) %>%
+              rowMeans()
+
+cfa.half.demean <- cfa.half %>%
+                    mutate_at(vars(-data_id, -age),
+                              function(x) x - score.avg)
+
+mcdi.cfa.4 <- cfa(model = model_2fac$lavaan,
+                  data = select(cfa.half.demean, -data_id, -age),
+                  estimator = "MLR",
+                  sample.nobs = nobs)
+
+
+summary(mcdi.cfa.4, fit.measures = TRUE)
+
+# Three factor fit stats
+
+fa_3fac <- fa(select(efa.half, -data_id, -age), 3, rotate = "Promax",
+              weight = NULL)
+model_3fac <- structure.diagram(fa_3fac, cut = 0.6, errors = TRUE)
+
+mcdi.cfa3.1r <- cfa(model = model_3fac$lavaan,
+                    data = select(cfa.half, -data_id, -age),
+                    sample.nobs = nobs,
+                    estimator = "MLR")
+
+summary(mcdi.cfa3.1r, fit.measures = TRUE)
+
+################################################################################
+# Based on the CFA, we decide the model is fine
 # Return factor analysis to age
 ################################################################################
 
-scores.FA2 <- factor.analyses[[2]]$scores
+#
+# Make this plot with everyone
+#
 
-plot.FA2.wide <- cbind.data.frame(all.demo, scores.FA2) %>%
-                  as_tibble()
+all.scores <- factor.scores(select(all.merge, -data_id, -age),
+                            factor.analyses[[2]],
+                            method = "tenBerge")
 
-plot.FA2 <- plot.FA2.wide %>%
-              pivot_longer(starts_with("MR"),
-                           names_to = "factor", values_to = "value")
+plot.scores <- cbind.data.frame(all.demo, all.scores$scores) %>%
+                as_tibble()
 
-ggplot(plot.FA2, aes(x = age, y = value, color = factor)) +
-  geom_point(position = position_jitter(width = 0.5, height = 0), alpha = 0.1) +
-  geom_boxplot(aes(group = interaction(age, factor)), outlier.shape = NA,
-               alpha = 0.5) +
-  geom_smooth()
+smear <- ggplot(plot.scores, aes(x = MR1, y = MR2, color = age)) +
+          scale_color_viridis() +
+          geom_point(alpha = 0.25, size = 1) +
+          labs(x = "Lexical", y = "Syntactic", color = "Age") +
+          geom_abline(linetype = "longdash", color = "red", size = 1) +
+          theme(legend.position = "none") +
+          geom_smooth(method = "lm", formula = y ~ poly(x, 2), color = "black",
+                      size = 1)
 
-plot.FA2.summary <- plot.FA2 %>%
-                      group_by(age, factor) %>%
-                      summarise(n = n(), mean = mean(value, na.rm = TRUE),
-                                sd = sd(value, na.rm = TRUE),
-                                iqr = IQR(value, na.rm = TRUE)) %>%
-                      mutate_at("factor", as_factor)
-
-levels(plot.FA2.summary$factor) <- c("Lexical", "Syntactic")
+# Group by age
+plot.scores.summary <- plot.scores %>%
+                        pivot_longer(-c(data_id, age, sex, mom_ed, instrument),
+                                     names_to = "factor") %>%
+                        group_by(age, factor) %>%
+                        summarise(n = n(), mean = mean(value, na.rm = TRUE),
+                                  sd = sd(value, na.rm = TRUE),
+                                  iqr = IQR(value, na.rm = TRUE)) %>%
+                        mutate_at("factor", as_factor)
 
 # Plot increase/decrease in lexical/syntactic scores over age.
 # Ribbons represent
 #   (1) IQR (50%)
 #   (2) 3 IQR (99.3%)
-ribbon <- ggplot(plot.FA2.summary, aes(x = age, y = mean, color = factor,
-                             fill = factor)) +
+ribbon <- ggplot(plot.scores.summary, 
+                 aes(x = age, y = mean, color = factor, fill = factor)) +
             geom_line(aes(y = mean), size = 2) +
             geom_ribbon(aes(ymin = mean - 0.5 * iqr, ymax = mean + 0.5 * iqr),
                         alpha = 0.4) +
@@ -291,14 +468,7 @@ ribbon <- ggplot(plot.FA2.summary, aes(x = age, y = mean, color = factor,
             theme(legend.position = "none") +
             labs(x = "Age (mo.)", y = "Mean score")
 
-smear <- ggplot(plot.FA2.wide, aes(x = MR1, y = MR2, color = age)) +
-          scale_color_viridis() +
-          geom_point(alpha = 0.5) +
-          labs(x = "Lexical", y = "Syntactic", color = "Age (mo.)") +
-          geom_abline(linetype = "longdash", color = "red", size = 1) +
-          theme(legend.position = "bottom") +
-          geom_smooth(method = "lm", formula = y ~ poly(x, 2), color = "black",
-                      size = 1)
+
 
 scores.poly.model <- lm(MR2 ~ 1 + MR1 + I(MR1^2), data = plot.FA2.wide)
 scores.exp.model <- lm(MR2 ~ exp(MR1), data = plot.FA2.wide)
@@ -307,17 +477,11 @@ scores.exp.model <- lm(MR2 ~ exp(MR1), data = plot.FA2.wide)
 AIC(scores.poly.model)
 AIC(scores.exp.model)
 
-png("plots/lags.png", width = 12, height = 5, units = "in", res = 300)
-grid.arrange(ribbon + labs(title = "(a)"),
-             smear + labs(title = "(b)"), nrow = 1)
-dev.off()
+ribbon_smear <- arrangeGrob(ribbon + labs(title = "(a)"),
+                            smear + labs(title = "(b)"), nrow = 1)
 
-# Lowest (0%) and highest (100%)
-smear +
-  geom_label_repel(aes(label = ifelse(plot.FA2.wide$data_id %in% c(130423,
-                                                                  134553),
-                                     plot.FA2.wide$data_id, "")),
-                   color = "black")
+ggsave(plot = ribbon_smear, filename = "plots/lags_5520.png", 
+       width = 6, height = 3, units = "in")
 
 ################################################################################
 # Other metrics
@@ -354,63 +518,92 @@ count <- merge(words.n, morph.n) %>%
           rename(WORD_FORMS_NOUNS = word_forms_nouns,
                  WORD_FORMS_VERBS = word_forms_verbs,
                  WORD_ENDINGS_NOUNS = word_endings_nouns,
-                 WORD_ENDINGS_NOUNS = word_endings_nouns) %>%
+                 WORD_ENDINGS_VERBS = word_endings_verbs) %>%
           mutate(COMPLEXITY = replace(COMPLEXITY, is.na(COMPLEXITY), 0))
 
-lexical <- colnames(count)[2:17]
+lexical <- colnames(count)[3:17]
 syntactic <- colnames(count)[18:29]
 one.weight <- count %>%
                 mutate(lex = select(., one_of(lexical)) %>% rowSums(),
                        syn = select(., one_of(syntactic)) %>% rowSums()) %>%
                 select(data_id, age, lex, syn)
 
-png("plots/1w-smear.png", width = 6, height = 5, units = "in", res = 300)
+max_size <- c(566, 221)
+
+onew.ribbon <- one.weight %>%
+                mutate_at("lex", function(x) x / max_size[1]) %>%
+                mutate_at("syn", function(x) x / max_size[2]) %>%
+                pivot_longer(-c(data_id, age)) %>%
+                group_by(age, name) %>%
+                summarize(n = n(), 
+                          mean = mean(value),
+                          sd = sd(value),
+                          iqr = IQR(value))
+
+png("plots/1w-lag-presentation.png", width = 7.5, height = 5, units = "in", 
+    res = 96)
+
+ggplot(onew.ribbon, aes(x = age, y = mean, color = name, fill = name)) +
+  geom_line(aes(y = mean), size = 2) +
+  geom_ribbon(aes(ymin = mean - 0.5 * iqr, ymax = mean + 0.5 * iqr),
+              alpha = 0.4) +
+  geom_ribbon(aes(ymin = mean - 1.5 * iqr, ymax = mean + 1.5 * iqr),
+              alpha = 0.3) +
+  facet_grid(rows = vars(name)) +
+  theme(legend.position = "none") +
+  labs(x = "Age (mo.)", y = "Mean score")
+
+dev.off()
+
+png("plots/1w-smear-presentation1.png", width = 7.5, height = 5, units = "in", 
+    res = 96)
 
 ggplot(one.weight, aes(x = lex, y = syn, color = age)) +
   scale_color_viridis() +
+  geom_abline(slope = max_size[2] / max_size[1], color = "red", 
+              linetype = "longdash", size = 1) +
+  geom_point(alpha = 0.1) +
+  labs(x = "Lexical", y = "Syntactic", color = "Age (mo.)") +
+  theme(legend.position = "bottom")
+
+dev.off()
+
+png("plots/1w-smear-presentation2.png", width = 7.5, height = 5, units = "in", 
+    res = 96)
+
+ggplot(one.weight, aes(x = lex, y = syn, color = age)) +
+  scale_color_viridis() +
+  geom_abline(slope = max_size[2] / max_size[1], color = "red", 
+              linetype = "longdash", size = 1) +
   geom_point(alpha = 0.3) +
   labs(x = "Lexical", y = "Syntactic", color = "Age (mo.)") +
-  geom_abline(slope = 221 / 596, color = "red", linetype = "longdash",
-              size = 1) +
+  theme(legend.position = "bottom")
+
+dev.off()
+
+png("plots/1w-smear-presentation3.png", width = 7.5, height = 5, units = "in", 
+    res = 96)
+
+ggplot(one.weight, aes(x = lex, y = syn, color = age)) +
+  scale_color_viridis() +
+  geom_abline(slope = max_size[2] / max_size[1], color = "red", 
+              linetype = "longdash", size = 1) +
+  geom_point(alpha = 0.3) +
+  labs(x = "Lexical", y = "Syntactic", color = "Age (mo.)") +
   theme(legend.position = "bottom") +
   geom_smooth(method = "lm", formula = y ~ poly(x, 2), color = "black")
 
 dev.off()
 
-w1.poly.model <- lm(syn ~ 1 + lex + I(lex ^2), data = one.weight)
-w1.exp.model <- lm(syn ~ a*exp(b+lex), data = one.weight2)
+## Save weights to CSV for easy import to paper draft
 
-# Lower is better; poly is a clear better fit
-AIC(w1.poly.model)
-AIC(w1.exp.model)
+factor.analyses[[2]]$loadings %>%
+  unclass() %>%
+  as.data.frame() %>%
+  write_csv(path = "data/WS-FA2-loadings.csv")
 
-aic <- matrix(NA, 2, 2)
-rownames(aic) <- c("scores", "ones")
-colnames(aic) <- c("poly2", "exp")
+factor.analyses[[3]]$loadings %>%
+  unclass() %>%
+  as.data.frame() %>%
+  write_csv(path = "data/WS-FA3-loadings.csv")
 
-aic[1, 1] <- AIC(scores.poly.model)
-aic[1, 2] <- AIC(scores.exp.model)
-aic[2, 1] <- AIC(w1.poly.model)
-aic[2, 2] <- AIC(w1.exp.model)
-
-coxtest(scores.poly.model, scores.exp.model)
-coxtest(w1.poly.model, w1.exp.model)
-
-coxtest(scores.poly.model, w1.poly.model)
-coxtest(scores.exp.model, w1.exp.model)
-
-################################################################################
-# How long until 50% acquired?
-
-all.merge <- select(all.merge, data_id, age, everything())
-
-l15 <- all.merge[, 1:17] %>%
-        mutate(avg = rowMeans(select(., -data_id, -age)))
-l7 <- all.merge[, c(1:2, 18:25)] %>%
-  mutate(avg = rowMeans(select(., -data_id, -age)))
-
-lm.l15 <- lm(avg ~ age, data = l15)
-lm.l7  <- lm(avg ~ age, data = l7)
-
-l15_age50 <- (.5 - lm.l15$coefficients[1]) / lm.l15$coefficients[2]
-l7_age50 <- (.5 - lm.l7$coefficients[1]) / lm.l7$coefficients[2]

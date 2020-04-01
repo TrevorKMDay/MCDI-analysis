@@ -75,44 +75,57 @@ BCP_WG_asWS <- score.GasS(BCP_WG) %>%
 BCP_both <- bind_rows(BCP_WS_scored.n, BCP_WG_asWS)
 
 #
+# Save data
 #
-#
 
-library(growthcurver)
+saveRDS(BCP_WG_scored, file = "data/BCP_WG_scored.rds")
+saveRDS(BCP_WG_asWS, file = "data/BCP_WG_asWS.rds")
+saveRDS(BCP_WS_scored, file = "data/BCP_WS_scored.rds")
 
-table(BCP_both$data_id) %>%
-  table() %>%
-  cumsum()
-
-ggplot(BCP_both, aes(x = age, y = inventory)) +
-  geom_point(alpha = 0.1, size = 1) +
-  geom_smooth(method = "loess", se = FALSE) +
-  geom_line(aes(group = data_id), alpha = 0.1) +
-  labs(x = "Age (mo.)", y = "W/S inventory") +
-  geom_hline(yintercept = 690) +
-  scale_x_continuous(limits = c(10, 40))
+# People who have four or more data points
 
 multiple <- table(BCP_both$data_id) >= 4
 who.multiple <- names(table(BCP_both$data_id)[multiple])
-
-ggplot(filter(BCP_both, data_id %in% who.multiple),
-       aes(x = age, y = inventory, color = as.factor(data_id))) +
-  geom_line(alpha = 0.5) +
-  theme(legend.position = "none")
 
 test <- filter(BCP_both, data_id %in% who.multiple) %>%
           select(data_id, age, inventory)
 
 write_csv(test, "data/test-subjs.csv")
 
- foo <- approxExtrap(test$age, test$inventory, 0:40) %>%
-        as.data.frame()
+# Score by category
 
-ggplot(NULL) +
-  geom_line(data = test, aes(x = age, y = inventory), size = 2) +
-  geom_line(data = foo, aes(x = x, y = y), color = "blue")+
+BCP_both.n <- full_join(BCP_WG_asWS, BCP_WS_scored[[1]])
+
+lexsyn <- BCP_both.n %>%
+            select(-how_use_words, -word_endings) %>%
+            mutate_all(function(x) replace_na(x,0)) %>%
+            mutate(age = replace(age, age == 0, NA)) %>%
+            mutate(lex = action_words + animals + body_parts + clothing +
+                          descriptive_words + food_drink + furniture_rooms +
+                          games_routines + helping_verbs + household + 
+                          outside + people + places + toys + vehicles,
+                   syn = pronouns + quantifiers + question_words + sounds +
+                          time_words + word_endings_nouns + word_endings_verbs +
+                          word_forms_nouns + word_forms_verbs + complexity +
+                          connecting_words + locations,
+                   SUM = lex + pronouns + quantifiers + question_words + sounds +
+                           time_words + connecting_words + locations) %>%
+            select(-everything(), data_id, age, lex, syn, SUM) %>%
+            mutate(lex.p = lex / 575, 
+                   syn.p = syn / 175)
+
+
+png("plots/BCP-trends-presentation.png", width = 5.5, height = 5, res = 300,
+    units = "in")
+
+ggplot(lexsyn, aes(x = age, y = SUM)) +
+  geom_point(alpha = 0.25) +
+  geom_smooth(method = "loess") +
+  geom_line(aes(group = data_id), alpha = 0.25) +
+  labs(x = "Age (mo.)", y = "Inventory size") +
   scale_y_continuous(limits = c(0, 680)) +
-  geom_hline(yintercept = 680)
+  scale_x_continuous(limits = c(5, 40)) 
 
+dev.off()
 
-
+write_csv(lexsyn, "data/lexsyn.csv")

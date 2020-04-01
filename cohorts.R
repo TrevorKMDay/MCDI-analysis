@@ -101,10 +101,9 @@ for (i in levels(mcdi.lt36$demo.Cohort)) {
             geom_point(data = filter(mcdi_today, data_id %in% x$data_id), 
                        aes(x = age.today, y = data_id), 
                        color = "red") +
-            scale_x_continuous(limits = c(10, 45)) +
+            scale_x_continuous(limits = c(NA, 45)) +
             labs(title = short_cohort) +
-            geom_vline(xintercept = lines, color = "blue")
-  
+            geom_vline(xintercept = lines, color = "blue") 
     print(p)}
   
 }

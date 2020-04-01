@@ -3,9 +3,10 @@ format.sentences <- function(sentences, s_dict_file) {
   s_dict <- read_csv(s_dict_file)
 
   sent <- sentences %>%
-    select(data_id, age, sex,
+    select(data_id, sent.Candidate_Age, sex,
            sent.Administration,
            starts_with("sent.I")) %>%
+    mutate(age = as.numeric(sent.Candidate_Age)) %>%
     filter(sent.Administration == "All") %>%
     select(-sent.Administration) %>%
     pivot_longer(-c(data_id, age, sex)) %>%
