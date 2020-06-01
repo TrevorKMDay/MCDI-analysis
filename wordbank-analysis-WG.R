@@ -8,6 +8,8 @@ library(tidyverse)
 library(tidyselect)
 library(psych)
 library(viridis)
+library(lavaan)
+library(corrplot)
 
 # This is large, so it takes a while!
 gestures <- read_csv("data/Wordbank-WG-191105.csv",
@@ -44,27 +46,33 @@ wg.mom_ed <- table(g.demo$mom_ed, useNA = "always")
 # from that script
 
 if (exists("ws.mom_ed")) {
+  
+  ws.mom_ed.nm <- ws.mom_ed[-length(ws.mom_ed)]
+  wg.mom_ed.nm <- ws.mom_ed[-length(wg.mom_ed)]
 
-mom_ed <- cbind(wg.mom_ed, ws.mom_ed) %>%
-          as_tibble() %>%
-          dplyr::rename(wg = wg.mom_ed, ws = ws.mom_ed) %>%
-          add_column(level = c(7, 4, 5, 2, 6, 3, 1, 8), .before = 1) %>%
-          arrange(level) %>%
-          pivot_longer(-level)
-
-mom_ed.plot <- ggplot(mom_ed, aes(x = level, y = value)) +
-  geom_histogram(stat = "identity", aes(fill = name), position = "dodge") +
-  scale_x_continuous(breaks = 1:8,
-                     labels = c("Primary", "Some Secondary", "Secondary",
-                                "Some College", "College", "Some Graduate",
-                                "Graduate", "Missing")) +
-  labs(x = NULL, y = "N", fill = "Form") +
-  coord_flip() +
-  scale_fill_discrete(labels = c("WG", "WS")) +
-  theme(legend.position = "bottom", text = element_text(size = 20))
-
-png("plots/mom_ed_presentation.png", width = 5.5, height = 5, units = "in",
-    res = 96) ; print(mom_ed.plot) ; dev.off()
+  mom_ed.test <- chisq.test(wg.mom_ed.nm, ws.mom_ed.nm, 
+                            simulate.p.value = TRUE)
+  
+  mom_ed <- cbind(wg.mom_ed, ws.mom_ed) %>%
+            as_tibble() %>%
+            dplyr::rename(wg = wg.mom_ed, ws = ws.mom_ed) %>%
+            add_column(level = c(7, 4, 5, 2, 6, 3, 1, 8), .before = 1) %>%
+            arrange(level) %>%
+            pivot_longer(-level)
+  
+  mom_ed.plot <- ggplot(mom_ed, aes(x = level, y = value)) +
+    geom_histogram(stat = "identity", aes(fill = name), position = "dodge") +
+    scale_x_continuous(breaks = 1:8,
+                       labels = c("Primary", "Some Secondary", "Secondary",
+                                  "Some College", "College", "Some Graduate",
+                                  "Graduate", "Missing")) +
+    labs(x = NULL, y = "N", fill = "Form") +
+    coord_flip() +
+    scale_fill_discrete(labels = c("WG", "WS")) +
+    theme(legend.position = "bottom", text = element_text(size = 20))
+  
+  png("plots/mom_ed_presentation.png", width = 5.5, height = 5, units = "in",
+      res = 96) ; print(mom_ed.plot) ; dev.off()
 
 }
 ################################################################################
@@ -187,7 +195,7 @@ for(i in 1:max.factors) {
 
 # This is psych's built-in method for estimating factors (and princ. comp.,
 # but I left those out)
-fa.parallel(efa.half[, -1], fa = "fa")
+x <- fa.parallel(efa.half[, -1], fa = "fa")
 
 #
 # Plot 3-factor solution 1+3 against 2
@@ -241,16 +249,22 @@ factor.analyses[[3]]$loadings %>%
 
 #
 # CFA
-# 
+#
+
+# fa_2fac <- fa(select(efa.half, -data_id), 2, rotate = "Promax",
+#               weight = NULL)
+# model_2fac <- structure.diagram(fa_2fac, cut = 0.4, errors = TRUE)
+
+nobs <- list(nrow(cfa.half), nrow(efa.half))
 
 model_2fac <- noquote(c("MR1 =~ + sounds + animals + vehicles + toys + food_drink + clothing + body_parts + household + outside + people + games_routines",
                         "MR2 =~ + furniture_rooms + household + outside + action_words + time_words + descriptive_words + pronouns + question_words + locations + quantifiers",
                         "MR1 ~~ MR2"))
 
 mcdi.cfa2fac.r <- cfa(model = model_2fac,
-                    data = select(cfa.half, -data_id),
-                    sample.nobs = nobs,
-                    estimator = "MLR")
+                      data = select(cfa.half, -data_id),
+                      sample.nobs = nobs,
+                      estimator = "MLR")
 
 summary(mcdi.cfa2fac.r, fit.measures = TRUE)
 
@@ -263,8 +277,8 @@ model_3fac <- noquote(c("MR1 =~ + animals + vehicles + food_drink + clothing + b
 
 
 mcdi.cfa3fac.r <- cfa(model = model_3fac,
-                    data = select(cfa.half, -data_id),
-                    sample.nobs = nobs,
-                    estimator = "MLR")
+                      data = select(cfa.half, -data_id),
+                      sample.nobs = nobs,
+                      estimator = "MLR")
 
 summary(mcdi.cfa3fac.r, fit.measures = TRUE)

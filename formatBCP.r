@@ -7,7 +7,6 @@ if(.Platform$OS.type == "unix") {
 # Libraries
 
 library(tidyverse)
-library(tidyselect)
 library(readxl)
 library(Hmisc)
 
@@ -18,25 +17,30 @@ source("format-BCP-funcs.R")
 
 # Read data
 
-mcdi_all <- read_csv("data/bcp-UMNUNC-mcdi-200131.csv")
+mcdi_all1 <- read_csv("data/bcp-UMNUNC-mcdi-200131.csv")
 s_dict_file <- "data/WS-example.csv"
 g_dict_file <- "data/WG-example.csv"
 
 # Clean up mcdi_all
-colnames(mcdi_all) <- gsub("demographics,", "demo.", colnames(mcdi_all))
-colnames(mcdi_all) <- gsub("mcdi,", "gest.", colnames(mcdi_all))
-colnames(mcdi_all) <- gsub("mcdi_words_sentences,", "sent.", colnames(mcdi_all))
+colnames(mcdi_all1) <- gsub("demographics,", "demo.", colnames(mcdi_all1))
+colnames(mcdi_all1) <- gsub("mcdi,", "gest.", colnames(mcdi_all1))
+colnames(mcdi_all1) <- gsub("mcdi_words_sentences,", "sent.", 
+                            colnames(mcdi_all1))
 
-mcdi_all <- mcdi_all %>%
+mcdi_all <- mcdi_all1 %>%
             select(demo.CandID, demo.Visit_label, demo.Gender,
                    starts_with("gest."), starts_with("sent.")) %>%
-            separate(demo.Visit_label, into = c(NA, "demo.ideal_age"),
+            filter(grepl("^bcp[ABCDEG]", demo.Visit_label),
+                   !(demo.Visit_label %in% c("bcpCFP", "bcpGUESTxV1")),
+                   !grepl("Biomom", demo.Visit_label)) %>%
+            separate(demo.Visit_label, 
+                     into = c(NA, "demo.ideal_age"),
                      sep = "x") %>%
             mutate(demo.ideal_age = as.numeric(gsub("m", "",
                                                     demo.ideal_age))) %>%
-            rename(data_id = demo.CandID,
-                   age = demo.ideal_age,
-                   sex = demo.Gender)
+            dplyr::rename(data_id = demo.CandID,
+                           age = demo.ideal_age,
+                           sex = demo.Gender)
 
 ################################################################################
 # BCP analysis

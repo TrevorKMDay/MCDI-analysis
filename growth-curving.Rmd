@@ -1,12 +1,13 @@
 ---
 title: "Growth Curving"
-author: "Trevor Day"
-date: "2/22/2020"
+author: "Trevor K.M. Day"
+date: "`r Sys.Date()`"
 output: 
   pdf_document:
     toc: true
 editor_options: 
   chunk_output_type: console
+bibliography: growth-curving-bib.json
 ---
 
 ```{r setup, include=FALSE}
@@ -36,8 +37,10 @@ library(ggrepel)
 library(gridExtra)
 
 library(growthcurver)
-library(educate)
 
+# library(devtools)
+# devtools::install_github("zief0002/educate")
+library(educate)
 
 ```
 
@@ -51,7 +54,7 @@ test <- read_csv("data/test-subjs.csv") %>%
 
 # Introduction
 
-Throughout, I will be using notation from XXX, where:
+Throughout, I will be using notation from @tjorve_and_tjorve, where:
 
  - $W_0$: The starting population. For our purposes, can be estimated at 1 or 
           less.
@@ -174,7 +177,7 @@ means it may pick an asymptote well below 680.
 I also want to point out this is a remarkably good fit; other subjects are not
 so good.
 
-# Gompertz II Electric Pertzaloo
+# Gompertz II: Electric Pertzaloo
 
 Through trial and error, I identified a form of the Gompertz equation that 
 works well with `nls` and allows $A$ and $W_0$ as parameters. As a result, only
@@ -253,7 +256,7 @@ $\frac{A}{e}=251$ is a feature of the model, so we solve for $T_i$ given a
 $k_g$. $k_u$ is the slope of the tangent line at that point.
 
 
-```{r plot2, echo=FALSE, fig.height=3, fig.width=5}
+```{r plot2, echo=FALSE, fig.height=4, fig.width=6}
 
 # Value at inflection: constant (a feature of the Gompertz formula)
 W_i <- 681 / exp(1)
@@ -281,13 +284,13 @@ ggplot(NULL) +
              alpha = 0.75,
              color = colors[1],
              size = 1) +
-  scale_x_continuous(limits = c(0, 60), breaks = seq(10, 36, by = 2), 
+  scale_x_continuous(limits = c(0, 60), breaks = seq(10, 36, by = 4), 
                      minor_breaks = NULL) +
   scale_y_continuous(limits = c(NA, 700)) + 
   labs(x = "Age (mo.)", y = "Inventory") +
   geom_hline(yintercept = c(680, 680 / exp(1)), size = 1, linetype = "dashed", 
              color = "darkred") +
-  stat_function(data = test, 
+  stat_function(data = test,
                 fun = function(age) { W_0 * (A / W_0) ^ (1 - exp(-gomp2.kg * age)) },
                 color = colors[2],
                 size = 1.1,
@@ -314,7 +317,9 @@ ggplot(NULL) +
 
 ```
 
-```{r iterate-for-pres}
+```{r iterate-for-pres, include=FALSE}
+
+# This is an animation for a presentation.
 
 p1 <- ggplot(NULL) +
         geom_point(data = test, 
@@ -334,8 +339,7 @@ p1 <- ggplot(NULL) +
                    color = "darkred")
 
 p2 <- p1 +
-        stat_function(data = test, 
-                      fun = function(age) { W_0 * (A / W_0) ^ (1 - exp(-gomp2.kg * age)) },
+        stat_function(fun = function(age) { W_0 * (A / W_0) ^ (1 - exp(-gomp2.kg * age)) },
                       color = colors[2],
                       size = 1.1,
                       alpha = 0.75)
@@ -732,7 +736,7 @@ png("plots/lexsyn-gompertz-presentation.png", width = 5.5, height = 5,
 
 print(p.lxsy)
 
-dev.off()
+invisible( dev.off() )
 
 ```
 
@@ -740,9 +744,11 @@ The take-away here is that syntactic development occurs later, and even though
 the SE is larger, the ranges do *not* overlap. It is the difference between
 $T_i,lex$ and $T_i,syn$ that is interesting.
 
-## L v S across subjects
+## Lexical vs. syntactic across subjects
 
-```{r LS plots, echo=FALSE, fig.height=3.5, fig.width=3.5, message=FALSE, warning=FALSE}
+Individuals in rows/columns (not one subject per row as above).
+
+```{r LS plots, echo=FALSE, fig.height=3, fig.width=3, message=FALSE, warning=FALSE}
 
 lexVsyn <- function(data) {
   
@@ -796,7 +802,7 @@ for (i in ID3)
 
 ## SE plots
 
-```{r}
+```{r LS.vals, error=FALSE}
 
 LS.vals <- data.frame(data_id = ID3) 
 lex.fits <- lapply(LS.vals$data_id, 
@@ -841,6 +847,19 @@ LS.vals <- LS.vals %>%
                                         A = 1),
                    synMlex = syn.m - lex.m)
 
+
+
+mean(LS.vals$synMlex, na.rm = TRUE)
+sd(LS.vals$synMlex, na.rm = TRUE)
+
+
+t.test(LS.vals$lex.m, LS.vals$syn.m, paired = TRUE)
+
+
+```
+
+```{r LS.vals_plot, message=FALSE, warning=FALSE, include=FALSE}
+
 # LS.vals.melt <-  LS.vals %>%
 #                   select(-syn.less.lex) %>%
 #                   pivot_longer(-data_id)
@@ -872,33 +891,16 @@ ggplot(LS.vals, aes(synMlex)) +
   geom_histogram(binwidth = .25) +
   labs(x = "Ti,syn - Ti,lex (mo.)") 
 
-mean(LS.vals$synMlex, na.rm = TRUE)
-sd(LS.vals$synMlex, na.rm = TRUE)
 
-dev.off()
-
-t.test(LS.vals$lex.m, LS.vals$syn.m, paired = TRUE)
-
-```
-
-## Bootstrapping significance of factor structure
-
-Although the CFA technically failed (fit parameters marginal), it does seem 
-there is a real difference in $T_i$ between syntax and lexical acquisition.
-We can compare this difference by randomly selecting identically sized parts,
-calculating the average difference and comparing that distribution to the 
-average difference between $T_i,syn$ and $T_i,lex$ 
-(`r round(mean(LS.vals$synMlex, na.rm = TRUE), 2)`).
-
-```{r bootstrap}
-
+# Suppress dev.off() messages
+invisible( dev.off() )
 
 ```
 
 
 ## All curves
 
-```{r all-curves}
+```{r all-curves, echo=TRUE, message=FALSE, warning=FALSE}
 
 LS.vals <- LS.vals %>%
             mutate(syn.m)
@@ -923,17 +925,19 @@ ggplot(LS.vals) +
   labs(x = "Centered on T_i,lex", y = "Proportion sub-score") +
   lexlines + synlines
 
-dev.off()
+invisible( dev.off() )
 
 ```
 
-## Prediction
+\newpage
+# Package info
 
-```{r}
+```{r package-info}
 
-demo.plot <- lexVsyn(filter(lexsyn, data_id == ID3[3], name != "SUM")) 
+version
 
-demo.plot +
-  stat_function(fun = function(.x) 1/(60^2) * .x^2)
+installed.packages()[names(sessionInfo()$otherPkgs), "Version"]
 
-````
+```
+
+# References

@@ -59,9 +59,13 @@ s.cat <- sentences.words %>%
           rename(s.cat = category) %>%
           mutate(definition = fct_recode(definition, "inside" = "inside/in"))
 
-
+# List words by categories
 cats <- merge(g.cat, s.cat, by = "definition") %>%
           filter(definition %in% sg.words)
+
+# Identify words whose categories are not the same between forms
+mismatch.cats <- cats %>%
+                  filter(as.character(g.cat) != as.character(s.cat))
 
 as.character(cats$g.cat) == as.character(cats$s.cat)
 

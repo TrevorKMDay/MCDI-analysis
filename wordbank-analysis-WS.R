@@ -434,6 +434,22 @@ all.scores <- factor.scores(select(all.merge, -data_id, -age),
 plot.scores <- cbind.data.frame(all.demo, all.scores$scores) %>%
                 as_tibble()
 
+lm(MR1 ~ sex, plot.scores) %>% summary()
+lm(MR2 ~ sex, plot.scores) %>% summary()
+
+## Mom ed
+mom_ed.lut <- data.frame(mom_ed = c("Some Secondary", "Secondary", "College", 
+                                    "Some College", "Primary", "Graduate", 
+                                    "Some Graduate"),
+                          mom_ed_y = c(9, 12, 16, 14, 6, 20, 18))
+
+lm(MR1 ~ mom_ed_y, plot.scores) %>% summary()
+lm(MR2 ~ mom_ed_y, plot.scores) %>% summary()
+
+lm(mom_ed_y ~ sex, plot.scores) %>% summary()
+
+plot.scores <- left_join(plot.scores, mom_ed.lut)
+
 smear <- ggplot(plot.scores, aes(x = MR1, y = MR2, color = age)) +
           scale_color_viridis() +
           geom_point(alpha = 0.25, size = 1) +
@@ -443,8 +459,20 @@ smear <- ggplot(plot.scores, aes(x = MR1, y = MR2, color = age)) +
           geom_smooth(method = "lm", formula = y ~ poly(x, 2), color = "black",
                       size = 1)
 
+ggplot(filter(plot.scores, !is.na(sex)), 
+       aes(x = MR1, y = MR1 - MR2, color = sex)) +
+  geom_point(alpha = 0.25, size = 1)+
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), size = 1)
+
+ggplot(filter(plot.scores, !is.na(mom_ed)), 
+       aes(x = MR1, y = MR2, color = mom_ed)) +
+  geom_point(alpha = 0.25, size = 1)+
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), size = 1, se = FALSE)
+
 # Group by age
 plot.scores.summary <- plot.scores %>%
+                        select(-mom_ed_y) %>%
+                        rename(Lexical = MR1, Structural = MR2) %>%
                         pivot_longer(-c(data_id, age, sex, mom_ed, instrument),
                                      names_to = "factor") %>%
                         group_by(age, factor) %>%
