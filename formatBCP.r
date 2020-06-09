@@ -17,7 +17,9 @@ source("format-BCP-funcs.R")
 
 # Read data
 
-mcdi_all1 <- read_csv("data/bcp-UMNUNC-mcdi-200131.csv")
+mcdi.date <- "200609"
+
+mcdi_all1 <- read_csv(paste0("data/bcp-UMNUNC-mcdi-", mcdi.date, ".csv"))
 s_dict_file <- "data/WS-example.csv"
 g_dict_file <- "data/WG-example.csv"
 
@@ -27,8 +29,11 @@ colnames(mcdi_all1) <- gsub("mcdi,", "gest.", colnames(mcdi_all1))
 colnames(mcdi_all1) <- gsub("mcdi_words_sentences,", "sent.", 
                             colnames(mcdi_all1))
 
+# Note that "Gender" was changed to "Sex" in spring 2020, may not work with
+# older datasets
+
 mcdi_all <- mcdi_all1 %>%
-            select(demo.CandID, demo.Visit_label, demo.Gender,
+            select(demo.CandID, demo.Visit_label, demo.Sex,
                    starts_with("gest."), starts_with("sent.")) %>%
             filter(grepl("^bcp[ABCDEG]", demo.Visit_label),
                    !(demo.Visit_label %in% c("bcpCFP", "bcpGUESTxV1")),
@@ -40,7 +45,9 @@ mcdi_all <- mcdi_all1 %>%
                                                     demo.ideal_age))) %>%
             dplyr::rename(data_id = demo.CandID,
                            age = demo.ideal_age,
-                           sex = demo.Gender)
+                           sex = demo.Sex) %>%
+            mutate_at(vars(ends_with("morphemes")), as.numeric) %>%
+            mutate_at(vars(ends_with("words")), as.numeric)
 
 ################################################################################
 # BCP analysis
@@ -53,6 +60,22 @@ BCP_WS <- format.sentences(mcdi_all, s_dict_file)
 
 # Score WS based on Wordbank
 BCP_WS_scored <- score.WS(BCP_WS)
+
+# Calculate MLU3
+MLU3 <- mcdi_all %>%
+          select(data_id, age, ends_with("morphemes"), ends_with("words")) %>%
+          na.omit() %>%
+          mutate(MLU3m = rowMeans(select(., ends_with("morphemes")), 
+                                  na.rm = TRUE),
+                 MLU3w = rowMeans(select(., ends_with("words")), na.rm = TRUE))
+
+ggplot(MLU3, aes(x = MLU3w, y = MLU3m, color = age)) +
+  geom_point() +
+  geom_line(aes(group = data_id), alpha = 0.25) + 
+  scale_color_viridis_c()
+
+cor(MLU3$MLU3m, MLU3$MLU3w) # 0.99
+
 
 # Extract ns (instead of perc) and sum to get total inventory size
 BCP_WS_scored.n <- BCP_WS_scored[[1]] %>%
@@ -82,9 +105,11 @@ BCP_both <- bind_rows(BCP_WS_scored.n, BCP_WG_asWS)
 # Save data
 #
 
-saveRDS(BCP_WG_scored, file = "data/BCP_WG_scored.rds")
-saveRDS(BCP_WG_asWS, file = "data/BCP_WG_asWS.rds")
-saveRDS(BCP_WS_scored, file = "data/BCP_WS_scored.rds")
+
+saveRDS(BCP_WG_scored, file = paste0("data/BCP_WG_scored-", mcdi.date, ".rds"))
+saveRDS(BCP_WG_asWS,   file = paste0("data/BCP_WG_asWS-", mcdi.date, ".rds"))
+saveRDS(BCP_WS_scored, file = paste0("data/BCP_WS_scored-", mcdi.date, ".rds"))
+saveRDS(MLU3,          file = paste0("data/BCP_WS_MLU3-", mcdi.date, ".rds"))
 
 # People who have four or more data points
 

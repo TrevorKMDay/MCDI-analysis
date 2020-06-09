@@ -185,7 +185,7 @@ if (file.exists(FA1000)) {
 # Display plots
 for(i in 1:max.factors) {
 
-  png(paste0("WG-factors", i, ".png"), width = 500, height = 500)
+  png(paste0("plots/WG-factors", i, ".png"), width = 500, height = 500)
 
   print( fa.diagram(factor.analyses[[i]]) )
 

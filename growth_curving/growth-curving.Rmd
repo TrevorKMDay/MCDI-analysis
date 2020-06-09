@@ -1,0 +1,943 @@
+---
+title: "Growth Curving"
+author: "Trevor K.M. Day"
+date: "`r Sys.Date()`"
+output: 
+  pdf_document:
+    toc: true
+editor_options: 
+  chunk_output_type: console
+bibliography: growth-curving-bib.json
+---
+
+```{r setup, include=FALSE}
+
+if(.Platform$OS.type == "unix") {
+  setwd("/Volumes/GoogleDrive/My Drive/Research/MCDI/MCDI-analysis")
+} else {
+  setwd("G:/My Drive/Research/MCDI/MCDI-analysis/")
+}
+
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Setup
+
+Load packages `tidyverse`, `plyr`, `ggplot2`, `scales`, `ggrepel`, `gridExtra`,
+`growthcurver`, `educate` (from Andy).
+
+```{r packages, echo=FALSE, message=FALSE, warning=FALSE}
+
+library(tidyverse) 
+library(plyr)
+library(ggplot2)
+library(scales)
+
+library(ggrepel)
+library(gridExtra)
+
+library(growthcurver)
+
+# library(devtools)
+# devtools::install_github("zief0002/educate")
+library(educate)
+
+```
+
+Load the first person with five points
+
+```{r data}
+test <- read_csv("data/test-subjs.csv") %>%
+          arrange(data_id, age) %>%
+          filter(data_id == 176427)
+```
+
+# Introduction
+
+Throughout, I will be using notation from @tjorve_and_tjorve, where:
+
+ - $W_0$: The starting population. For our purposes, can be estimated at 1 or 
+          less.
+ - $A$: The upper asymptote, here I use $680+1$, the size of MCDI plus one so
+          the participant is actually modeled as learning all words.
+ - $t$: Time. Here, age in months.
+ - $k_g$: *Relative* (or *intrinsic*) growth rate.
+ - $k_U$: Absolute maximum growth rate (at inflection). 
+          Given as $k_U=\frac{A\times{}k_g}{e}$. 
+          Has units $\frac{\textrm{words}}{\textrm{month}}$.
+ - $W_i,T_i$: Value and time at inflection. $W_i$ is fixed at $\frac{A}{e}\approx251$,
+                and $T_i$ can be solved for. 
+                
+```{r values}
+
+# Upper asymptote
+A <- 681
+
+# Lower asymptote: the smallest value R can represent
+W_0 <- .Machine$double.eps
+
+```
+                
+# Basic Gompertz
+
+The Gompertz equation given by `growthcurver`, converted to the new notation is: 
+
+<!-- $$ -->
+<!-- y = \frac{K}{1 + \frac{K - N_0}{N_0}e^{-rx}} -->
+<!-- $$ -->
+
+$$
+y = \frac{A}{1 + \frac{A - W_0}{W_0}(\exp{(-k_g\times{}x)})}
+$$
+
+
+
+This can be created like so:
+
+```{r growthcurver}
+gomp.fit <- SummarizeGrowth(test$age, test$inventory)
+gomp.fit
+```
+
+We write a quick function to calculate the fit over a given range. We use 
+`0.01` as a step as a day is `0.03` months. See the first part of 
+`predict.gomp`.
+
+```{r gomp_fit}
+
+predict.gomp <- function(fit, range = seq(0, 36, by = 0.01), max = 681,
+                         ci = FALSE) {
+  
+  if (class(fit) == "gcfit"){
+    
+    # Result from growth curver
+    A <- fit$vals$k
+    W_0 <- fit$vals$n0
+    k_g <- fit$vals$r
+    k_g.se <- fit$vals$r_se
+    
+    if (ci)
+      k_g.se <- 1.96 * k_g.se
+
+    result <- A/(1 + ((A - W_0)/W_0) * exp(-1 * k_g * range))
+    result.lo <- A/(1 + ((A - W_0)/W_0) * exp(-1 * (k_g - k_g.se) * range))
+    result.hi <- A/(1 + ((A - W_0)/W_0) * exp(-1 * (k_g + k_g.se) * range))
+    
+  } else if (class(fit) == "nls") {
+    
+    # Result from my constrained model
+    A <- max
+    W_0 <- .Machine$double.eps
+    k_g <- coef(fit) %>% unname()
+    k_g.se <- summary(fit)$coefficients[1, 2]
+    
+    if (ci)
+      k_g.se <- 1.96 * k_g.se
+
+    result <- W_0 * (A / W_0) ^ (1 - exp(-1 * k_g * range))
+    result.lo <- W_0 * (A / W_0) ^ (1 - exp(-1 * (k_g - k_g.se) * range))
+    result.hi <- W_0 * (A / W_0) ^ (1 - exp(-1 * (k_g + k_g.se) * range))
+    
+    
+  }
+  
+  
+  out <- cbind(range, result, result.lo, result.hi) %>%
+          as.data.frame()
+  
+  return(out)
+  
+}
+
+```
+
+```{r plot_1, fig.height=3, fig.width=5, fig.cap="Gompertz curve from growthcurver package", echo=FALSE}
+
+fit1 <- predict.gomp(gomp.fit)
+
+ggplot(NULL) +
+  scale_x_continuous(limits = c(10, 36), breaks = seq(10, 36, by = 2)) +
+  scale_y_continuous(limits = c(0, 680)) +
+  geom_ribbon(data = fit1, aes(x = range, ymin = result.lo, ymax = result.hi),
+              fill = "lightblue", alpha = 0.5) +
+  geom_line(data = fit1, aes(x = range, y = result), color = "blue") +
+  geom_point(data = test, aes(x = age, y = inventory)) +
+  labs(x = "Age (mo.)", y = "Inventory") +
+  geom_hline(yintercept = 680)
+
+```
+
+The standard error of $k_g$ is used for two additional lines and plotted here as 
+an error range.
+
+However, this has the limitation that $A$ is 
+estimated by the function, which 
+means it may pick an asymptote well below 680.
+
+I also want to point out this is a remarkably good fit; other subjects are not
+so good.
+
+# Gompertz II: Electric Pertzaloo
+
+Through trial and error, I identified a form of the Gompertz equation that 
+works well with `nls` and allows $A$ and $W_0$ as parameters. As a result, only
+$k_g$ has to converge for this model.
+
+For $A$, we use $680+1$, as otherwie, a kid who never learns the 680th word
+on the MCDI would be modeled. Although, as a reminder, we are most interested
+in the shape of the first two-thirds of the model, since the greater asymptote
+is an artifact of the instrument.
+
+This equation is:
+
+$$
+y = W_0\left(\frac{A}{W_0}\right)^{1-\exp(-k_G \times{} t)}
+$$
+
+The absolute growth rate, $k_u$, which technically has the units words/month,
+can be solved for as follows:
+
+$$
+k_u = \frac{A\times{}k_g}{e} = \frac{681}{e}k_g \approx 251\times{}k_g
+$$
+
+Function and solver below:
+
+```{r gomp2}
+gomp2.fit <- function(data, response = "inventory", max = 681, max.iter = 50) {
+  
+  A <- max
+  W_0 <- .Machine$double.eps
+  
+  # This is the formula that works best to solve in R
+  # 19 refers to its number in the Tjorve and Tjorve paper
+  fit19 <- NULL
+  try( fit19 <- nls(as.formula(paste(response, 
+                                "~ W_0 * (A / W_0) ^ (1 - exp(-k_g * age))")),
+                   data = data,
+                   start = list(k_g = .1),
+                   control = list(maxiter = max.iter)) )
+  
+  if (is.null(fit19))
+    fit19 <- NA
+  
+  return(fit19)
+  
+}
+
+# Estimate relative growth rate
+gomp2 <- gomp2.fit(test)
+gomp2.kg <- summary(gomp2)$coefficients[1, 1]
+
+# Solve for abs growth rate
+gomp2.kU <- 681 * gomp2.kg / exp(1)
+
+# Solve for a given X or Y, given kg
+solve.gomp2 <- function(x = NA, y = NA, k_g, A = 681) {
+  
+  W_0 <- .Machine$double.eps
+  
+  if (is.na(y) & !is.na(x))
+    result <-  W_0 * (A / W_0) ^ (1 - exp(-k_g * x))
+  else if (is.na(x) & !is.na(y))
+    result <- -log(1 - log(y / W_0) / log(A / W_0)) / k_g
+  else
+    message("Exactly one of x/y must be specified")
+  
+  return(result)
+  
+}
+
+```
+
+Now we plot the Gompertz fit, including the point of inflection, and the 
+maximum absolute growth rate, the rate at $\{T_i, W_i\}$. The value of $W_i$,
+$\frac{A}{e}=251$ is a feature of the model, so we solve for $T_i$ given a 
+$k_g$. $k_u$ is the slope of the tangent line at that point.
+
+
+```{r plot2, echo=FALSE, fig.height=4, fig.width=6}
+
+# Value at inflection: constant (a feature of the Gompertz formula)
+W_i <- 681 / exp(1)
+
+# Time at inflection
+# Slope at inflection is gomp2.kU
+T_i <- solve.gomp2(y = W_i, k_g = gomp2.kg)
+
+# Solve for intercept of tangent line
+b <- W_i - gomp2.kU * T_i
+
+# This block solves for upper and lower estimates 
+# gomp2.kg.se <- summary(gomp2)$coefficients[1, 2]
+# gomp2.kgs <- c(gomp2.kg - gomp2.kg.se, gomp2.kg + gomp2.kg.se)
+
+colors <- hue_pal()(3)
+
+ggplot(NULL) +
+  geom_point(data = test, 
+             aes(x = age, y = inventory),
+             alpha = 0.75,
+             color = colors[1]) +
+  geom_line(data = test, 
+             aes(x = age, y = inventory),
+             alpha = 0.75,
+             color = colors[1],
+             size = 1) +
+  scale_x_continuous(limits = c(0, 60), breaks = seq(10, 36, by = 4), 
+                     minor_breaks = NULL) +
+  scale_y_continuous(limits = c(NA, 700)) + 
+  labs(x = "Age (mo.)", y = "Inventory") +
+  geom_hline(yintercept = c(680, 680 / exp(1)), size = 1, linetype = "dashed", 
+             color = "darkred") +
+  stat_function(data = test,
+                fun = function(age) { W_0 * (A / W_0) ^ (1 - exp(-gomp2.kg * age)) },
+                color = colors[2],
+                size = 1.1,
+                alpha = 0.75) +
+  geom_abline(intercept = b,
+              slope = gomp2.kU,
+              color = "black",
+              size = 0.75,
+              alpha = 0.5) +
+  geom_point(aes(x = T_i, y = W_i), 
+             size = 3, 
+             shape = 16, 
+             color = colors[3]) +
+  geom_label_repel(aes(x = T_i, y = W_i), 
+                    size = 4, 
+                    label = paste0(round(T_i), ",", round(W_i)),
+                    nudge_x = 5,
+                    color = colors[3]) +
+  annotate("text",
+           x = 15, y = 600, 
+           label = paste0("k_U=", round(gomp2.kU, 1))) +
+  theme_bw()
+  
+
+```
+
+```{r iterate-for-pres, include=FALSE}
+
+# This is an animation for a presentation.
+
+p1 <- ggplot(NULL) +
+        geom_point(data = test, 
+                   aes(x = age, y = inventory),
+                   size = 2,
+                   color = "black") +
+        geom_line(data = test, 
+                   aes(x = age, y = inventory),
+                   color = "black",
+                   size = 1) +
+        scale_x_continuous(limits = c(0, 60), 
+                           breaks = seq(10, 36, by = 2), 
+                           minor_breaks = NULL) +
+        scale_y_continuous(limits = c(NA, 700)) + 
+        labs(x = "Age (mo.)", y = "Inventory") +
+        geom_hline(yintercept = 680, size = 1, linetype = "dashed", 
+                   color = "darkred")
+
+p2 <- p1 +
+        stat_function(fun = function(age) { W_0 * (A / W_0) ^ (1 - exp(-gomp2.kg * age)) },
+                      color = colors[2],
+                      size = 1.1,
+                      alpha = 0.75)
+
+p3 <- p2 +
+        geom_hline(yintercept = 680 / exp(1), size = 1, linetype = "dashed", 
+                    color = "darkred")
+
+p4 <- p3 +  
+        geom_abline(intercept = b,
+                    slope = gomp2.kU,
+                    color = "red",
+                    size = 1) +
+        geom_label_repel(aes(x = T_i, y = W_i), 
+                          size = 4, 
+                          label = paste0(round(T_i), ",", round(W_i)),
+                          nudge_x = 5,
+                          color = "red") +
+        annotate("text",
+                 x = 15, y = 600, 
+                 label = paste0("k_U=", round(gomp2.kU, 1)))
+
+
+names <- paste0("plots/gompertz", 1:4, ".png")
+plots <- list(p1, p2, p3, p4)
+
+for (i in 1:4) {
+  
+  png(names[i], width = 6, height = 5, res = 300, units = "in")
+  print(plots[[i]])
+  dev.off()
+  
+}
+
+```
+
+## Reducing observations
+
+Here we are modeling five points. However, not everyone has five points, so 
+how few can we use?
+
+```{r five_or_less, echo = FALSE}
+
+gomp2s <- lapply(5:3, function(x) gomp2.fit(data = test[1:x, ]))
+gomp2.kgs <- sapply(gomp2s, function(x) summary(x)$coefficients[1, 1])
+gomp2.kUs <- A * gomp2.kgs / exp(1)
+
+T_is <- sapply(gomp2.kgs, function(x) solve.gomp2(y = W_i, k_g = x))
+bs <- W_i - gomp2.kUs * T_is
+
+#colors <- hue_pal()(3)
+
+ggplot(NULL) +
+  geom_point(data = test, 
+             aes(x = age, y = inventory),
+             alpha = 0.75,
+             color = "black") +
+  geom_line(data = test, 
+             aes(x = age, y = inventory),
+             alpha = 0.75,
+             color = "black",
+             size = 1) +
+  scale_x_continuous(limits = c(0, 60), breaks = seq(10, 36, by = 2), 
+                     minor_breaks = NULL) +
+  scale_y_continuous(limits = c(NA, 700)) + 
+  labs(x = "Age (mo.)", y = "Inventory") +
+  geom_hline(yintercept = c(680, 680 / exp(1)), size = 1, linetype = "dashed", 
+             color = "darkred") +
+  stat_function(data = test, 
+                fun = function(age) { W_0 * (A / W_0) ^ (1 - exp(-gomp2.kgs[1] * age)) },
+                color = colors[1],
+                size = 1.1,
+                alpha = 0.5) +
+  stat_function(data = test, 
+                fun = function(age) { W_0 * (A / W_0) ^ (1 - exp(-gomp2.kgs[2] * age)) },
+                color = colors[2],
+                size = 1.1,
+                alpha = 0.5) +
+  stat_function(data = test, 
+                fun = function(age) { W_0 * (A / W_0) ^ (1 - exp(-gomp2.kgs[3] * age)) },
+                color = colors[3],
+                size = 1.1,
+                alpha = 0.5) +
+  geom_abline(intercept = bs,
+              slope = gomp2.kUs,
+              color = colors,
+              size = 0.75,
+              alpha = 0.5) +
+  geom_point(aes(x = T_is, y = W_i), 
+             size = 3, 
+             shape = 16,
+             color = colors) +
+  geom_label_repel(aes(x = T_is, y = W_i), 
+                    size = 4, 
+                    label = paste0(round(T_is, 1), ",", round(W_i)),
+                    nudge_x = 5,
+                   force = 25, 
+                    color = colors) +
+  annotate("text",
+           x = 15, y = 600 + c(0, 25, 50), 
+           label = paste0("k_U=", round(gomp2.kUs, 2)),
+           color = colors) +
+  theme_bw()
+
+```
+
+It looks like four and five give reasonably close values, with three not doing
+too poorly for this individual.
+
+## Modeling across subjects
+
+The `test` file contains data from 51 subjects who have at least four 
+observations. Here, we're going to repeat the same steps as above and plot all
+51 to examine how consistent curves are with other data.
+
+```{r load-all-data}
+
+# Load data as a list
+test_all <- read_csv("data/test-subjs.csv") %>%
+              arrange(data_id, age) %>%
+              split(., f = .$data_id)
+
+```
+
+I'm going to invisibly fit the curves here, with tangent lines and $\{T_i,W_i\}$
+coordinates on the left and SE envelopes on the right.
+
+```{r fit-curves, echo=FALSE, fig.height=3.5, fig.width=6.5, message=FALSE, warning=FALSE}
+
+all.fits5 <- lapply(test_all, function(x) if (nrow(x) == 5) { gomp2.fit(x) } else { NA })
+all.fits4 <- lapply(test_all, function(x) gomp2.fit(x[1:4, ]))
+all.fits3 <- lapply(test_all, function(x) gomp2.fit(x[1:3, ]))
+
+# Plots three curves/tangents, list fits 3 -> 5
+plot.tri <- function(data, fit3, fit4, fit5 = NA) {
+  
+  if (is.list(fit5)) {
+    fits <- list(fit3, fit4, fit5)
+  } else {
+    fits <- list(fit3, fit4)
+  }
+  
+  kgs <- sapply(fits, function(x) summary(x)$coefficients[1, 1])
+  
+  # The maximum number of colors is 3
+  colors <- hue_pal()(3)
+  
+  p <- ggplot(NULL) +
+        geom_point(data = data, 
+                   aes(x = age, y = inventory),
+                   alpha = 0.75,
+                   color = "black") +
+        geom_line(data = data, 
+                   aes(x = age, y = inventory),
+                   alpha = 0.75,
+                   color = "black",
+                   size = 1) +
+        scale_x_continuous(limits = c(0, 60), 
+                           breaks = seq(10, 36, by = 4), 
+                           minor_breaks = NULL) +
+        scale_y_continuous(limits = c(NA, 700)) + 
+        labs(x = "Age (mo.)", y = "Inventory") +
+        geom_hline(yintercept = c(680, 680 / exp(1)), 
+                   size = 1, 
+                   linetype = "dashed", 
+                   color = "darkred") 
+  
+  # Here are the basic curves
+  curves <- lapply(1:length(fits), function(x)
+                      stat_function(data = data,
+                                    fun = function(age) { W_0 * (A / W_0) ^ (1 - exp(-kgs[x] * age)) },
+                                    color = colors[x],
+                                    size = 1.1,
+                                    alpha = 0.5))
+  
+  # Add the basic curves to the plot (only add 3 if it exists)
+  p2 <- p + curves[[1]] + curves[[2]]
+  if (length(curves) == 3) {
+    p2 <- p2 + curves[[3]]
+  }
+  
+  # Ranges using predict.gomp
+  ribbons <- lapply(fits, predict.gomp)
+  
+  geom_ribbons <- lapply(1:length(ribbons), 
+                         function(x) {
+    
+                            dat <- ribbons[[x]]
+      
+                            r <- geom_ribbon(data = dat, 
+                                              aes(x = range, 
+                                                  ymin = result.lo, 
+                                                  ymax = result.hi), 
+                                                  fill = colors[x],
+                                                  alpha = 0.5)
+                            
+                            return(r)
+                          
+                          } )
+  
+  
+  kUs <- 681 * kgs / exp(1)
+  T_is <- sapply(kgs, function(x) solve.gomp2(y = W_i, k_g = x))
+  bs <- W_i - kUs * T_is
+  
+  tangents <- list(geom_abline(intercept = bs,
+                    slope = kUs,
+                    color = colors[1:length(bs)],
+                    size = 0.75,
+                    alpha = 0.5),
+                  geom_point(aes(x = T_is, y = W_i),
+                             size = 3,
+                             shape = 16,
+                             color = colors[1:length(T_is)]),
+                  geom_label_repel(aes(x = T_is, y = W_i),
+                                    size = 4,
+                                    label = paste0(round(T_is, 1), ",", round(W_i)),
+                                    nudge_x = 5,
+                                    force = 25,
+                                    color = colors[1:length(T_is)]) )
+  
+  p3 <- p2 + tangents
+  
+  y_pos <- (600 + c(0, 25, 50))[1:length(kUs)]
+  labels <- paste0(2 + 1:length(kUs), ": k_U=", round(kUs, 2)) 
+  
+  annot <- list(annotate("text",
+                           x = 15, y = y_pos,
+                           label = labels,
+                           color = colors[1:length(kUs)]),
+                  theme_bw())
+  
+  p4 <- p3 + annot
+  pr1 <- p + geom_ribbons + curves + annot
+
+  grid.arrange(p4, pr1, ncol = 2, top = unique(data$data_id))
+  
+}
+
+# plot.tri(test_all[[51]], 
+#          fit3 = all.fits3[[51]], 
+#          fit4 = all.fits4[[51]], 
+#          fit5 = all.fits5[[51]])
+
+all.plots <- lapply(1:51, function(x) plot.tri(test_all[[x]],
+                                                all.fits3[[x]],
+                                                all.fits4[[x]],
+                                                all.fits5[[x]]))
+
+for (p in all.plots){
+  p
+}
+
+```
+
+## Distribution of $k_u$
+
+How widely distributed is $k_u$? In other words, are we getting meaningful
+variation in $k_u$, or does everyone develop at the same rate?
+Boxplots are shown to visualize variation in estimates per-person, per number of
+points.
+
+```{r dist-ku}
+
+kgs5 <- sapply(all.fits5, function(x) if(is.list(x)) {summary(x)$coefficients[1, 1]} else {NA})
+kgs4 <- sapply(all.fits4, function(x) summary(x)$coefficients[1, 1])
+kgs3 <- sapply(all.fits3, function(x) summary(x)$coefficients[1, 1])
+
+all.kgs <- cbind(kgs3, kgs4, kgs5)
+all.kUs <- (A * all.kgs / exp(1)) %>%
+            as.data.frame() %>% 
+            rownames_to_column() %>%
+            pivot_longer(-rowname) %>%
+            na.omit()
+
+# max_vals <- bind_rows(test_all) %>%
+#               group_by(data_id) %>%
+#               summarize(age = max(age), W = max(inventory)) %>%
+#               mutate(data_id = as.character(data_id))
+
+ggplot(all.kUs, aes(x = rowname, y = value)) +
+  geom_point(aes(color = name)) +
+  geom_boxplot(outlier.shape = NULL) +
+  coord_flip() + 
+  theme_bw() +
+  scale_y_continuous(limits = c(20, 56), breaks = seq(20, 56, by = 2),
+                     minor_breaks = NULL) +
+  scale_x_discrete(labels = NULL) + 
+  labs(y = "kU (words/month)", x = "Subject")
+
+```
+
+This shows that for the majority of individuals, using 3, 4, or 5 points 
+provide reasonable estimates, however, there are some individuals whose spread
+is large.
+
+These individuals don't seem to have a systematically low oldest visit or 
+low largest inventory size.
+
+However, it appears, as a rule of thumb, at least the final value should 
+exceed $\approx100$, or
+for simplicity's sake, $0.5 * W_i = 125$.
+
+\newpage
+# Lexical vs syntactic
+
+Are the lexical vs. syntactic scores discriminable? (Subject selected at 
+random from those with five visits.) Here, the curve is fit between 0 and 1, as
+a proportion of items endorsed. This makes $W_i\approx{}0.37$.
+
+This plot uses the 95% confidence interval rather than the SE.
+
+```{r lexsyn, echo=FALSE, message=FALSE, warning=FALSE, fig.width=5, fig.height=3}
+
+lexsyn <- read_csv("data/lexsyn.csv")
+
+three_or_more <- table(lexsyn$data_id)
+ID3 <- names(three_or_more)[three_or_more >= 3]
+
+lexsyn <- filter(lexsyn, data_id %in% ID3) %>%
+            arrange(data_id, age) %>%
+            select(-lex, -syn) %>%
+            group_by(data_id, age) %>%
+            pivot_longer(-c(data_id, age)) %>%
+            filter(age > 0)
+
+test <- filter(lexsyn, data_id == "116056")
+
+# ggplot(test, aes(x = age, y = value, color = name)) +
+#   geom_point() +
+#   scale_x_continuous(limits = c(10, 40)) +
+#   scale_y_continuous(limits = 0:1) +
+#   geom_line()
+
+gformula <- function(kg, W_0 = .Machine$double.eps, A = 1, adj = 0) {
+  
+  f <- function(.x) { W_0 * (A/W_0)^(1 - exp(-kg * (.x + adj) )) }
+  return(f)
+  
+}
+
+gminmax <- function(fit, min = TRUE) {
+  
+  kg <- coef(fit) %>% unname()
+  se <- coef(summary(fit))[1, 2]
+  ci <- 1.96 * se
+  
+  if (min)
+    return(kg - ci)
+  else
+    return(kg + ci)
+  
+}
+
+test.l <- gomp2.fit(filter(test, name == "lex.p"), response = "value", 
+                    max = 1) 
+test.s <- gomp2.fit(filter(test, name == "syn.p"), response = "value", 
+                    max = 1) 
+
+colors <- hue_pal()(2)
+
+p.lxsy <- ggplot(NULL) +
+            scale_x_continuous(limits = c(0, 60)) +
+            geom_hline(yintercept = 1 / exp(1)) +
+            labs(x = "Age (mo.)", y = "Proportion sub-score", 
+                 color = "Subscore") +
+            theme(legend.position = "below") + 
+            scale_colour_discrete(labels = c("Lexical", "Syntax")) +
+            geom_point(data = filter(test, name %in% c("lex.p", "syn.p")),
+                       aes(x = age, y = value, color = name)) +
+            stat_function(data = test,
+                          fun = gformula(coef(test.l)), 
+                          color = colors[1], size = 1) +
+            stat_function(data = test,
+                          fun = gformula(coef(test.s)), 
+                          color = colors[2], size = 1) +
+            geom_ribbon(data = predict.gomp(test.l, range = 10:60, max = 1,
+                                                ci = TRUE),
+                        aes(x = range, 
+                            ymax = result.hi,
+                            ymin = result.lo),
+                        fill = colors[1], alpha = 0.25) +
+            geom_ribbon(data = predict.gomp(test.s, range = 10:60, max = 1,
+                                                ci = TRUE),
+                        aes(x = range, 
+                            ymax = result.hi,
+                            ymin = result.lo),
+                        fill = colors[2], alpha = 0.25) 
+
+p.lxsy
+
+png("plots/lexsyn-gompertz-presentation.png", width = 5.5, height = 5,
+    res = 300, units = "in")
+
+print(p.lxsy)
+
+invisible( dev.off() )
+
+```
+
+The take-away here is that syntactic development occurs later, and even though
+the SE is larger, the ranges do *not* overlap. It is the difference between
+$T_i,lex$ and $T_i,syn$ that is interesting.
+
+## Lexical vs. syntactic across subjects
+
+Individuals in rows/columns (not one subject per row as above).
+
+```{r LS plots, echo=FALSE, fig.height=3, fig.width=3, message=FALSE, warning=FALSE}
+
+lexVsyn <- function(data) {
+  
+  lexical.fit <- gomp2.fit(filter(data, name == "lex.p"), 
+                            response = "value", max = 1, max.iter = 500) 
+  syntax.fit <- gomp2.fit(filter(data, name == "syn.p"), 
+                          response = "value", max = 1, max.iter = 500) 
+  
+  colors <- hue_pal()(2)
+  
+  if (!is.na(lexical.fit) & !is.na(syntax.fit))
+    plot <- ggplot(NULL) +
+              scale_x_continuous(limits = c(0, 60)) +
+              geom_hline(yintercept = 1 / exp(1)) +
+              labs(x = "Age (mo.)", y = "Proportion sub-score", 
+                   color = "Subscore") +
+              theme(legend.position = "below") + 
+              scale_colour_discrete(labels = c("Lexical", "Syntax")) +
+              geom_point(data = filter(data, name != "SUM"),
+                         aes(x = age, y = value, color = name)) +
+              stat_function(data = test,
+                            fun = gformula(coef(lexical.fit)), 
+                            color = colors[1], size = 1) +
+              stat_function(data = data,
+                            fun = gformula(coef(syntax.fit)), 
+                            color = colors[2], size = 1) +
+              geom_ribbon(data = predict.gomp(lexical.fit, range = 10:60, max = 1,
+                                                  ci = TRUE),
+                          aes(x = range, 
+                              ymax = result.hi,
+                              ymin = result.lo),
+                          fill = colors[1], alpha = 0.25) +
+              geom_ribbon(data = predict.gomp(syntax.fit, range = 10:60, max = 1,
+                                                  ci = TRUE),
+                          aes(x = range, 
+                              ymax = result.hi,
+                              ymin = result.lo),
+                          fill = colors[2], alpha = 0.25) +
+              labs(title = unique(data$data_id))
+  else
+    plot <- NA
+  
+  return(plot)
+  
+}
+
+for (i in ID3)
+  print(lexVsyn(filter(lexsyn, data_id == i)))
+
+```
+
+## SE plots
+
+```{r LS.vals, error=FALSE}
+
+LS.vals <- data.frame(data_id = ID3) 
+lex.fits <- lapply(LS.vals$data_id, 
+                    function(x) gomp2.fit(filter(lexsyn,
+                                                 data_id == x,
+                                                 name == "lex.p"), 
+                                          response = "value", max = 1, 
+                                          max.iter = 500) )
+syn.fits <- lapply(LS.vals$data_id, 
+                    function(x) gomp2.fit(filter(lexsyn, 
+                                                 data_id == x,
+                                                 name == "syn.p"), 
+                                          response = "value", max = 1, 
+                                          max.iter = 500) )
+
+# Get values
+LS.vals <- LS.vals %>%
+            mutate(lex = sapply(lex.fits, coef),
+                   lex.se = sapply(lex.fits, 
+                                   function(x) coef(summary(x))[1, 2]),
+                   syn = sapply(syn.fits, 
+                                function(x) ifelse(class(x) != "nls", 
+                                                   NA, 
+                                                   coef(x))),
+                   syn.se = sapply(syn.fits, 
+                                   function(x) ifelse(class(x) != "nls", 
+                                                      NA,
+                                                      coef(summary(x))[1, 2])))
+
+# Value at Wi 
+W_i.1 <- 1 / exp(1)
+LS.vals <- LS.vals %>%
+            mutate(lex.m = solve.gomp2(y = W_i.1, k_g = lex, A = 1),
+                   lex.lo = solve.gomp2(y = W_i.1, k_g = lex - (2 * lex.se), 
+                                        A = 1),
+                   lex.hi = solve.gomp2(y = W_i.1, k_g = lex + (2 * lex.se),
+                                        A = 1),
+                   syn.m = solve.gomp2(y = W_i.1, k_g = syn, A = 1),
+                   syn.lo = solve.gomp2(y = W_i.1, k_g = syn - (2 * syn.se),
+                                        A = 1),
+                   syn.hi = solve.gomp2(y = W_i.1, k_g = syn + (2 * syn.se),
+                                        A = 1),
+                   synMlex = syn.m - lex.m)
+
+
+
+mean(LS.vals$synMlex, na.rm = TRUE)
+sd(LS.vals$synMlex, na.rm = TRUE)
+
+
+t.test(LS.vals$lex.m, LS.vals$syn.m, paired = TRUE)
+
+
+```
+
+```{r LS.vals_plot, message=FALSE, warning=FALSE, include=FALSE}
+
+# LS.vals.melt <-  LS.vals %>%
+#                   select(-syn.less.lex) %>%
+#                   pivot_longer(-data_id)
+
+png("plots/rangediff-presentation.png", width = 5, height = 5, units = "in",
+    res = 300)
+
+ggplot(LS.vals) +
+  geom_pointrange(aes(x = data_id, 
+                      y = 0, ymin = lex.hi - lex.m, ymax = lex.lo - lex.m), 
+                  color = hue_pal()(2)[1], 
+                  size = 0.75, fatten = 0.25) +
+  geom_pointrange(aes(x = data_id, 
+                      y = syn.m - lex.m, ymin = syn.hi - lex.m, 
+                      ymax = syn.lo - lex.m), 
+                  color = hue_pal()(2)[2], 
+                  size = 0.75, fatten = 0.25) +
+  coord_flip() +
+  scale_x_discrete(labels = NULL) +
+  scale_y_continuous(limits = c(-6, NA)) + 
+  labs(y = "Time between {lex = Wi} and {syn = Wi} (mo)", x = "Participant")
+
+dev.off()
+
+png("plots/differences-presentation.png", width = 5, height = 5, units = "in",
+    res = 300)
+
+ggplot(LS.vals, aes(synMlex)) +
+  geom_histogram(binwidth = .25) +
+  labs(x = "Ti,syn - Ti,lex (mo.)") 
+
+
+# Suppress dev.off() messages
+invisible( dev.off() )
+
+```
+
+
+## All curves
+
+```{r all-curves, echo=TRUE, message=FALSE, warning=FALSE}
+
+LS.vals <- LS.vals %>%
+            mutate(syn.m)
+
+
+lexlines <- alply(as.matrix(LS.vals[, c("lex", "lex.m")]), 1, 
+                  function(x) stat_function(fun = gformula(x[1], adj = x[2]), 
+                                            color = "grey",
+                                            alpha = .25) )
+
+synlines <- alply(as.matrix(LS.vals[, c("syn", "lex.m")]), 1, 
+                  function(x) stat_function(fun = gformula(x[1], adj = x[2]), 
+                                            color = colors[2],
+                                            alpha = 0.25) )
+
+png("plots/lexsyn-lines.png", width = 5, height = 5, units = "in", res = 300)
+
+ggplot(LS.vals) +
+  scale_x_continuous(limits = c(-20, 40)) +
+  scale_y_continuous(limits = c(0, 1)) + 
+  geom_hline(yintercept = 1 / exp(1)) +
+  labs(x = "Centered on T_i,lex", y = "Proportion sub-score") +
+  lexlines + synlines
+
+invisible( dev.off() )
+
+```
+
+\newpage
+# Package info
+
+```{r package-info}
+
+version
+
+installed.packages()[names(sessionInfo()$otherPkgs), "Version"]
+
+```
+
+# References
