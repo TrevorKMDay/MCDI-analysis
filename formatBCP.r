@@ -56,18 +56,23 @@ mcdi_all <- mcdi_all1 %>%
 # Words and Sentences
 
 # Format BCP data as Wordbank
-BCP_WS <- format.sentences(mcdi_all, s_dict_file)
+BCP_WS <- mcdi_all %>%
+            select(-ends_with("morphemes"), -ends_with("words")) %>%
+            format.sentences(., s_dict_file)
 
 # Score WS based on Wordbank
 BCP_WS_scored <- score.WS(BCP_WS)
 
 # Calculate MLU3
 MLU3 <- mcdi_all %>%
-          select(data_id, age, ends_with("morphemes"), ends_with("words")) %>%
+          select(data_id, sent.Candidate_Age, 
+                 ends_with("morphemes"), ends_with("words")) %>%
+          rename(age = sent.Candidate_Age) %>%
           na.omit() %>%
-          mutate(MLU3m = rowMeans(select(., ends_with("morphemes")), 
+          mutate(age = as.numeric(age),
+                  MLU3m = rowMeans(select(., ends_with("morphemes")), 
                                   na.rm = TRUE),
-                 MLU3w = rowMeans(select(., ends_with("words")), na.rm = TRUE))
+                  MLU3w = rowMeans(select(., ends_with("words")), na.rm = TRUE))
 
 ggplot(MLU3, aes(x = MLU3w, y = MLU3m, color = age)) +
   geom_point() +

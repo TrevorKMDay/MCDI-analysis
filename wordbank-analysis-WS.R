@@ -20,6 +20,10 @@ library(ggridges)
 # Substantive packages (to cite)
 library(psych)
 library(lavaan)
+library(psychometric)
+
+# psychometric loads MASS; which masks select()
+select <- dplyr::select
 
 # This is large, so it takes a while!
 sentences.file <- "data/Wordbank-WS-191105.RDS"
@@ -288,7 +292,7 @@ fa.parallel.plot <- efa.half %>%
 png("plots/fa_parallel.png", width = 10, height = 6, res = 300, units = "in")
 efa.half %>%
   select(-data_id, -age) %>%
-  fa.parallel(fa = "fa")
+  fa.parallel(fa = "pc")
 dev.off()
 
 rmsea <- sapply(factor.analyses, function(x) x$RMSEA) %>%
@@ -431,6 +435,8 @@ all.scores <- factor.scores(select(all.merge, -data_id, -age),
                             factor.analyses[[2]],
                             method = "tenBerge")
 
+
+
 plot.scores <- cbind.data.frame(all.demo, all.scores$scores) %>%
                 as_tibble()
 
@@ -438,8 +444,8 @@ lm(MR1 ~ sex, plot.scores) %>% summary()
 lm(MR2 ~ sex, plot.scores) %>% summary()
 
 ## Mom ed
-mom_ed.lut <- data.frame(mom_ed = c("Some Secondary", "Secondary", "College", 
-                                    "Some College", "Primary", "Graduate", 
+mom_ed.lut <- data.frame(mom_ed = c("Some Secondary", "Secondary", "College",
+                                    "Some College", "Primary", "Graduate",
                                     "Some Graduate"),
                           mom_ed_y = c(9, 12, 16, 14, 6, 20, 18))
 
@@ -459,12 +465,12 @@ smear <- ggplot(plot.scores, aes(x = MR1, y = MR2, color = age)) +
           geom_smooth(method = "lm", formula = y ~ poly(x, 2), color = "black",
                       size = 1)
 
-ggplot(filter(plot.scores, !is.na(sex)), 
+ggplot(filter(plot.scores, !is.na(sex)),
        aes(x = MR1, y = MR1 - MR2, color = sex)) +
   geom_point(alpha = 0.25, size = 1)+
   geom_smooth(method = "lm", formula = y ~ poly(x, 2), size = 1)
 
-ggplot(filter(plot.scores, !is.na(mom_ed)), 
+ggplot(filter(plot.scores, !is.na(mom_ed)),
        aes(x = MR1, y = MR2, color = mom_ed)) +
   geom_point(alpha = 0.25, size = 1)+
   geom_smooth(method = "lm", formula = y ~ poly(x, 2), size = 1, se = FALSE)
@@ -485,7 +491,7 @@ plot.scores.summary <- plot.scores %>%
 # Ribbons represent
 #   (1) IQR (50%)
 #   (2) 3 IQR (99.3%)
-ribbon <- ggplot(plot.scores.summary, 
+ribbon <- ggplot(plot.scores.summary,
                  aes(x = age, y = mean, color = factor, fill = factor)) +
             geom_line(aes(y = mean), size = 2) +
             geom_ribbon(aes(ymin = mean - 0.5 * iqr, ymax = mean + 0.5 * iqr),
@@ -508,7 +514,7 @@ AIC(scores.exp.model)
 ribbon_smear <- arrangeGrob(ribbon + labs(title = "(a)"),
                             smear + labs(title = "(b)"), nrow = 1)
 
-ggsave(plot = ribbon_smear, filename = "plots/lags_5520.png", 
+ggsave(plot = ribbon_smear, filename = "plots/lags_5520.png",
        width = 6, height = 3, units = "in")
 
 ################################################################################
@@ -556,6 +562,9 @@ one.weight <- count %>%
                        syn = select(., one_of(syntactic)) %>% rowSums()) %>%
                 select(data_id, age, lex, syn)
 
+wt1.r <- cor(one.weight$lex, one.weight$syn)
+CIr(r = wt1.r, n = nrow(one.weight))
+
 max_size <- c(566, 221)
 
 onew.ribbon <- one.weight %>%
@@ -563,12 +572,12 @@ onew.ribbon <- one.weight %>%
                 mutate_at("syn", function(x) x / max_size[2]) %>%
                 pivot_longer(-c(data_id, age)) %>%
                 group_by(age, name) %>%
-                summarize(n = n(), 
+                summarize(n = n(),
                           mean = mean(value),
                           sd = sd(value),
                           iqr = IQR(value))
 
-png("plots/1w-lag-presentation.png", width = 7.5, height = 5, units = "in", 
+png("plots/1w-lag-presentation.png", width = 7.5, height = 5, units = "in",
     res = 96)
 
 ggplot(onew.ribbon, aes(x = age, y = mean, color = name, fill = name)) +
@@ -583,12 +592,12 @@ ggplot(onew.ribbon, aes(x = age, y = mean, color = name, fill = name)) +
 
 dev.off()
 
-png("plots/1w-smear-presentation1.png", width = 7.5, height = 5, units = "in", 
+png("plots/1w-smear-presentation1.png", width = 7.5, height = 5, units = "in",
     res = 96)
 
 ggplot(one.weight, aes(x = lex, y = syn, color = age)) +
   scale_color_viridis() +
-  geom_abline(slope = max_size[2] / max_size[1], color = "red", 
+  geom_abline(slope = max_size[2] / max_size[1], color = "red",
               linetype = "longdash", size = 1) +
   geom_point(alpha = 0.1) +
   labs(x = "Lexical", y = "Syntactic", color = "Age (mo.)") +
@@ -596,12 +605,12 @@ ggplot(one.weight, aes(x = lex, y = syn, color = age)) +
 
 dev.off()
 
-png("plots/1w-smear-presentation2.png", width = 7.5, height = 5, units = "in", 
+png("plots/1w-smear-presentation2.png", width = 7.5, height = 5, units = "in",
     res = 96)
 
 ggplot(one.weight, aes(x = lex, y = syn, color = age)) +
   scale_color_viridis() +
-  geom_abline(slope = max_size[2] / max_size[1], color = "red", 
+  geom_abline(slope = max_size[2] / max_size[1], color = "red",
               linetype = "longdash", size = 1) +
   geom_point(alpha = 0.3) +
   labs(x = "Lexical", y = "Syntactic", color = "Age (mo.)") +
@@ -609,12 +618,12 @@ ggplot(one.weight, aes(x = lex, y = syn, color = age)) +
 
 dev.off()
 
-png("plots/1w-smear-presentation3.png", width = 7.5, height = 5, units = "in", 
+png("plots/1w-smear-presentation3.png", width = 7.5, height = 5, units = "in",
     res = 96)
 
 ggplot(one.weight, aes(x = lex, y = syn, color = age)) +
   scale_color_viridis() +
-  geom_abline(slope = max_size[2] / max_size[1], color = "red", 
+  geom_abline(slope = max_size[2] / max_size[1], color = "red",
               linetype = "longdash", size = 1) +
   geom_point(alpha = 0.3) +
   labs(x = "Lexical", y = "Syntactic", color = "Age (mo.)") +

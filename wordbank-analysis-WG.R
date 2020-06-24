@@ -46,31 +46,51 @@ wg.mom_ed <- table(g.demo$mom_ed, useNA = "always")
 # from that script
 
 if (exists("ws.mom_ed")) {
-  
-  ws.mom_ed.nm <- ws.mom_ed[-length(ws.mom_ed)]
-  wg.mom_ed.nm <- ws.mom_ed[-length(wg.mom_ed)]
 
-  mom_ed.test <- chisq.test(wg.mom_ed.nm, ws.mom_ed.nm, 
-                            simulate.p.value = TRUE)
-  
-  mom_ed <- cbind(wg.mom_ed, ws.mom_ed) %>%
-            as_tibble() %>%
-            dplyr::rename(wg = wg.mom_ed, ws = ws.mom_ed) %>%
-            add_column(level = c(7, 4, 5, 2, 6, 3, 1, 8), .before = 1) %>%
-            arrange(level) %>%
-            pivot_longer(-level)
-  
-  mom_ed.plot <- ggplot(mom_ed, aes(x = level, y = value)) +
-    geom_histogram(stat = "identity", aes(fill = name), position = "dodge") +
-    scale_x_continuous(breaks = 1:8,
-                       labels = c("Primary", "Some Secondary", "Secondary",
-                                  "Some College", "College", "Some Graduate",
-                                  "Graduate", "Missing")) +
-    labs(x = NULL, y = "N", fill = "Form") +
-    coord_flip() +
-    scale_fill_discrete(labels = c("WG", "WS")) +
-    theme(legend.position = "bottom", text = element_text(size = 20))
-  
+  wg.me <- as.list(wg.mom_ed, sorted = TRUE)
+  names(wg.me) <- gsub(" ", "", names(wg.me))
+  names(wg.me)[length(names(wg.me))] <- ".NA"
+
+  ws.me <- as.list(ws.mom_ed, sorted = TRUE)
+  names(ws.me) <- gsub(" ", "", names(ws.me))
+  names(ws.me)[length(names(ws.me))] <- ".NA"
+
+  # Table, sorted by education level
+  me.tbl <- wg.me %>%
+              as_tibble() %>%
+              rbind(ws.me) %>%
+              add_column(form = c("WG", "WS"), .before = 1) %>%
+              select(form, Primary, SomeSecondary, Secondary, SomeCollege,
+                     College, SomeGraduate, Graduate, .NA)
+
+  mom_ed.test <- select(me.tbl, -form, -.NA) %>% t() %>%
+                    chisq.test(simulate.p.value = TRUE)
+
+  sum.wg.me <- sum(me.tbl[1,-1])
+  sum.ws.me <- sum(me.tbl[2,-1])
+
+  mom_ed <- me.tbl %>%
+              mutate_if(is.integer, as.numeric)
+  mom_ed[1, 2:9] <- mom_ed[1, -1] / sum.wg.me
+  mom_ed[2, 2:9] <- mom_ed[2, -1] / sum.ws.me
+
+  mom_ed <- mom_ed %>%
+              select(-.NA) %>%
+              rename(a = Primary, b = SomeSecondary, c = Secondary,
+                     d = SomeCollege, e = College, f = SomeGraduate,
+                     g= Graduate) %>%
+              pivot_longer(cols = -form)
+
+  mom_ed.plot <-
+
+  ggplot(mom_ed, aes(x = name, y = value * 100)) +
+    geom_histogram(stat = "identity", aes(fill = form), position = "dodge") +
+    scale_x_discrete(labels = c("Primary", "SomeSecondary", "Secondary",
+                                "SomeCollege", "College", "SomeGraduate",
+                                "Graduate")) +
+    labs(x = "Education Level", y = "% of sample", fill = "Form")
+
+
   png("plots/mom_ed_presentation.png", width = 5.5, height = 5, units = "in",
       res = 96) ; print(mom_ed.plot) ; dev.off()
 
