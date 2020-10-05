@@ -8,7 +8,7 @@ format.sentences <- function(sentences, s_dict_file) {
            starts_with("sent.I")) %>%
     mutate(age = as.numeric(sent.Candidate_Age)) %>%
     filter(sent.Administration == "All") %>%
-    select(-sent.Administration) %>%
+    select(-sent.Administration, -sent.Candidate_Age) %>%
     pivot_longer(-c(data_id, age, sex)) %>%
     filter(!grepl("score", name)) %>%
     filter(!grepl("status", name)) %>%

@@ -12,11 +12,10 @@ library(MuMIn)
 library(viridis)
 # Helper functions
 
-source("wordbank-functions.R")
-source("format-BCP-funcs.R")
+# source("wordbank-functions.R")
+# source("format-BCP-funcs.R")
 
 date <- "200609"
-names <- readRDS(paste0("data/BCP_WG_asWS-", date, ".rds"))
 
 # Load data
 
@@ -45,19 +44,18 @@ BCP_WS_scored <- readRDS(paste0("data/BCP_WS_scored-", date, ".rds"))[[1]] %>%
 
 # Read demographics file (just mom ed)
 BCP.demographics <- read_csv(paste0("data/BCP-demographics-", date, ".csv")) %>%
-                      select(demo.CandID, demo.Sex, mom_ed_n)
+                      select(CandID, sex, educ_momed_n)
 
 BCP_MLU <- readRDS(paste0("data/BCP_WS_MLU3-", date, ".rds"))
 
 wMLU <- right_join(BCP_WS_scored, BCP_MLU) %>%
-          left_join(., BCP.demographics, by = c("data_id" = "demo.CandID")) %>%
-          rename(sex = demo.Sex)
+          left_join(., BCP.demographics, by = c("data_id" = "CandID"))
 
 ggplot(wMLU, aes(x = MLU3w, y = MLU3m, color = age)) +
   geom_point() +
   geom_smooth() +
   geom_line(aes(group = data_id)) +
-  scale_color_viridis() + 
+  scale_color_viridis() +
   labs(x = "Words", y = "Morphemes")
 
 #
@@ -79,7 +77,7 @@ AICc(model.syn_m) # 435   diff = 27
 # aux: words
 
 model.lex_w <- lmer(MLU3w ~ LEX + (1|data_id), data = wMLU, REML = TRUE)
-moedl.syn_w <- lmer(MLU3w ~ SYN + (1|data_id), data = wMLU, REML = TRUE)
+model.syn_w <- lmer(MLU3w ~ SYN + (1|data_id), data = wMLU, REML = TRUE)
 
 AICc(model.lex_w) # 455
 AICc(moedl.syn_w) # 429   diff = 25       W<M = 6
@@ -168,13 +166,13 @@ demo.predictors <- c("age", "sex", "mom_ed_n")
 
 # All part I/lexical predictors
 lexical.predictors <- c("action_words", "animals", "body_parts", "clothing",
-                        "descriptive_words", "food_drink", "furniture_rooms", 
-                        "games_routines", "helping_verbs", "household", 
-                        "outside", "people", "places", "toys", "vehicles", 
+                        "descriptive_words", "food_drink", "furniture_rooms",
+                        "games_routines", "helping_verbs", "household",
+                        "outside", "people", "places", "toys", "vehicles",
                         "sounds")
 
 # Predictors in Part II, but also syntax
-swap.predictors <- c("pronouns ", "quantifiers", "question_words", "time_words", 
+swap.predictors <- c("pronouns ", "quantifiers", "question_words", "time_words",
                       "word_endings_nouns", "connecting_words", "locations")
 
 # Part II/syntax
@@ -188,7 +186,7 @@ partII.predictors <- c("word_endings_verbs", "word_forms_nouns",
 formula.lex <- paste("MLU3m ~ ", paste(lexical.predictors, collapse = " + "),
                      "+ (1|data_id)")
 
-formula.lex_ctrl <- paste("MLU3m ~ ", 
+formula.lex_ctrl <- paste("MLU3m ~ ",
                           paste(c(demo.predictors, lexical.predictors),
                                 collapse = " + "),
                           "+ (1|data_id)")
@@ -196,20 +194,20 @@ formula.lex_ctrl <- paste("MLU3m ~ ",
 model2.lex <- lmer(formula = formula.lex, data = wMLU, REML = TRUE)
 model2.lex_ctrl <- lmer(formula = formula.lex_ctrl, data = wMLU, REML = TRUE)
 
-# Adding in demographic controls improves test, so we always use control in 
-# syntax compariosns
+# Adding in demographic controls improves test, so we always use control in
+# syntax comparisons
 anova(model2.lex, model2.lex_ctrl)
 
 # Syntactic
 
-formula.syntax_partII <- paste("MLU3m ~ ", 
+formula.syntax_partII <- paste("MLU3m ~ ",
                                 paste(c(demo.predictors, partII.predictors),
                                       collapse = " + "),
                                 "+ (1|data_id)")
 
-formula.syntax_SYN <- paste("MLU3m ~", 
-                            paste(c(demo.predictors, swap.predictors, 
-                                    partII.predictors), 
+formula.syntax_SYN <- paste("MLU3m ~",
+                            paste(c(demo.predictors, swap.predictors,
+                                    partII.predictors),
                                   collapse = " + "),
                             "+ (1|data_id)")
 
@@ -222,15 +220,14 @@ anova(syntax1, syntax2)
 ###
 
 wMLU.long <- wMLU %>%
-              select(data_id, age, LEX, SYN, MLU3m) %>% 
+              select(data_id, age, LEX, SYN, MLU3m) %>%
               mutate_at(c("LEX", "SYN", "MLU3m"), scale) %>%
               pivot_longer(-c(data_id, age))
 
-ggplot(wMLU.long, aes(value, fill = name)) + 
+ggplot(wMLU.long, aes(value, fill = name)) +
   geom_density(alpha = 0.25)
 
 ggplot(wMLU, aes(x = age, y  = MLU3m)) +
-  geom_point() + 
+  geom_point() +
   geom_line(aes(group = data_id))
 
-             

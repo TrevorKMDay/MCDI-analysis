@@ -32,8 +32,16 @@ colnames(mcdi_all1) <- gsub("mcdi_words_sentences,", "sent.",
 # Note that "Gender" was changed to "Sex" in spring 2020, may not work with
 # older datasets
 
+if ("demo.Gender" %in% colnames(mcdi_all1)) {
+  .sex_column <- "demo.Gender"
+} else if ("demo.Sex" %in% colnames(mcdi_all1)) {
+  .sex_column <- "demo.Sex"
+} else {
+  stop("No sex/gender column in data")
+}
+
 mcdi_all <- mcdi_all1 %>%
-            select(demo.CandID, demo.Visit_label, demo.Sex,
+            select(demo.CandID, demo.Visit_label, all_of(.sex_column),
                    starts_with("gest."), starts_with("sent.")) %>%
             filter(grepl("^bcp[ABCDEG]", demo.Visit_label),
                    !(demo.Visit_label %in% c("bcpCFP", "bcpGUESTxV1")),
@@ -45,9 +53,10 @@ mcdi_all <- mcdi_all1 %>%
                                                     demo.ideal_age))) %>%
             dplyr::rename(data_id = demo.CandID,
                            age = demo.ideal_age,
-                           sex = demo.Sex) %>%
+                           sex = .sex_column) %>%
             mutate_at(vars(ends_with("morphemes")), as.numeric) %>%
-            mutate_at(vars(ends_with("words")), as.numeric)
+            mutate_at(vars(ends_with("words")), as.numeric) %>%
+            mutate(sent.Candidate_Age = as.numeric(sent.Candidate_Age))
 
 ################################################################################
 # BCP analysis
@@ -57,7 +66,8 @@ mcdi_all <- mcdi_all1 %>%
 
 # Format BCP data as Wordbank
 BCP_WS <- mcdi_all %>%
-            select(-ends_with("morphemes"), -ends_with("words")) %>%
+            select(-starts_with("gest"), 
+                   -ends_with("morphemes"), -ends_with("words")) %>%
             format.sentences(., s_dict_file)
 
 # Score WS based on Wordbank
@@ -112,9 +122,9 @@ BCP_both <- bind_rows(BCP_WS_scored.n, BCP_WG_asWS)
 
 
 saveRDS(BCP_WG_scored, file = paste0("data/BCP_WG_scored-", mcdi.date, ".rds"))
-saveRDS(BCP_WG_asWS,   file = paste0("data/BCP_WG_asWS-", mcdi.date, ".rds"))
+saveRDS(BCP_WG_asWS,   file = paste0("data/BCP_WG_asWS-",   mcdi.date, ".rds"))
 saveRDS(BCP_WS_scored, file = paste0("data/BCP_WS_scored-", mcdi.date, ".rds"))
-saveRDS(MLU3,          file = paste0("data/BCP_WS_MLU3-", mcdi.date, ".rds"))
+saveRDS(MLU3,          file = paste0("data/BCP_WS_MLU3-",   mcdi.date, ".rds"))
 
 # People who have four or more data points
 
