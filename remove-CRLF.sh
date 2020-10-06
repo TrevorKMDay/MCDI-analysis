@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Leave me on the top level to work on all directories.
+
 # Find everyone with CRLF, and remove the notes it generates
 files=$(find . -not -type d -exec file "{}" ";" | \
 			grep CRLF | \

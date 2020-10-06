@@ -1,10 +1,10 @@
+# R files
+**/.Rhistory
+**/.RData
 
-.Rhistory
-.RData
-stats_consult/stats_consult.tex
-stats_consult/stats_consult.synctex.gz
-stats_consult/stats_consult.pdf
-stats_consult/stats_consult.out
-stats_consult/stats_consult.log
-stats_consult/stats_consult.aux
-data/Wordbank-WS-191105.RDS
+# Too big
+data/Wordbank/Wordbank-WS-191105.RDS
+data/Wordbank/Wordbank-WS-191105.csv
+
+# Old, use only new plots
+plots/

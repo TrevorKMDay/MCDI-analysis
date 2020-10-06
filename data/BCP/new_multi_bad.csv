@@ -1,0 +1,13 @@
+demo.CandID,lg_english_p1_pct,lg_lg2_p1,lg_lg2_p1_pct,lg_lg3_p1,lg_lg3_p1_pct,lg_english_p2_pct,lg_lg2_p2,lg_lg2_p2_pct,lg_lg3_p2,lg_lg3_p2_pct,p1_checksum,p2_checksum,lg_avg_english
+503722,90,bosnian,10,NA,NA,NA,NA,NA,NA,NA,100,0,90
+710562,98,french,1,spanish,1,NA,NA,NA,NA,NA,100,0,98
+774769,95,vietnamese,5,spanish,30,NA,NA,NA,NA,NA,130,0,95
+393942,90,mandarin,5,spanish / german,5,NA,NA,NA,NA,NA,100,0,90
+382287,NA,spanish,NA,NA,NA,100,NA,NA,NA,NA,0,100,100
+868724,100,NA,NA,NA,NA,NA,dutch,NA,german,NA,100,0,100
+412584,NA,dutch,NA,NA,NA,NA,dutch,NA,NA,NA,0,0,NaN
+354404,NA,russian,NA,NA,NA,100,NA,NA,NA,NA,0,100,100
+223244,NA,spanish,NA,japanese,NA,NA,spanish,NA,japanese,NA,0,0,NaN
+151307,NA,french,NA,NA,NA,100,NA,NA,NA,NA,0,100,100
+777598,100,NA,NA,NA,NA,NA,spanish,NA,NA,NA,100,0,100
+512716,NA,japanese,NA,NA,NA,100,NA,NA,NA,NA,0,100,100

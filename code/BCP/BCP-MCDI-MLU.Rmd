@@ -1,0 +1,283 @@
+---
+title: "BCP MLU Preliminary Analysis"
+author: "Trevor KM Day"
+date: "June 25, 2020"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Setup 
+
+Packages: `tidyverse, lme4, MuMIn, viridis, gridExtra`.
+
+```{r load-libraries, include=FALSE}
+
+if(.Platform$OS.type == "unix") {
+  setwd("/Volumes/GoogleDrive/My Drive/Research/MCDI/MCDI-analysis")
+} else {
+  setwd("G:/My Drive/Research/MCDI/MCDI-analysis/")
+}
+
+# Libraries
+
+library(tidyverse)
+library(lme4)
+library(MuMIn)
+library(viridis)
+library(gridExtra)
+
+# Helper functions
+
+# source("wordbank-functions.R")
+# source("format-BCP-funcs.R")
+
+date <- "200609"
+
+```
+
+# Load data
+
+Wordbank had only age, sex, and mother's education as demographics. Here, we 
+show those for the available subjects, as well as the correlation between MLU3m
+and MLU3w.
+
+```{r load-data, echo=FALSE, message=FALSE, warning=FALSE}
+
+# Load data
+
+#BCP_WG_scored <- readRDS("data/BCP_WG_scored.rds")
+BCP_WS_scored <- readRDS(paste0("data/BCP_WS_scored-", date, ".rds"))[[1]] %>%
+                  select(-how_use_words) %>%
+                  mutate(LEX = action_words + animals + body_parts + clothing +
+                                descriptive_words + food_drink +
+                                furniture_rooms + games_routines +
+                                helping_verbs + household + outside + people +
+                                places + toys + vehicles + sounds,
+                         SYN = pronouns + quantifiers + question_words +
+                                time_words + word_endings_nouns +
+                                word_endings_verbs + word_forms_nouns +
+                                word_forms_verbs + complexity +
+                                connecting_words + locations,
+                         partI = action_words + animals + body_parts + clothing +
+                           descriptive_words + food_drink +
+                           furniture_rooms + games_routines +
+                           helping_verbs + household + outside + people +
+                           places + toys + vehicles + sounds + pronouns +
+                           quantifiers + question_words + time_words +
+                           connecting_words + locations,
+                         partII = word_endings_nouns + word_endings_verbs +
+                           word_forms_nouns + word_forms_verbs + complexity)
+
+# Read demographics file 
+# Explicit levels in momed set order
+BCP_demo <- read_csv(paste0("data/BCP-demographics-", date, ".csv")) %>%
+              select(CandID, sex, educ_momed, educ_momed_n, income_inr,
+                     family_size) %>%
+              mutate(educ_momed = replace(educ_momed,
+                                          educ_momed == "not_answered",
+                                          NA) %>%
+                                  factor(levels = c("some_high", "high", 
+                                                    "some_college", "college",
+                                                    "some_grad", "grad",
+                                                    "not_answered"))) 
+
+# Fill in missing INR based on mother's education and family size
+inr.predictor <- lm(income_inr ~ 1 + educ_momed_n + family_size, 
+                    data = filter(BCP_demo, !is.na(income_inr)))
+inr.predicted <- predict(inr.predictor, 
+                         newdata = filter(BCP_demo, is.na(income_inr)))
+
+# There are some not calculated - but they don't have MLU. If needed, could be
+# replaced with mean/median INR
+BCP_demo$income_inr[is.na(BCP_demo$income_inr)] <- inr.predicted
+
+# MLU file
+BCP_MLU <- readRDS(paste0("data/BCP_WS_MLU3-", date, ".rds"))
+
+# Join them all into "with MLU file"
+wMLU <- right_join(BCP_WS_scored, BCP_MLU) %>%
+          left_join(., BCP_demo, by = c("data_id" = "CandID"))
+
+
+p1 <- ggplot(wMLU, aes(x = MLU3w, y = MLU3m, color = age)) +
+        geom_point() +
+        geom_line(aes(group = data_id)) +
+        scale_color_viridis() + 
+        labs(x = "Words", y = "Morphemes") +
+        theme(legend.position = "bottom")
+
+p2 <- ggplot(BCP_demo, aes(educ_momed)) +
+        geom_histogram(stat = "count") +
+        scale_x_discrete(labels = c("Some Sec. (10)", "Secondary (12)", 
+                                    "Some College (14)", "College (16)", 
+                                    "Some Grad (18)", "Grad (20)", 
+                                    "Not Answered")) +
+        labs(x = "Level", y = "Count") + 
+        theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+
+p3 <- ggplot(wMLU, aes(x = age)) +
+        geom_histogram(binwidth = 1) +
+        scale_x_continuous(breaks = seq(19, 38, by = 2)) +
+        labs(x = "Age", y = "Count")
+
+
+p4 <- ggplot(wMLU, aes(x = sex, fill = sex)) +
+        geom_histogram(stat = "count") +
+        labs(x = "Gender", y = "Count") +
+        theme(legend.position = "none")
+
+grid.arrange(p1, p2, p3, p4,
+             layout_matrix = rbind(c(2,  3, 1),
+                                   c(NA, 4, 1)))
+
+
+# Clean up
+rm(BCP_demo, BCP_MLU, BCP_WS_scored, p1, p2, p3, p4)
+
+
+means <- wMLU %>%
+          select(age, educ_momed_n, LEX, SYN, partI, partII, MLU3m, MLU3w) %>%
+          summarize_all(list(M = mean))
+
+sds <- wMLU %>%
+          select(age, educ_momed_n, LEX, SYN, partI, partII, MLU3m, MLU3w) %>%
+          summarize_all(list(SD = sd))
+
+var.sum <- rbind(unname(unlist(means)), unname(unlist(sds))) %>%
+            round(1)
+colnames(var.sum) <- c("Age", "Mom Ed", "LEX", "SYN", "Part I", "PartII",
+                       "MLU3m", "MLU3w")
+rownames(var.sum) <- c("Mean", "SD")
+
+var.sum
+
+```
+
+# Analysis
+
+Since MLU3m and MLU3w are so closely correlated, I use MLU3m for here on out.
+
+```{r include=FALSE}
+
+model.lex_m <- lmer(MLU3m ~ LEX + (1|data_id), data = wMLU, REML = TRUE)
+model.syn_m = lmer(MLU3m ~ SYN + (1|data_id), data = wMLU, REML = TRUE)
+
+# Control model
+
+model.lex_m_ctrl <- lmer(MLU3m ~ LEX + age + sex + educ_momed + (1|data_id),
+                          data = wMLU, REML = TRUE)
+model.syn_m_ctrl <- lmer(MLU3m ~ SYN + age + sex + educ_momed + (1|data_id),
+                          data = wMLU, REML = TRUE)
+
+#
+# Compare with MCDI categories
+#
+
+# mcdi categories are word_* + complexity vs. all others
+
+model.partI_m <- lmer(MLU3m ~ partI + (1|data_id), data = wMLU, REML = TRUE)
+model.partII_m <- lmer(MLU3m ~ partII + (1|data_id), data = wMLU, REML = TRUE)
+
+model.partI_m_ctrl <- lmer(MLU3m ~ partI + age + sex + educ_momed + (1|data_id),
+                            data = wMLU, REML = TRUE)
+model.partII_m_ctrl <- lmer(MLU3m ~ partII + age + sex + educ_momed +(1|data_id),
+                              data = wMLU, REML = TRUE)
+
+AICc_noctrl <- sapply(list(model.lex_m, model.syn_m, model.partI_m,
+                           model.partII_m),
+                      AICc) %>%
+                round()
+
+AICc_ctrl <- sapply(list(model.lex_m_ctrl, model.syn_m_ctrl, model.partI_m_ctrl,
+                           model.partII_m_ctrl),
+                      AICc) %>%
+                round()
+
+AICc_tbl <- rbind(AICc_noctrl, AICc_ctrl)
+colnames(AICc_tbl) <- c("LEX", "SYN", "Part I", "Part II")
+
+```
+
+So we see that control overall improves the models, and that SYN/Part II are 
+better than LEX/Part I, but SYN doesn't meaningfully improve over Part II.
+
+# Reanalysis
+
+However, it turns out SYN is a superset of Part II, so we can do a direct ANOVA
+for more information.
+
+```{r}
+
+# Demographic predictors
+demo.predictors <- c("age", "sex", "educ_momed", "income_inr")
+
+# All part I/lexical predictors
+lexical.predictors <- c("action_words", "animals", "body_parts", "clothing",
+                        "descriptive_words", "food_drink", "furniture_rooms", 
+                        "games_routines", "helping_verbs", "household", 
+                        "outside", "people", "places", "toys", "vehicles", 
+                        "sounds")
+
+# Predictors in Part II, but also syntax
+swap.predictors <- c("pronouns ", "quantifiers", "question_words", "time_words", 
+                      "word_endings_nouns", "connecting_words", "locations")
+
+# Part II/syntax
+partII.predictors <- c("word_endings_verbs", "word_forms_nouns",
+                        "word_forms_verbs", "complexity")
+
+formula.syntax_demo <- paste("MLU3m ~ ", 
+                             paste(c(demo.predictors, "(1|data_id)"),
+                                    collapse = " + "))
+
+formula.syntax_partII <- paste("MLU3m ~ ", 
+                                paste(c(demo.predictors, partII.predictors),
+                                      collapse = " + "),
+                                "+ (1|data_id)")
+
+formula.syntax_SYN <- paste("MLU3m ~", 
+                            paste(c(demo.predictors, swap.predictors, 
+                                    partII.predictors), 
+                                  collapse = " + "),
+                            "+ (1|data_id)")
+
+syntax00 <- lmer(MLU3m ~ 1 + (1|data_id), data = wMLU, REML = TRUE)
+syntax0  <- lmer(formula = formula.syntax_demo, data = wMLU, REML = TRUE)
+syntax1  <- lmer(formula = formula.syntax_partII, data = wMLU, REML = TRUE)
+syntax2  <- lmer(formula = formula.syntax_SYN, data = wMLU, REML = TRUE)
+
+anova(syntax00, syntax0, syntax1, syntax2)
+
+# Improvements:
+# demo   >  intercept-only
+# partII >  demo
+# SYN    !> partII
+
+```
+
+# Conclusion
+
+Preliminary analysis with `r nrow(wMLU)` subjects shows that MLU3m is 
+differentially associated with syntax metrics over lexical metrics. However,
+the proposed metric is not significantly better than traditional MCDI Part II.
+
+Analysis plan:
+
+ - Identify other variables and test them further against BCP82 sample.
+ - Once phenoscreening is done, use any variables identified above and rerun.
+
+\newpage
+# Package info
+
+```{r package-info}
+
+version
+
+installed.packages()[names(sessionInfo()$otherPkgs), "Version"]
+
+```
