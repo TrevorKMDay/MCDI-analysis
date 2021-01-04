@@ -2,7 +2,7 @@
 
 files=$(find . \
 			-type  f \
-			\(  -name  "*.csv" -or \
+			\(  -name "*.csv" -or \
 			 	-name "*.RDS"  -or \
 			 	-name "*.rds"  -or \
 			 	-name "*.xlsx?" \) )

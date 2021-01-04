@@ -1,7 +1,7 @@
 if(.Platform$OS.type == "unix") {
-  setwd("/Volumes/GoogleDrive/My Drive/Research/MCDI/MCDI-analysis")
+  setwd("/Volumes/GoogleDrive/My Drive/Research/MCDI/MCDI-analysis/code/Wordbank/")
 } else {
-  setwd("G:/My Drive/Research/MCDI/MCDI-analysis/")
+  setwd("G:/My Drive/Research/MCDI/MCDI-analysis/code/Wordbank")
 }
 
 library(tidyverse)
@@ -11,112 +11,52 @@ library(viridis)
 library(lavaan)
 library(corrplot)
 
-# This is large, so it takes a while!
-gestures <- read_csv("data/Wordbank-WG-191105.csv",
-                      col_types = cols(.default = "f", age = "i"))
+# psychometric loads MASS; which masks select()
+select <- dplyr::select
 
-# filter(gestures, data_id == gestures$data_id[1]) %>%
-#   write_csv("data/g_dict.csv")
-
+source("wordbank-csv2rds.R")
 source("wordbank-functions.R")
 
 ################################################################################
 # Extract demographics
 ################################################################################
 
-g.demo <- gestures %>%
-            select(data_id, age, sex, mom_ed) %>%
-            distinct() %>%
-            mutate(instrument = "G")
+mean(WG.demo$age)  # 13.8
+sd(WG.demo$age)    #  2.34
 
-mean(g.demo$age)
-sd(g.demo$age)
-
-table.sex <- table(g.demo$sex, useNA = "always")
+table.sex <- table(WG.demo$sex, useNA = "always")
 sex.missing <- table.sex[length(table.sex)]
-table.sex / (nrow(g.demo) - sex.missing)
+table.sex / (nrow(WG.demo) - sex.missing)
 
-table.mom <- table(g.demo$mom_ed, useNA = "always")
+table.mom <- table(WG.demo$mom_ed, useNA = "always")
 mom.missing <- table.mom[length(table.mom)]
-table.mom / (nrow(g.demo) - mom.missing)
+table.mom / (nrow(WG.demo) - mom.missing)
 
-wg.mom_ed <- table(g.demo$mom_ed, useNA = "always")
-
-# ws.mom_ed is mother's education from words and sentences, and has to be run
-# from that script
-
-if (exists("ws.mom_ed")) {
-
-  wg.me <- as.list(wg.mom_ed, sorted = TRUE)
-  names(wg.me) <- gsub(" ", "", names(wg.me))
-  names(wg.me)[length(names(wg.me))] <- ".NA"
-
-  ws.me <- as.list(ws.mom_ed, sorted = TRUE)
-  names(ws.me) <- gsub(" ", "", names(ws.me))
-  names(ws.me)[length(names(ws.me))] <- ".NA"
-
-  # Table, sorted by education level
-  me.tbl <- wg.me %>%
-              as_tibble() %>%
-              rbind(ws.me) %>%
-              add_column(form = c("WG", "WS"), .before = 1) %>%
-              select(form, Primary, SomeSecondary, Secondary, SomeCollege,
-                     College, SomeGraduate, Graduate, .NA)
-
-  mom_ed.test <- select(me.tbl, -form, -.NA) %>% t() %>%
-                    chisq.test(simulate.p.value = TRUE)
-
-  sum.wg.me <- sum(me.tbl[1,-1])
-  sum.ws.me <- sum(me.tbl[2,-1])
-
-  mom_ed <- me.tbl %>%
-              mutate_if(is.integer, as.numeric)
-  mom_ed[1, 2:9] <- mom_ed[1, -1] / sum.wg.me
-  mom_ed[2, 2:9] <- mom_ed[2, -1] / sum.ws.me
-
-  mom_ed <- mom_ed %>%
-              select(-.NA) %>%
-              rename(a = Primary, b = SomeSecondary, c = Secondary,
-                     d = SomeCollege, e = College, f = SomeGraduate,
-                     g= Graduate) %>%
-              pivot_longer(cols = -form)
-
-  mom_ed.plot <-
-
-  ggplot(mom_ed, aes(x = name, y = value * 100)) +
-    geom_histogram(stat = "identity", aes(fill = form), position = "dodge") +
-    scale_x_discrete(labels = c("Primary", "SomeSecondary", "Secondary",
-                                "SomeCollege", "College", "SomeGraduate",
-                                "Graduate")) +
-    labs(x = "Education Level", y = "% of sample", fill = "Form")
-
-
-  png("plots/mom_ed_presentation.png", width = 5.5, height = 5, units = "in",
-      res = 96) ; print(mom_ed.plot) ; dev.off()
-
-}
 ################################################################################
 # Score per Part I.D subcategory
 # For type = word, sum 'produce' over all
 ################################################################################
 
-# Convert produces/NA to T/F (takes a while on 3.5M elements)
-words <- gestures %>%
-          filter(type == "word") %>%
-          mutate(produces = score.produces(value))
+# This function tests for the existence of this RDS in the data/ directory
+# If it doesn't exist, it returns NA
+datafile <- .data("Wordbank/WG-scored.rds")
+if (file.exists(datafile)) {
+  scored <- readRDS(datafile)
+} else {
+  # Score W&G using developed function
+  # 1: n in category per subject
+  # 2: %
+  scored <- score.WG(WG)
+  save_data(scored, filename = "Wordbank/WG-scored.rds")
+}
 
-# For each ID, count the number of responses in each category, then convert
-# that to a proportion and spread to wide, keeping only ID and 22 columns
-words.grouped <- words %>%
-                  group_by(data_id, category) %>%
-                  summarise(n = n(), sum = sum(produces)) %>%
-                  mutate(score = sum / n) %>%
-                  pivot_wider(c(data_id),
-                              names_from = category, values_from = score) %>%
-                  ungroup()
+scored_p <- scored$p %>%
+  select(-LEXICAL, -SYNTAX)
 
-words.corr <- select(words.grouped, -data_id) %>%
-                cor()
+# Corrplot
+words.corr <- scored_p %>%
+  select(-data_id, -age) %>%
+  cor()
 
 corrplot(words.corr, method = "color",
          is.corr = FALSE,
@@ -125,23 +65,6 @@ corrplot(words.corr, method = "color",
          tl.pos = "l", tl.col = "black",
          cl.lim = 0:1)
 
-
-words.lexsym <- words %>%
-                  mutate(syntactic = category %in% c("time_words",
-                                                     "descriptive_words",
-                                                     "pronouns",
-                                                     "question_words",
-                                                     "locations",
-                                                     "quantifiers")) %>%
-                  group_by(data_id, age, syntactic) %>%
-                  summarise(n = n(),
-                            score = sum(produces),
-                            perc = score / n) %>%
-                  pivot_wider(id_cols = c(data_id, age), values_from = perc,
-                              names_from = syntactic) %>%
-                  rename(SYNTAX = "TRUE", LEXICAL = "FALSE") %>%
-                  ungroup()
-
 ################################################################################
 # Split half
 ################################################################################
@@ -149,31 +72,65 @@ words.lexsym <- words %>%
 # Zip code for UMN
 set.seed(55455)
 
+## Mom ed to numeric
+mom_ed.lut <- tibble(mom_ed = c("Some Secondary", "Secondary", "College",
+                                "Some College", "Primary", "Graduate",
+                                "Some Graduate"),
+                     mom_ed_n = c(9, 12, 16, 14, 6, 20, 18))
+
+birth_ord.lut <- tibble(birth_order = levels(WG.demo$birth_order),
+                        birth_order_n = 1:8)
+
 # We need to do the split-half with sex/mom ed present to balance them
-efa.demo <- g.demo %>%
-              mutate(sex = fct_explicit_na(sex, na_level = "Missing"),
-                     mom_ed = fct_explicit_na(mom_ed,
-                                              na_level = "Missing")) %>%
-              group_by(age, sex, mom_ed) %>%
-              sample_frac(.5)
+efa.demo <- WG.demo %>%
+  # Create explicit NA category for all demo variables
+  mutate(across(sex:ethnicity, ~fct_explicit_na(.x, na_level = "Missing"))) %>%
+  group_by(age, sex, mom_ed) %>%
+  # Update to use new selector
+  sample_frac(.5) %>%
+  left_join(mom_ed.lut) %>%
+  left_join(birth_ord.lut)
 
 efa.half.ID <- efa.demo$data_id
-cfa.half.ID <- g.demo$data_id[!(g.demo$data_id %in% efa.half.ID)]
+cfa.half.ID <- WG.demo$data_id[!(WG.demo$data_id %in% efa.demo$data_id)]
 
-cfa.demo <- g.demo %>%
-              mutate(sex = fct_explicit_na(sex, na_level = "Missing"),
-                     mom_ed = fct_explicit_na(mom_ed,
-                                              na_level = "Missing")) %>%
-              filter(data_id %in% cfa.half.ID)
+# Descriptive statistics
+mean(efa.demo$age, na.rm = TRUE) ; sd(efa.demo$age)
 
-# Age test
-t.test(efa.demo$age, cfa.demo$age)
+(table(efa.demo$sex, useNA = "a") / nrow(efa.demo) * 100) %>%
+  round()
+(table(efa.demo$ethnicity, useNA = "a") / nrow(efa.demo) * 100) %>%
+  round()
 
-chisq.test(table(efa.demo$sex), table(cfa.demo$sex))
-chisq.test(table(efa.demo$mom_ed), table(cfa.demo$mom_ed))
+mean(efa.demo$mom_ed_n, na.rm = TRUE) ; sd(efa.demo$mom_ed_n, na.rm = TRUE)
+mean(efa.demo$birth_order_n, na.rm = TRUE)
 
-efa.half <- filter(words.grouped, data_id %in% efa.demo$data_id)
-cfa.half <- filter(words.grouped, data_id %in% cfa.demo$data_id)
+(table(efa.demo$birth_order, useNA = "a") / nrow(efa.demo) * 100) %>%
+  round()
+
+cfa.demo <- WG.demo %>%
+  filter(data_id %in% cfa.half.ID) %>%
+  # Create explicit NA category for all demo variables
+  mutate(across(sex:ethnicity, ~fct_explicit_na(.x, na_level = "Missing"))) %>%
+  left_join(mom_ed.lut) %>%
+  left_join(birth_ord.lut)
+
+# Descriptive statistics
+mean(cfa.demo$age, na.rm = TRUE) ; sd(cfa.demo$age)
+
+(table(cfa.demo$sex, useNA = "a") / nrow(cfa.demo) * 100) %>%
+  round()
+(table(cfa.demo$ethnicity, useNA = "a") / nrow(cfa.demo) * 100) %>%
+  round()
+
+mean(cfa.demo$mom_ed_n, na.rm = TRUE) ; sd(cfa.demo$mom_ed_n, na.rm = TRUE)
+mean(cfa.demo$birth_order_n, na.rm = TRUE)
+
+(table(cfa.demo$birth_order, useNA = "a") / nrow(cfa.demo) * 100) %>%
+  round()
+
+efa.half <- filter(scored_p, data_id %in% efa.demo$data_id)
+cfa.half <- filter(scored_p, data_id %in% cfa.demo$data_id)
 
 ################################################################################
 # EFA
@@ -182,7 +139,7 @@ cfa.half <- filter(words.grouped, data_id %in% cfa.demo$data_id)
 # Max.factors is the most I want to do, it's max_interpretable + 1
 max.factors <- 5
 
-FA1000 <- "FA1000-WG.RDS"
+FA1000 <- .data("FA1000-WG.RDS")
 if (file.exists(FA1000)) {
 
   # If the 1,000-iteration analysis has been run and saved, load it,
@@ -221,7 +178,7 @@ x <- fa.parallel(efa.half[, -1], fa = "fa")
 # Plot 3-factor solution 1+3 against 2
 #
 
-wgl <- pivot_longer(efa.half, -data_id)
+wgl <- pivot_longer(efa.half, -c(data_id, age))
 
 quantile(wgl$value, probs = seq(0, 1, by = 0.1))
 
@@ -229,8 +186,8 @@ wgl <- wgl %>%
         mutate(trunc_val = replace(value, value > 4/15, 4/15))
 
 ggplot(wgl, aes(x = name, y = value)) +
-  geom_boxplot()
-
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 values <- factor.analyses[[3]]$scores %>%
             as_tibble() %>%
@@ -260,12 +217,12 @@ ggplot(words.lexsym, aes(x = LEXICAL, y = SYNTAX, color = age)) +
 factor.analyses[[2]]$loadings %>%
   unclass() %>%
   as.data.frame() %>%
-  write_csv(path = "data/WG-FA2-loadings.csv")
+  write_csv(path = .data("WG-FA2-loadings.csv"))
 
 factor.analyses[[3]]$loadings %>%
   unclass() %>%
   as.data.frame() %>%
-  write_csv(path = "data/WG-FA3-loadings.csv")
+  write_csv(path = .data("WG-FA3-loadings.csv"))
 
 #
 # CFA

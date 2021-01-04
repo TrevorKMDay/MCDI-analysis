@@ -26,7 +26,7 @@ g_dict_file <- "data/WG-example.csv"
 # Clean up mcdi_all
 colnames(mcdi_all1) <- gsub("demographics,", "demo.", colnames(mcdi_all1))
 colnames(mcdi_all1) <- gsub("mcdi,", "gest.", colnames(mcdi_all1))
-colnames(mcdi_all1) <- gsub("mcdi_words_sentences,", "sent.", 
+colnames(mcdi_all1) <- gsub("mcdi_words_sentences,", "sent.",
                             colnames(mcdi_all1))
 
 # Note that "Gender" was changed to "Sex" in spring 2020, may not work with
@@ -46,7 +46,7 @@ mcdi_all <- mcdi_all1 %>%
             filter(grepl("^bcp[ABCDEG]", demo.Visit_label),
                    !(demo.Visit_label %in% c("bcpCFP", "bcpGUESTxV1")),
                    !grepl("Biomom", demo.Visit_label)) %>%
-            separate(demo.Visit_label, 
+            separate(demo.Visit_label,
                      into = c(NA, "demo.ideal_age"),
                      sep = "x") %>%
             mutate(demo.ideal_age = as.numeric(gsub("m", "",
@@ -66,7 +66,7 @@ mcdi_all <- mcdi_all1 %>%
 
 # Format BCP data as Wordbank
 BCP_WS <- mcdi_all %>%
-            select(-starts_with("gest"), 
+            select(-starts_with("gest"),
                    -ends_with("morphemes"), -ends_with("words")) %>%
             format.sentences(., s_dict_file)
 
@@ -75,18 +75,18 @@ BCP_WS_scored <- score.WS(BCP_WS)
 
 # Calculate MLU3
 MLU3 <- mcdi_all %>%
-          select(data_id, sent.Candidate_Age, 
+          select(data_id, sent.Candidate_Age,
                  ends_with("morphemes"), ends_with("words")) %>%
           rename(age = sent.Candidate_Age) %>%
           na.omit() %>%
           mutate(age = as.numeric(age),
-                  MLU3m = rowMeans(select(., ends_with("morphemes")), 
+                  MLU3m = rowMeans(select(., ends_with("morphemes")),
                                   na.rm = TRUE),
                   MLU3w = rowMeans(select(., ends_with("words")), na.rm = TRUE))
 
 ggplot(MLU3, aes(x = MLU3w, y = MLU3m, color = age)) +
   geom_point() +
-  geom_line(aes(group = data_id), alpha = 0.25) + 
+  geom_line(aes(group = data_id), alpha = 0.25) +
   scale_color_viridis_c()
 
 cor(MLU3$MLU3m, MLU3$MLU3w) # 0.99
@@ -146,7 +146,7 @@ lexsyn <- BCP_both.n %>%
             mutate(age = replace(age, age == 0, NA)) %>%
             mutate(lex = action_words + animals + body_parts + clothing +
                           descriptive_words + food_drink + furniture_rooms +
-                          games_routines + helping_verbs + household + 
+                          games_routines + helping_verbs + household +
                           outside + people + places + toys + vehicles,
                    syn = pronouns + quantifiers + question_words + sounds +
                           time_words + word_endings_nouns + word_endings_verbs +
@@ -155,7 +155,7 @@ lexsyn <- BCP_both.n %>%
                    SUM = lex + pronouns + quantifiers + question_words + sounds +
                            time_words + connecting_words + locations) %>%
             select(-everything(), data_id, age, lex, syn, SUM) %>%
-            mutate(lex.p = lex / 575, 
+            mutate(lex.p = lex / 575,
                    syn.p = syn / 175)
 
 
@@ -168,7 +168,7 @@ ggplot(lexsyn, aes(x = age, y = SUM)) +
   geom_line(aes(group = data_id), alpha = 0.25) +
   labs(x = "Age (mo.)", y = "Inventory size") +
   scale_y_continuous(limits = c(0, 680)) +
-  scale_x_continuous(limits = c(5, 40)) 
+  scale_x_continuous(limits = c(5, 40))
 
 dev.off()
 

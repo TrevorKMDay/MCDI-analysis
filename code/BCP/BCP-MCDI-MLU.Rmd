@@ -18,9 +18,9 @@ Packages: `tidyverse, lme4, MuMIn, viridis, gridExtra`.
 ```{r load-libraries, include=FALSE}
 
 if(.Platform$OS.type == "unix") {
-  setwd("/Volumes/GoogleDrive/My Drive/Research/MCDI/MCDI-analysis")
+  setwd("/Volumes/GoogleDrive/My Drive/Research/MCDI/MCDI-analysis/code/BCP")
 } else {
-  setwd("G:/My Drive/Research/MCDI/MCDI-analysis/")
+  setwd("G:/My Drive/Research/MCDI/MCDI-analysis/code/BCP")
 }
 
 # Libraries
@@ -33,8 +33,9 @@ library(gridExtra)
 
 # Helper functions
 
-# source("wordbank-functions.R")
-# source("format-BCP-funcs.R")
+source("../mcdi-setup.R")
+source("../Wordbank/wordbank-functions.R")
+source("format-BCP-funcs.R")
 
 date <- "200609"
 
@@ -51,40 +52,36 @@ and MLU3w.
 # Load data
 
 #BCP_WG_scored <- readRDS("data/BCP_WG_scored.rds")
-BCP_WS_scored <- readRDS(paste0("data/BCP_WS_scored-", date, ".rds"))[[1]] %>%
-                  select(-how_use_words) %>%
-                  mutate(LEX = action_words + animals + body_parts + clothing +
-                                descriptive_words + food_drink +
-                                furniture_rooms + games_routines +
-                                helping_verbs + household + outside + people +
-                                places + toys + vehicles + sounds,
-                         SYN = pronouns + quantifiers + question_words +
-                                time_words + word_endings_nouns +
-                                word_endings_verbs + word_forms_nouns +
-                                word_forms_verbs + complexity +
-                                connecting_words + locations,
-                         partI = action_words + animals + body_parts + clothing +
-                           descriptive_words + food_drink +
-                           furniture_rooms + games_routines +
-                           helping_verbs + household + outside + people +
-                           places + toys + vehicles + sounds + pronouns +
-                           quantifiers + question_words + time_words +
-                           connecting_words + locations,
-                         partII = word_endings_nouns + word_endings_verbs +
-                           word_forms_nouns + word_forms_verbs + complexity)
+BCP_WS_scored <- read_data(paste0("BCP/BCP_WS_scored-", date, ".rds"))[[1]] %>%
+  select(-how_use_words) %>%
+  mutate(LEX = action_words + animals + body_parts + clothing +
+                descriptive_words + food_drink +
+                furniture_rooms + games_routines +
+                helping_verbs + household + outside + people +
+                places + toys + vehicles + sounds,
+         SYN = pronouns + quantifiers + question_words +
+                time_words + word_endings_nouns +
+                word_endings_verbs + word_forms_nouns +
+                word_forms_verbs + complexity +
+                connecting_words + locations,
+         partI = action_words + animals + body_parts + clothing +
+           descriptive_words + food_drink +
+           furniture_rooms + games_routines +
+           helping_verbs + household + outside + people +
+           places + toys + vehicles + sounds + pronouns +
+           quantifiers + question_words + time_words +
+           connecting_words + locations,
+         partII = word_endings_nouns + word_endings_verbs +
+           word_forms_nouns + word_forms_verbs + complexity)
 
 # Read demographics file 
 # Explicit levels in momed set order
-BCP_demo <- read_csv(paste0("data/BCP-demographics-", date, ".csv")) %>%
-              select(CandID, sex, educ_momed, educ_momed_n, income_inr,
-                     family_size) %>%
-              mutate(educ_momed = replace(educ_momed,
-                                          educ_momed == "not_answered",
-                                          NA) %>%
-                                  factor(levels = c("some_high", "high", 
-                                                    "some_college", "college",
-                                                    "some_grad", "grad",
-                                                    "not_answered"))) 
+BCP_demo <- read_data(paste0("BCP/BCP-demographics-", date, ".csv")) %>%
+  select(CandID, sex, educ_momed, educ_momed_n, income_inr, family_size) %>%
+  mutate(educ_momed = replace(educ_momed, educ_momed == "not_answered", NA) %>%
+                      factor(levels = c("some_high", "high", "some_college", 
+                                        "college", "some_grad", "grad",
+                                        "not_answered"))) 
 
 # Fill in missing INR based on mother's education and family size
 inr.predictor <- lm(income_inr ~ 1 + educ_momed_n + family_size, 
@@ -97,39 +94,40 @@ inr.predicted <- predict(inr.predictor,
 BCP_demo$income_inr[is.na(BCP_demo$income_inr)] <- inr.predicted
 
 # MLU file
-BCP_MLU <- readRDS(paste0("data/BCP_WS_MLU3-", date, ".rds"))
+BCP_MLU <- read_data(paste0("BCP/BCP_WS_MLU3-", date, ".rds"))
 
 # Join them all into "with MLU file"
 wMLU <- right_join(BCP_WS_scored, BCP_MLU) %>%
-          left_join(., BCP_demo, by = c("data_id" = "CandID"))
+  left_join(BCP_demo, by = c("data_id" = "CandID"))
+
+cor(wMLU$MLU3m, wMLU$MLU3w)
 
 
 p1 <- ggplot(wMLU, aes(x = MLU3w, y = MLU3m, color = age)) +
-        geom_point() +
-        geom_line(aes(group = data_id)) +
-        scale_color_viridis() + 
-        labs(x = "Words", y = "Morphemes") +
-        theme(legend.position = "bottom")
+  geom_point() +
+  geom_line(aes(group = data_id)) +
+  scale_color_viridis() + 
+  labs(x = "Words", y = "Morphemes") +
+  theme(legend.position = "bottom")
 
 p2 <- ggplot(BCP_demo, aes(educ_momed)) +
-        geom_histogram(stat = "count") +
-        scale_x_discrete(labels = c("Some Sec. (10)", "Secondary (12)", 
-                                    "Some College (14)", "College (16)", 
-                                    "Some Grad (18)", "Grad (20)", 
-                                    "Not Answered")) +
-        labs(x = "Level", y = "Count") + 
-        theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+  geom_histogram(stat = "count") +
+  scale_x_discrete(labels = c("Some Sec. (10)", "Secondary (12)", 
+                              "Some College (14)", "College (16)", 
+                              "Some Grad (18)", "Grad (20)", "Not Answered")) +
+  labs(x = "Level", y = "Count") + 
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
 
 p3 <- ggplot(wMLU, aes(x = age)) +
-        geom_histogram(binwidth = 1) +
-        scale_x_continuous(breaks = seq(19, 38, by = 2)) +
-        labs(x = "Age", y = "Count")
+  geom_histogram(binwidth = 1) +
+  scale_x_continuous(breaks = seq(19, 38, by = 2)) +
+  labs(x = "Age", y = "Count")
 
 
 p4 <- ggplot(wMLU, aes(x = sex, fill = sex)) +
-        geom_histogram(stat = "count") +
-        labs(x = "Gender", y = "Count") +
-        theme(legend.position = "none")
+  geom_histogram(stat = "count") +
+  labs(x = "Gender", y = "Count") +
+  theme(legend.position = "none")
 
 grid.arrange(p1, p2, p3, p4,
              layout_matrix = rbind(c(2,  3, 1),

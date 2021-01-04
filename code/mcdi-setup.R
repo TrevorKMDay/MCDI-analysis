@@ -28,6 +28,7 @@ most_recent <- function(regex, directory = ".") {
                           pattern = filename,
                           recursive = TRUE,
                           full.names = TRUE)
+
   if (length(full_path) == 1) {
     return(full_path)
   } else if (length(full_path) > 1) {
@@ -55,6 +56,12 @@ read_data <- function(filename) {
 
   src <- paste0(data_dir, "/", filename)
 
-  return(readRDS(src))
+  if (grepl(".rds$", ignore.case = TRUE, x = src)) {
+    x <- readRDS(src)
+  } else if (grepl(".csv$", x = src)) {
+    x <- read_csv(src)
+  }
+
+  return(x)
 
 }

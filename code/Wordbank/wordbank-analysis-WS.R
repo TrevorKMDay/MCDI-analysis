@@ -27,7 +27,7 @@ library(psychometric)
 select <- dplyr::select
 
 # Kyle says Promax is orthogonal, followed by an oblique correction
-# oblimin is orthogonal from the get-go, but is more computationWSy intensive
+# oblimin is orthogonal from the get-go, but is more computationally intensive
 # (but fine on modern machines)
 rotation <- "oblimin"
 
@@ -45,8 +45,7 @@ sd(WS.demo$age)
 
 table(WS.demo$sex, useNA = "always")
 
-table(WS.demo$mom_ed,
-      useNA = "always")
+table(WS.demo$mom_ed, useNA = "always")
 
 ws.mom_ed <- table(WS.demo$mom_ed, useNA = "always")
 
@@ -60,7 +59,7 @@ length(unique(WS.demo$data_id)) == nrow(WS.demo)
 # This function tests for the existence of this RDS in the data/ directory
 # If it doesn't exist, it returns NA
 datafile <- .data("Wordbank/WS-scored.rds")
-if (!is.na(datafile)) {
+if (file.exists(datafile)) {
   scored <- readRDS(datafile)
 } else {
   # Score W&S using developed function
@@ -97,13 +96,16 @@ dev.off()
 # Zip code for UMN
 set.seed(55455)
 
-# We need to do the split-half with sex/mom ed present to balance them
 WS.merge1 <- WS.demo %>%
-                mutate(sex = fct_explicit_na(sex, na_level = "Missing"),
-                        mom_ed = fct_explicit_na(mom_ed,
-                                                 na_level = "Missing")) %>%
-                group_by(age, sex, mom_ed) %>%
-                sample_frac(.5)
+  # Create explicit NA category for all demo variables
+  mutate(across(sex:ethnicity, ~fct_explicit_na(.x, na_level = "Missing"))) %>%
+  # Although we later identified birth order and ethnicity, leave original
+  # balancing call.
+  group_by(age, sex, mom_ed) %>%
+  sample_frac(size = .5)
+
+apply(WS.demo, 2, function(x) sum(is.na(x)))
+
 
 # Everyone in WS.merge1; everyone not
 efa.half.ID <- as.character(WS.merge1$data_id)
@@ -114,43 +116,46 @@ efa.half <- scored$p %>%
 cfa.half <- scored$p %>%
   filter(data_id %in% cfa.half.ID)
 
+## Mom ed to numeric
+mom_ed.lut <- tibble(mom_ed = c("Some Secondary", "Secondary", "College",
+                                "Some College", "Primary", "Graduate",
+                                "Some Graduate"),
+                     mom_ed_n = c(9, 12, 16, 14, 6, 20, 18))
+
+birth_ord.lut <- tibble(birth_order = levels(WS.demo$birth_order),
+                        birth_order_n = 1:8)
+
 # Test for differences
 efa.demo <- WS.demo %>%
-              filter(data_id %in% efa.half.ID)
+  filter(data_id %in% efa.half.ID) %>%
+  left_join(mom_ed.lut) %>%
+  left_join(birth_ord.lut)
+
+# Stats
+mean(efa.demo$age) ; sd(efa.demo$age)
+mean(efa.demo$mom_ed_n, na.rm = TRUE) ; sd(efa.demo$mom_ed_n, na.rm = TRUE)
+
+table(efa.demo$sex, useNA = "a") / nrow(efa.demo) * 100
+(table(efa.demo$ethnicity, useNA = "a") / nrow(efa.demo) * 100) %>%
+  round()
+(table(efa.demo$birth_order == "First", useNA = "a") / nrow(efa.demo) * 100) %>%
+  round()
 
 cfa.demo <- WS.demo %>%
-              filter(data_id %in% cfa.half.ID)
+  filter(data_id %in% cfa.half.ID) %>%
+  left_join(mom_ed.lut) %>%
+  left_join(birth_ord.lut)
 
-# Age
-t.test(efa.demo$age, cfa.demo$age)
+# Stats
+mean(cfa.demo$age) ; sd(cfa.demo$age)
+mean(cfa.demo$mom_ed_n, na.rm = TRUE) ; sd(cfa.demo$mom_ed_n, na.rm = TRUE)
 
-# Sex
+table(cfa.demo$sex, useNA = "a") / nrow(cfa.demo) * 100
+(table(cfa.demo$ethnicity, useNA = "a") / nrow(cfa.demo) * 100) %>%
+  round()
+(table(cfa.demo$birth_order == "First", useNA = "a") / nrow(cfa.demo) * 100) %>%
+  round()
 
-efa.sex <- efa.demo %>%
-            mutate(sex = fct_explicit_na(sex, na_level = "Missing")) %>%
-            group_by(sex) %>%
-            dplyr::summarize(n = n())
-
-cfa.sex <- cfa.demo %>%
-            mutate(sex = fct_explicit_na(sex, na_level = "Missing")) %>%
-            group_by(sex) %>%
-            dplyr::summarize(n = n())
-
-chisq.test(efa.sex$n, cfa.sex$n)
-
-# Mother's education
-
-efa.mom <- efa.demo %>%
-            mutate(mom_ed = fct_explicit_na(mom_ed, na_level = "Missing")) %>%
-            group_by(mom_ed) %>%
-            dplyr::summarize(n = n())
-
-cfa.mom <- cfa.demo %>%
-              mutate(mom_ed = fct_explicit_na(mom_ed, na_level = "Missing")) %>%
-              group_by(mom_ed) %>%
-              dplyr::summarize(n = n())
-
-chisq.test(efa.mom$n, cfa.mom$n)
 
 ################################################################################
 # Exploratory factor analysis
@@ -171,7 +176,7 @@ if (file.exists(FA1000)) {
   # ... actually run FAs with default method/iterations
   factor.analyses <- lapply(1:max.factors,
                             function(x)
-                              apply.FA(select(efa.half, -age),
+                              apply.FA(select(efa.half, -data_id, -age),
                                        factors = x))
 
   # and save it
@@ -348,12 +353,6 @@ WS.scores <- factor.scores(dplyr::select(scored$n,
                             factor.analyses[[2]],
                             method = "Thurstone")
 
-## Mom ed to numeric
-mom_ed.lut <- data.frame(mom_ed = c("Some Secondary", "Secondary", "College",
-                                    "Some College", "Primary", "Graduate",
-                                    "Some Graduate"),
-                         mom_ed_y = c(9, 12, 16, 14, 6, 20, 18))
-
 plot.scores <- cbind.data.frame(WS.demo, WS.scores$scores) %>%
   as_tibble() %>%
   left_join(mom_ed.lut)
@@ -473,14 +472,16 @@ CIr(r = wt1.r, n = nrow(one.weight))
 max_size <- c(566, 221)
 
 onew.ribbon <- one.weight %>%
-                mutate_at("lex", function(x) x / max_size[1]) %>%
-                mutate_at("syn", function(x) x / max_size[2]) %>%
-                pivot_longer(-c(data_id, age)) %>%
-                group_by(age, name) %>%
-                summarize(n = n(),
-                          mean = mean(value),
-                          sd = sd(value),
-                          iqr = IQR(value))
+  mutate_at("lex", function(x) x / max_size[1]) %>%
+  mutate_at("syn", function(x) x / max_size[2]) %>%
+  pivot_longer(-c(data_id, age)) %>%
+  group_by(age, name) %>%
+  summarize(
+    n = n(),
+    mean = mean(value),
+    sd = sd(value),
+    iqr = IQR(value)
+  )
 
 png("plots/1w-lag-presentation.png", width = 7.5, height = 5, units = "in",
     res = 96)
