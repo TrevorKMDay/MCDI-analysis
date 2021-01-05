@@ -14,9 +14,9 @@ bibliography: growth-curving-bib.json
 ```{r setup, include=FALSE}
 
 if(.Platform$OS.type == "unix") {
-  setwd("/Volumes/GoogleDrive/My Drive/Research/MCDI/MCDI-analysis/growth_curving")
+  setwd("/Volumes/GoogleDrive/My Drive/Research/MCDI/MCDI-analysis/code/growth_curving")
 } else {
-  setwd("G:/My Drive/Research/MCDI/MCDI-analysis/growth_curving")
+  setwd("G:/My Drive/Research/MCDI/MCDI-analysis/code/growth_curving")
 }
 
 knitr::opts_chunk$set(echo = TRUE)
@@ -48,9 +48,13 @@ library(educate)
 Load the first person with five points
 
 ```{r data}
-test <- read_csv("../data/test-subjs.csv") %>%
+
+test_subjs <- "G:/My Drive/Research/MCDI/MCDI-analysis/data/other/test-subjs.csv"
+
+test <- read_csv(test_subjs) %>%
           arrange(data_id, age) %>%
           filter(data_id == 176427)
+
 ```
 
 # Introduction
@@ -453,12 +457,10 @@ too poorly for this individual.
 
 ## Modeling across subjects
 
-+
-
 ```{r load-all-data}
 
 # Load data as a list
-test_all <- read_csv("../data/test-subjs.csv") %>%
+test_all <- read_csv(test_subjs) %>%
               arrange(data_id, age) %>%
               split(., f = .$data_id)
 
@@ -660,7 +662,7 @@ This plot uses the 95% confidence interval rather than the SE.
 
 ```{r lexsyn, echo=FALSE, message=FALSE, warning=FALSE, fig.width=5, fig.height=3}
 
-lexsyn <- read_csv("../data/lexsyn.csv")
+lexsyn <- read_csv("G:/My Drive/Research/MCDI/MCDI-analysis/data/other/lexsyn.csv")
 
 three_or_more <- table(lexsyn$data_id)
 ID3 <- names(three_or_more)[three_or_more >= 3]

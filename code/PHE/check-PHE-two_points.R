@@ -131,3 +131,6 @@ ggplot(min_df_unnest, aes(x = age, y = inv, color = age < 25)) +
   labs(x = "Month", y = "Words",
        title = paste(min_var, "low variability in kg"))
 
+ggplot(all, aes(x = age, y = inventory)) +
+  geom_line(aes(group = data_id))
+

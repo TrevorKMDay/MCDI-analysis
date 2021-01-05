@@ -31,6 +31,10 @@ if (file.exists(.data(PHE_data))) {
 
 }
 
+ages <- select(PHE, demo.CandID, wg.Candidate_Age) %>%
+  arrange(demo.CandID) %>%
+  mutate(month = round(as.numeric(wg.Candidate_Age), 0))
+
 ################################################################################
 # How many MLU entries?
 ################################################################################
