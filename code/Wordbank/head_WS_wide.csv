@@ -1,0 +1,7 @@
+data_id,age,action_words,animals,body_parts,clothing,connecting_words,descriptive_words,food_drink,furniture_rooms,games_routines,helping_verbs,household,locations,outside,people,places,pronouns,quantifiers,question_words,sounds,time_words,toys,vehicles,WORD_FORMS_NOUNS,WORD_FORMS_VERBS,WORD_ENDINGS_NOUNS,WORD_ENDINGS_VERBS,COMPLEXITY,LEXICAL,SYNTAX
+129242,27,92,18,24,18,3,60,52,29,24,15,39,15,21,21,12,9,8,0,5,7,13,12,3,10,2,2,14,440,88
+129243,21,61,30,23,20,1,19,50,22,20,0,32,10,16,11,9,5,4,5,9,2,13,7,2,7,0,0,15,342,51
+129244,26,18,12,13,9,2,11,24,7,17,4,13,5,6,7,6,5,5,2,11,3,6,4,2,1,3,1,1,164,34
+129245,27,69,9,12,5,0,22,15,14,20,2,24,7,17,9,6,8,2,2,9,3,6,3,2,2,5,5,0,240,38
+129246,19,56,7,6,1,0,15,10,5,15,0,11,5,3,7,0,0,1,0,10,1,3,3,2,1,0,0,0,152,10
+129247,30,74,43,24,18,3,43,56,23,24,12,44,17,22,22,13,15,11,4,11,4,18,12,2,17,0,5,24,447,114

@@ -372,7 +372,6 @@ smear <- ggplot(plot.scores, aes(x = MR1, y = MR2, color = age)) +
           geom_point(alpha = 0.25, size = 1) +
           labs(x = "Lexical", y = "Syntactic", color = "Age") +
           geom_abline(linetype = "longdash", color = "red", size = 1) +
-          theme(legend.position = "none") +
           geom_smooth(method = "lm", formula = y ~ poly(x, 2),
                       color = "black", size = 1)
 
@@ -388,15 +387,17 @@ ggplot(filter(plot.scores, !is.na(mom_ed)),
 
 # Group by age
 plot.scores.summary <- plot.scores %>%
-  dplyr::select(-mom_ed_y) %>%
   rename(Lexical = MR1, Structural = MR2) %>%
-  pivot_longer(-c(data_id, age, sex, mom_ed, instrument),
+  pivot_longer(-c(data_id, age, sex, mom_ed, mom_ed_n, instrument, birth_order,
+                  ethnicity),
                names_to = "factor") %>%
   group_by(age, factor) %>%
-  summarise(n = n(),
-            mean = mean(value, na.rm = TRUE),
-            sd = sd(value, na.rm = TRUE),
-            iqr = IQR(value, na.rm = TRUE)) %>%
+  summarise(
+    n = n(),
+    mean = mean(value, na.rm = TRUE),
+    sd = sd(value, na.rm = TRUE),
+    iqr = IQR(value, na.rm = TRUE)
+  ) %>%
   mutate_at("factor", as_factor)
 
 # Plot increase/decrease in lexical/syntactic scores over age.
@@ -416,6 +417,9 @@ ribbon <- ggplot(plot.scores.summary,
 
 scores.poly.model <- lm(MR2 ~ 1 + MR1 + I(MR1^2), data = plot.scores)
 scores.exp.model <- lm(MR2 ~ exp(MR1), data = plot.scores)
+
+CI.Rsq(rsq = summary(scores.poly.model)$r.squared, n = nrow(plot.scores),
+       k = 3)
 
 # Lower is better
 AIC(scores.poly.model)
@@ -461,12 +465,21 @@ count <- scored$n
 lexical <- colnames(count)[3:17]
 syntactic <- colnames(count)[18:29]
 one.weight <- count %>%
-  mutate(lex = dplyr::select(., one_of(lexical)) %>% rowSums(),
-         syn = dplyr::select(., one_of(syntactic)) %>% rowSums()) %>%
+  mutate(
+    lex = dplyr::select(., one_of(lexical)) %>%
+            rowSums(),
+    syn = dplyr::select(., one_of(syntactic)) %>%
+            rowSums()
+  ) %>%
   dplyr::select(data_id, age, lex, syn)
 
-wt1.r <- cor(one.weight$lex, one.weight$syn)
-CIr(r = wt1.r, n = nrow(one.weight))
+sum.poly.model <- lm(syn ~ 1 + lex + I(lex**2), data = one.weight)
+
+CI.Rsq(rsq = summary(sum.poly.model)$r.squared, n = nrow(one.weight),
+       k = 3)
+
+# wt1.r <- cor(one.weight$lex, one.weight$syn)
+# CIr(r = wt1.r, n = nrow(one.weight))
 
 # Max number of words in lex, syn
 max_size <- c(566, 221)
@@ -549,3 +562,35 @@ factor.analyses[[3]]$loadings %>%
   unclass() %>%
   as.data.frame() %>%
   write_csv(path = .data("results/WS-FA3-loadings.csv"))
+
+################################################################################
+
+scored_pZ <- scored$p %>%
+  select(-LEXICAL, -SYNTAX, -data_id, -age) %>%
+  t() %>%
+  scale() %>%
+  t() %>%
+  as.data.frame() %>%
+  mutate(scored$p[, 1], scored$p[, 2]) %>%
+  select(data_id, age, everything())
+
+scored_pZ_long <- scored_pZ %>%
+  mutate(
+    max = select(., -data_id, -age) %>%
+            apply(1, function(x) max(abs(x)))
+  ) %>%
+  filter(max > 3) %>%
+  select(-max) %>%
+  pivot_longer(-c(data_id, age))
+
+foo <- scored$p %>%
+  filter(data_id %in% scored_pZ_long$data_id)
+
+ggplot(scored_pZ_long, aes(x = value, color = data_id)) +
+  geom_density() +
+  theme(legend.position = "none")
+
+################################################################################
+
+write_csv(head(WS), "head_WS.csv")
+write_csv(head(scored$n), "head_WS_wide.csv")

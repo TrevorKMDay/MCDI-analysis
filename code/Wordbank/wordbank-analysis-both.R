@@ -230,6 +230,32 @@ demo <- bind_rows(WG.demographics, WS.demographics) %>%
 
 count.demo <- left_join(all.n, demo, by = c("data_id", "age"))
 
+sent.inventory <- sentences.n %>%
+  select(matches("^[a-z]", ignore.case = FALSE)) %>%
+  mutate(
+    inventory = select(., -instrument, -data_id, -age) %>%
+                  rowSums()
+  )
+
+gest.inventory <- gw.as.sent.count %>%
+  select(matches("^[a-z]", ignore.case = FALSE)) %>%
+  mutate(
+    inventory = select(., -instrument, -data_id, -age) %>%
+      rowSums()
+  )
+
+inventory <- bind_rows(gest.inventory, sent.inventory) %>%
+  select(instrument, data_id, age, inventory) %>%
+  left_join(demo) %>%
+  mutate(
+    first_born = birth_order == "First",
+    mom_ed_n   = as.numeric(mom_ed_n)
+  )
+
+lm.inv <- lm(inventory ~ 1 + age + I(age^2) + sex + mom_bachelors + first_born,
+             data = inventory)
+
+
 ggplot(count.demo, aes(x = LEXICAL, y = SYNTAX, color = age)) +
   geom_point(alpha = 0.1) +
   scale_color_viridis_c() +

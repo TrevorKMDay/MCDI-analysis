@@ -1,0 +1,7 @@
+data_id,age,sex,mom_ed,value,item_id,type,category,definition
+129242,27,Female,Some Secondary,produces,item_1,word,sounds,baa baa
+129242,27,Female,Some Secondary,NA,item_2,word,sounds,choo choo
+129242,27,Female,Some Secondary,NA,item_3,word,sounds,cockadoodledoo
+129242,27,Female,Some Secondary,produces,item_4,word,sounds,grrr
+129242,27,Female,Some Secondary,NA,item_5,word,sounds,meow
+129242,27,Female,Some Secondary,NA,item_6,word,sounds,moo

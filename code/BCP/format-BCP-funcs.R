@@ -146,49 +146,48 @@ format.sentences <- function(sentences, s_dict_file) {
 }
 
 format.gestures <- function(gestures, g_dict_file, inventory.only = TRUE) {
-  
+
   g_dict <- read_csv(g_dict_file)
-  
+
   gest <- gestures %>%
-            select(data_id, age, sex,
-                   gest.Administration,
-                   starts_with("gest.I")) %>%
-            filter(gest.Administration == "All") %>%
-            select(-gest.Administration) %>%
-            pivot_longer(-c(data_id, age, sex)) %>%
-            filter(!grepl("score", name),
-                   !grepl("status", name),
-                   !grepl("F_replacement", name)) %>%
-            mutate(name = gsub("gest.", "", name)) %>%
-            separate(name, into = c("part", "section", "x"),
-                     extra = "merge") %>%
-            separate(x, into = c("subsection", "question"), fill = "left",
-                     convert = TRUE)
-  
-  words <- filter(g_dict, type == "word")
-  
+    select(data_id, age, sex,
+           gest.Administration,
+           starts_with("gest.I")) %>%
+    filter(gest.Administration == "All") %>%
+    select(-gest.Administration) %>%
+    pivot_longer(-c(data_id, age, sex)) %>%
+    filter(
+      !grepl("score", name),
+      !grepl("status", name),
+      !grepl("F_replacement", name)
+    ) %>%
+    mutate(name = gsub("gest.", "", name)) %>%
+    separate(name, into = c("part", "section", "x"), extra = "merge") %>%
+    separate(x, into = c("subsection", "question"), fill = "left",
+             convert = TRUE)
+
+  words <- g_dict
+
   # Part I.D is the inventory
   gest.ID <- gest %>%
-              filter(part == "I", section == "D") %>%
-              mutate(type = "word",
-                      item_id = rep(words$item_id, length.out = nrow(.)),
-                      category = rep(words$category, length.out = nrow(.)),
-                      definition = rep(words$definition, 
-                                       length.out = nrow(.))) %>%
-              select(data_id, age, sex, value, item_id, type, category, 
-                     definition) %>%
-              mutate(value = replace(value, 
-                                     value == "not_answered", 
-                                     NA),
-                     value = replace(value, 
-                                     value == "says_and_understands", 
-                                     "produces"))
-  
-  # If inventory ony, return just section I.D,
+    filter(part == "I", section == "D") %>%
+    mutate(
+      type = "word",
+      item_id = rep(words$item_id, length.out = nrow(.)),
+      category = rep(words$category, length.out = nrow(.)),
+      definition = rep(words$definition, length.out = nrow(.))
+    ) %>%
+    select(data_id, age, sex, value, item_id, type, category, definition) %>%
+    mutate(
+      value = replace(value, value == "not_answered", NA),
+      value = replace(value, value == "says_and_understands", "produces")
+    )
+
+  # If inventory only, return just section I.D,
   # haven't written full section yet
   if (inventory.only)
     return(gest.ID)
   else
     return(NA)
-  
+
 }

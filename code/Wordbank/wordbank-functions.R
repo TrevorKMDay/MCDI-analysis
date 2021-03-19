@@ -89,7 +89,9 @@ score.GasS <- function(gestures, sc.understands = FALSE,
     ) %>%
     mutate(
       s.category = mapping$s.cat[match(definition, mapping$definition)],
-      says = score.produces(value, score.understands = sc.understands)
+      says = score.produces(value,
+                            produces = "says_and_understands",
+                            score.understands = sc.understands)
     ) %>%
     group_by(data_id, age, s.category) %>%
     summarise(

@@ -259,3 +259,43 @@ mcdi.cfa3fac.r <- cfa(model = model_3fac,
                       estimator = "MLR")
 
 summary(mcdi.cfa3fac.r, fit.measures = TRUE)
+
+################################################################################
+
+scored_p_long <- scored_p %>%
+  pivot_longer(-c(data_id, age))
+
+threshold <- function(long, thresh) {
+
+  long %>%
+    mutate(
+      thresh = thresh,
+      above = value > thresh
+    ) %>%
+    filter(above) %>%
+    group_by(above, thresh) %>%
+    summarize(
+      n = n()
+    ) %>%
+    return()
+
+}
+
+at_thresholds <- lapply(seq(.1, .9, by = .1),
+                        function(x) threshold(scored_p_long, x)) %>%
+  data.table::rbindlist() %>%
+  ungroup() %>%
+  mutate(
+    p = n / prod(dim(scored_n))
+  )
+
+scored_p_long_old <- scored_p_long %>%
+  filter(age > 17)
+
+old <- lapply(seq(.1, .9, by = .1),
+              function(x) threshold(scored_p_long_old, x)) %>%
+  data.table::rbindlist() %>%
+  ungroup() %>%
+  mutate(
+    p = n / (length(unique(scored_p_long_old$data_id)) * 21)
+  )

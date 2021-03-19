@@ -4,40 +4,40 @@ if(.Platform$OS.type == "unix") {
   setwd("G:/My Drive/Research/MCDI/MCDI-analysis/")
 }
 
-# Format demographics, including matching mother's/father's education 
+# Format demographics, including matching mother's/father's education
 # appropriately
 
 na_omit <- function(x) {
-  
+
   # My own NA omit function that returns NA instead of 'logical(0)' when used
   # on an all-NA list
-  
+
   y <- na.omit(x)
-  
-  if (length(y) == 0) 
+
+  if (length(y) == 0)
     y <- NA
-  
+
   return(y)
-  
+
 }
 
 get_education <- function(x) {
-  
+
   result <- c(NA, NA)
-  
+
   # Loop through in this order;
   for ( i in c("biological_mother", "nonbio_mother", "biological_father",
                 "non_specified", "not_answered") ) {
-    
+
     if (!is.na(x[i])) {
       result <- c(x[i], i)
       break
     }
-    
+
   }
-  
+
   return(unlist(unname(result)))
-  
+
 }
 
 # Libraries
@@ -48,8 +48,11 @@ library(readxl)
 
 date <- "200609"
 
+source("G:/My Drive/Research/MCDI/MCDI-analysis/code/mcdi-setup.R")
+
 # National poverty threshold - could find one for Hennepin Co. or TC metro
-thresholds <- read_xlsx("poverty_threshold2019.xlsx", sheet = 2) %>% 
+poverty = "G:/My Drive/Research/MCDI/MCDI-analysis/data/other/poverty_threshold2019.xlsx"
+thresholds <- read_xlsx(poverty, sheet = 2) %>%
                 pivot_longer(-family_size, names_to = "num_kids",
                              values_to = "pthresh") %>%
                 mutate(num_kids = gsub("kids.", "", num_kids) %>%
@@ -58,7 +61,7 @@ thresholds <- read_xlsx("poverty_threshold2019.xlsx", sheet = 2) %>%
                 na_omit()
 
 # Get demographic/demographic-eligibility data, just the education for now
-DE <- read_csv(paste0("data/bcp-UMNUNC-demoeligb-", date, ".csv")) %>%
+DE <- read_csv(.data(paste0("BCP/bcp-UMNUNC-demoeligb-", date, ".csv"))) %>%
         select_all(~gsub("demographics,", "demo.", .)) %>%
         select_all(~gsub("demographics_eligibility,", "de.", .)) %>%
         filter(de.Administration == "All") %>%
@@ -76,7 +79,7 @@ multiple.ids <- names(which(ids > 1))
 
 
 demo.eligb <- DE  %>%
-                select(demo.CandID, de.Candidate_Age, demo.Sex, 
+                select(demo.CandID, de.Candidate_Age, demo.Sex,
                        ends_with("relationship"), ends_with("education")) %>%
                 distinct()
 
@@ -85,7 +88,7 @@ demo.eligb <- DE  %>%
 demo.eligb.long <- demo.eligb %>%
                     pivot_longer(-c(demo.CandID, de.Candidate_Age)) %>%
                     mutate(name = gsub("de.", "", name)) %>%
-                    separate(name, into = c("parent", "x")) 
+                    separate(name, into = c("parent", "x"))
 
 # Separate into two dfs
 del.educ <- filter(demo.eligb.long, x == "education") %>%
@@ -104,13 +107,13 @@ del <- left_join(del.rel, del.educ) %>%
 
 # Pivot wider ...
 del.wide <- del %>%
-              pivot_wider(id_cols = c(demo.CandID, de.Candidate_Age), 
-                          names_from = relationship, 
+              pivot_wider(id_cols = c(demo.CandID, de.Candidate_Age),
+                          names_from = relationship,
                           values_from = education,
-                          values_fn = list(education = length)) 
+                          values_fn = list(education = length))
 
-# Except there's a few individuals with mutliples, one person with 
-## 'non_specified' twice (this is ok), and two with two biomom entries. 
+# Except there's a few individuals with mutliples, one person with
+## 'non_specified' twice (this is ok), and two with two biomom entries.
 ## Presumably, those are errors
 multiple <- del.wide %>%
               filter(biological_mother > 1 | non_specified > 1 | biological_father > 1 | nonbio_mother > 1 | not_answered > 1 | nonbio_father > 1)
@@ -133,10 +136,10 @@ remove(del, del2, del3, del.wide, del.educ, del.rel, demo.eligb.long, multiple)
 
 # Pivot wider, this time without duplicates
 del.wide2 <- del4 %>%
-              pivot_wider(id_cols = c(demo.CandID, de.Candidate_Age), 
-                          names_from = relationship, 
+              pivot_wider(id_cols = c(demo.CandID, de.Candidate_Age),
+                          names_from = relationship,
                           values_from = education,
-                          values_fn = list(education = na_omit)) 
+                          values_fn = list(education = na_omit))
 
 # Lookup table to easily convert buckets into numbers
 educ_lut <- tibble(mom_ed = c("jr_high", "some_high", "high", "some_college",
@@ -147,7 +150,7 @@ educ_lut <- tibble(mom_ed = c("jr_high", "some_high", "high", "some_college",
 educ <- apply(del.wide2, 1, get_education) %>%
           t() %>%
           as_tibble(.name_repair = "unique") %>%
-          rename(mom_ed = ...1, parent_ed = ...2) 
+          rename(mom_ed = ...1, parent_ed = ...2)
 
 # Join with ID#s
 educ <- left_join(educ, educ_lut) %>%
@@ -159,7 +162,7 @@ educ <- left_join(educ, educ_lut) %>%
 #
 
 sex <- demo.eligb %>%
-        select(demo.CandID, demo.Sex) %>% 
+        select(demo.CandID, demo.Sex) %>%
         distinct()
 
 #
@@ -172,7 +175,7 @@ SES <- DE %>%
                de.num_siblings_all, matches("de.sibling._home"),
                matches("de.parent._relationship")) %>%
         mutate(de.household_income = replace(de.household_income,
-                                             de.household_income %in% c(".", "not_answered"), 
+                                             de.household_income %in% c(".", "not_answered"),
                                              NA) %>%
                                       replace(de.household_income == "less_than_25k",
                                               "0_25k"),
@@ -180,7 +183,7 @@ SES <- DE %>%
                             gsub("k", "", .) %>%
                             as.numeric(),
                de.num_siblings_all = as.numeric(de.num_siblings_all)) %>%
-        mutate_at(c("demo.CandID", "demo.Sex", "de.household_income"), 
+        mutate_at(c("demo.CandID", "demo.Sex", "de.household_income"),
                   as.factor) %>%
         distinct()
 
@@ -199,11 +202,11 @@ parents <- SES %>%
 # Calculate family size (don't forget to include the baby)
 SES$n_siblings  <- siblings
 SES$n_kids    <- siblings + 1
-SES$n_parents   <- parents        
+SES$n_parents   <- parents
 SES$family_size <- SES$n_parents + SES$n_kids
 
 ggplot(na_omit(SES), aes(as.factor(income_n))) +
-  geom_histogram(stat = "count") + 
+  geom_histogram(stat = "count") +
   scale_x_discrete(labels = c("<25k", "25-35k", "35-50k", "50-75k", "75-100k",
                               "100-150k", ">200k"))
 
@@ -211,7 +214,7 @@ mean(SES$income_n, na.rm = TRUE)
 
 ggplot(SES, aes(family_size)) +
   geom_histogram(stat = "count") +
-  scale_x_continuous(breaks = 2:9) 
+  scale_x_continuous(breaks = 2:9)
 
 income_lut <- cbind(de.household_income = levels(SES$de.household_income),
                     income_mean = c(12.5, 125, 175, 30, 42.5, 62.5, 87.5,
@@ -220,17 +223,17 @@ income_lut <- cbind(de.household_income = levels(SES$de.household_income),
 
 # Add in mean income for bin, in dollars
 SES <- left_join(SES, income_lut) %>%
-        mutate_at("income_mean", as.numeric) %>% 
-        left_join(thresholds, 
+        mutate_at("income_mean", as.numeric) %>%
+        left_join(thresholds,
                   by = c("family_size", "n_kids" = "num_kids")) %>%
         mutate(inr = income_mean / pthresh)
 
-ggplot(SES, aes(inr)) + 
+ggplot(SES, aes(inr)) +
   geom_histogram(binwidth = 1) +
   scale_x_continuous(breaks = 0:14) +
-  labs(x = "Income-to-needs ratio", y = "Count") + 
-  theme_bw() + 
-  geom_vline(xintercept = c(mean(SES$inr, na.rm = TRUE), 
+  labs(x = "Income-to-needs ratio", y = "Count") +
+  theme_bw() +
+  geom_vline(xintercept = c(mean(SES$inr, na.rm = TRUE),
                             median(SES$inr, na.rm = TRUE)),
              linetype = c("solid", "dashed"))
 
@@ -241,7 +244,7 @@ SES.short <- SES %>%
                      income_mean, inr) %>%
               mutate(demo.CandID = as.numeric(as.character(demo.CandID)),
                      inr = signif(inr, 3)) %>%
-              rename(income_bin = de.household_income) %>% 
+              rename(income_bin = de.household_income) %>%
               distinct()
 
 #
@@ -249,7 +252,7 @@ SES.short <- SES %>%
 #
 
 de.ethnicity <- DE %>%
-                  select(demo.CandID, contains("ethnicity"), 
+                  select(demo.CandID, contains("ethnicity"),
                          contains("race")) %>%
                   rename(CandID = demo.CandID,
                          ethnicity_biodad = de.biodad_ethnicity,
@@ -258,8 +261,8 @@ de.ethnicity <- DE %>%
                          race_biomom = de.biomom_race,
                          race_biodad = de.biodad_race,
                          race = de.subject_race) %>%
-                  mutate_at(vars(-CandID), 
-                            function(x) 
+                  mutate_at(vars(-CandID),
+                            function(x)
                               as.factor(replace(x, x == "not_answered", NA)))
 
 
@@ -275,23 +278,25 @@ demographics <- left_join(educ, sex) %>%
                          income_inr = inr,
                          family_n_sibs = n_siblings,
                          family_n_parents = n_parents) %>%
-                  select(CandID, sex, starts_with("educ"), 
+                  select(CandID, sex, starts_with("educ"),
                          starts_with("family"), starts_with("income")) %>%
                   mutate_at(c("sex", "income_bin"), as.factor)
 
 apply(demographics, 2, function(x) sum(is.na(x)))
 
 ggplot(demographics, aes(x = family_size, y = income_inr,
-                         color = educ_momed_n)) + 
+                         color = educ_momed_n)) +
   geom_jitter(height = 0.25, width = 0.25, alpha = 0.25) +
-  scale_x_continuous(breaks = 2:9) + 
-  scale_y_continuous(breaks = 0:13) + 
+  scale_x_continuous(breaks = 2:9) +
+  scale_y_continuous(breaks = 0:13) +
   scale_color_viridis_c() +
   labs(x = "Family Size", y = "INR", color = "Mom Ed")
 
 # ids <- table(demographics$demo.CandID)
 # multiple.ids <- names(which(ids > 1))
-# 
+#
 # filter(demographics, demo.CandID %in% multiple.ids)
 
-write_csv(demographics, path = paste0("data/BCP-demographics-", date, ".csv"))
+write_csv(demographics,
+          path = paste0("data/BCP/BCP-demographics-", date, ".csv"))
+

@@ -36,19 +36,21 @@ model <- data.frame(month = seq(0, 60, by = 1)) %>%
 ggplot(model, aes(x = moj, y = yj)) +
   geom_point()
 
-select_5pts <- function(x, kg) {
+select_5pts <- function(month_vec, kg, mo_jitter = 1, y_jitter = 50) {
 
   a <- seq(0, 681, length.out = 6)
 
-  jittered <- model %>%
+  jittered <- data.frame(month = month_vec) %>%
     mutate(
-      y = predict_gomp(month, kg, A),
-      moj = jitter(month, amount = 1),
-      yj = jitter(y, amount = 50)
+      y   = predict_gomp(month, kg, 681),
+      moj = jitter(month, amount = mo_jitter),
+      yj  = jitter(y, amount = y_jitter)
     )
 
-  points <- data.frame(month = rep(NA, length(a) - 1),
-                       y = rep(NA, length(a) - 1))
+  points <- data.frame(
+      month = rep(NA, length(a) - 1),
+      y = rep(NA, length(a) - 1)
+    )
 
   for (i in seq(2, length(a))) {
 
@@ -64,11 +66,11 @@ select_5pts <- function(x, kg) {
 
 }
 
+# Generate 1000 data frames
 sets <- lapply(1:1000, function(x) select_5pts(seq(0, 60), kg = kg1))
 
 # Sets of rows to pick
 combinations <- lapply(2:5, function(x) combn(1:5, x))
-
 
 fit_model_to_data <- function(data, rows) {
 
@@ -83,12 +85,15 @@ fit_model_to_data <- function(data, rows) {
 
 ## Two points
 
+# Run models on each of the 1000 random data frames, and extract the calculated
+# k_g value from the model object and unlist
 two_pts <- lapply(sets, function(x)
             lapply(1:10, function(y)
               fit_model_to_data(x, combinations[[1]][, y])) %>%
                 extract.kg() %>%
                 unlist() )
 
+# Extract values and plot by extracted pair of (x, y) values
 results2 <- two_pts %>%
   unlist() %>%
   matrix(ncol = 10) %>%
@@ -157,7 +162,7 @@ five_pts <- data.frame(
                    function(x) gomp2.fit(x, t_var = "month",
                                          response_var = "y")) %>%
             extract.kg()
-)
+  )
 
 ggplot(five_pts, aes(x = 0, y = kg)) +
   geom_hline(yintercept = kg1, size = 1) +
@@ -283,5 +288,31 @@ ggplot(all_kg, aes(x = as.factor(kg), y = value, fill = as.factor(pts))) +
   scale_y_continuous(limits = c(NA, 0.25)) +
   labs(x = "true kg", y = "modeled kg")
 
+################################################################################
 
+# More extreme jitter (x3)
 
+extreme_sets <- lapply(1:1000,
+                       function(x) select_5pts(seq(0, 60), kg = 0.15,
+                                               mo_jitter = 1,
+                                               y_jitter = 130 / 2))
+
+extreme_estimates <- lapply(extreme_sets, function(x)
+  lapply(1:5, function(y)
+    fit_model_to_data(x, combinations[[3]][, y])) %>%
+    extract.kg() %>%
+    unlist() )
+
+results_extreme_4 <- extreme_estimates %>%
+  unlist() %>%
+  matrix(ncol = 5) %>%
+  as.data.frame() %>%
+  set_colnames(paste0("x", c("11110", "11101", "11011", "10111", "01111"))) %>%
+  mutate(id = row_number()) %>%
+  pivot_longer(-id)
+
+ggplot(results_extreme, aes(x = name, y = value, fill = name)) +
+  geom_hline(yintercept = kg1, size = 1) +
+  geom_violin(alpha = 0.5, draw_quantiles = 0.5) +
+  labs(x = "Quantiles", y = "k_g", title = "Four points") +
+  scale_y_continuous(limits = c(0.1, 0.2))

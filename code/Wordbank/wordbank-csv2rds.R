@@ -79,12 +79,12 @@ save_data(WG.demo, "Wordbank/WG-demographics.rds")
 
 s_dict <- WS %>%
   filter(type == "word") %>%
-  select(category, definition) %>%
+  select(category, definition, item_id, type) %>%
   distinct()
 
 g_dict <- WG %>%
   filter(type == "word") %>%
-  select(category, definition) %>%
+  select(category, definition, item_id, type) %>%
   distinct()
 
 write_csv(s_dict, .data("other/s_dict.csv"))
