@@ -10,4 +10,4 @@ data/Wordbank/Wordbank-WS-191105.csv
 plots/
 
 # Do not have permission to share
-data/EIRLI/
+data/EIRLI/*
