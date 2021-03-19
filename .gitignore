@@ -12,3 +12,6 @@ plots/
 # Do not have permission to share
 # This allows README (no extension)
 data/EIRLI/*[.]*
+
+# Excel files
+~$*
