@@ -9,7 +9,7 @@ library(tidyselect)
 library(corrplot)
 library(psych)
 
-source("wordbank-csv2rds.R")
+# source("wordbank-csv2rds.R")
 source("wordbank-functions.R")
 max_size <- c(566, 221)
 
@@ -21,18 +21,18 @@ sentences <- read_data("Wordbank/Wordbank-WS-191105.rds")
 ### Overlapping items
 
 gestures.words <- gestures %>%
-                    filter(type == "word")
+  filter(type == "word")
 
 sentences.words <- sentences %>%
-                    filter(type == "word")
+  filter(type == "word")
 
 all.g.words <- gestures.words$definition %>%
-                as.character() %>%
-                unique()
+  as.character() %>%
+  unique()
 
 all.s.words <- sentences.words$definition %>%
-                as.character() %>%
-                unique()
+  as.character() %>%
+  unique()
 
 # 394/296 are ...
 
@@ -60,7 +60,7 @@ s.cat <- sentences.words %>%
 
 
 cats <- merge(g.cat, s.cat, by = "definition") %>%
-          filter(definition %in% sg.words)
+  filter(definition %in% sg.words)
 
 as.character(cats$g.cat) == as.character(cats$s.cat)
 
@@ -84,16 +84,16 @@ write_csv(gest.ord, path = "s_dict.csv")
 # Plot category sizes
 
 g.sizes <- gestures.words %>%
-              filter(data_id == .$data_id[1]) %>%
-              group_by(category) %>%
-              summarise(n = n()) %>%
-              ungroup()
+  filter(data_id == .$data_id[1]) %>%
+  group_by(category) %>%
+  summarise(n = n()) %>%
+  ungroup()
 
 s.sizes <- sentences.words %>%
-              filter(data_id == .$data_id[1]) %>%
-              group_by(category) %>%
-              summarise(n = n()) %>%
-              ungroup()
+  filter(data_id == .$data_id[1]) %>%
+  group_by(category) %>%
+  summarise(n = n()) %>%
+  ungroup()
 
 sizes <- merge(g.sizes, s.sizes, by = "category", suffixes = c(".g", ".s"),
                all = TRUE) %>%
@@ -159,12 +159,13 @@ lm(perc.gestures ~ perc.complete, data = sen.merge)
 
 # 1: n, 2: %
 gw.as.sent <- score.GasS(gestures.words, sc.understands = FALSE)
+write_rds(gw.as.sent, .data("Wordbank/WG_as_WS-scored.rds"))
 
 gw.as.sent.wide <- gw.as.sent[[2]] %>%
-                    add_column(instrument = "WG", .before = 1)
+  add_column(instrument = "WG", .before = 1)
 
 gw.as.sent.count <- gw.as.sent[[1]] %>%
-                      add_column(instrument = "WG", .before = 1)
+  add_column(instrument = "WG", .before = 1)
 
 # Proportions
 ## TO DO here
@@ -234,7 +235,7 @@ sent.inventory <- sentences.n %>%
   select(matches("^[a-z]", ignore.case = FALSE)) %>%
   mutate(
     inventory = select(., -instrument, -data_id, -age) %>%
-                  rowSums()
+      rowSums()
   )
 
 gest.inventory <- gw.as.sent.count %>%
@@ -373,7 +374,7 @@ plot2 <- male_interaction %>%
 ggplot(plot2, aes(x = age, y = value, color = gender)) +
   geom_smooth(se = FALSE)
 
- ggplot(male_interaction, aes(x = age, y = g_minus_b)) +
+ggplot(male_interaction, aes(x = age, y = g_minus_b)) +
   geom_line()
 
 
@@ -411,8 +412,8 @@ ggplot(sen.merge, aes(x = age, y = perc.gestures - perc.complete)) +
 lm.cat <- function(estimates, cat) {
 
   x <- estimates %>%
-        filter(category == as.character(cat)) %>%
-        mutate(diff = perc.gestures - perc.complete)
+    filter(category == as.character(cat)) %>%
+    mutate(diff = perc.gestures - perc.complete)
 
   print(x[1,])
 
@@ -435,10 +436,10 @@ lm.result <- function(lm, x) {
 
 relationships <- sapply(levels(sen.merge$category),
                         function(x) coef(lm.cat(sen.merge, x))) %>%
-                  t() %>%
-                  data.frame() %>%
-                  add_column(name = levels(sen.merge$category),
-                             .before = 1)
+  t() %>%
+  data.frame() %>%
+  add_column(name = levels(sen.merge$category),
+             .before = 1)
 
 png("plots/error-presentation.png", width = 7.5, height = 5, res = 96,
     units = "in")
@@ -468,15 +469,15 @@ median.ed <- median(count.demo$mom_ed_n, na.rm = TRUE)
 mom.hi <- count.demo$mom_ed_n >= median.ed
 
 all <- bind_rows(sent.count, gw.as.sent.count) %>%
-        select(data_id, age, instrument,
-               everything(),
-               -starts_with("W"), -COMPLEXITY) %>%
-        as_tibble() %>%
-        mutate(SUM = select(., -data_id, -age, -instrument) %>% rowSums()) %>%
-        inner_join(count.demo) %>%
-        select(data_id, age, instrument, sex, mom_ed, mom_ed_n,
-               everything()) %>%
-        add_column(mom_ed_hi = mom.hi, .after = "mom_ed_n")
+  select(data_id, age, instrument,
+         everything(),
+         -starts_with("W"), -COMPLEXITY) %>%
+  as_tibble() %>%
+  mutate(SUM = select(., -data_id, -age, -instrument) %>% rowSums()) %>%
+  inner_join(count.demo) %>%
+  select(data_id, age, instrument, sex, mom_ed, mom_ed_n,
+         everything()) %>%
+  add_column(mom_ed_hi = mom.hi, .after = "mom_ed_n")
 
 png("plots/Wordbank-trends-presentation.png", width = 5.5, height = 5,
     res = 300,
@@ -500,8 +501,8 @@ dev.off()
 sent.count <- read_rds("data/WS-scored.rds")[[1]]
 
 all.n <- bind_rows(gw.as.sent.count, sent.count) %>%
-          select(-COMPLEXITY, -starts_with("W")) %>%
-          mutate(SUM = rowSums(.[, -(1:3)]))
+  select(-COMPLEXITY, -starts_with("W")) %>%
+  mutate(SUM = rowSums(.[, -(1:3)]))
 
 png("plots/words-presentation.png", width = 6, height = 5, units = "in",
     res = 300)

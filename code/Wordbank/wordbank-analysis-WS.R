@@ -111,19 +111,25 @@ apply(WS.demo, 2, function(x) sum(is.na(x)))
 efa.half.ID <- as.character(WS.merge1$data_id)
 cfa.half.ID <- scored[[1]]$data_id[!(scored[[1]]$data_id %in% efa.half.ID)]
 
+write_csv(tibble(data_id = efa.half.ID), .data("Wordbank/efa_half.csv"))
+write_csv(tibble(data_id = cfa.half.ID), .data("Wordbank/cfa_half.csv"))
+
 efa.half <- scored$p %>%
   filter(data_id %in% efa.half.ID)
 cfa.half <- scored$p %>%
   filter(data_id %in% cfa.half.ID)
 
 ## Mom ed to numeric
-mom_ed.lut <- tibble(mom_ed = c("Some Secondary", "Secondary", "College",
-                                "Some College", "Primary", "Graduate",
-                                "Some Graduate"),
-                     mom_ed_n = c(9, 12, 16, 14, 6, 20, 18))
+mom_ed.lut <- tibble(
+    mom_ed = c("Some Secondary", "Secondary", "College", "Some College",
+               "Primary", "Graduate", "Some Graduate"),
+    mom_ed_n = c(9, 12, 16, 14, 6, 20, 18)
+)
 
-birth_ord.lut <- tibble(birth_order = levels(WS.demo$birth_order),
-                        birth_order_n = 1:8)
+birth_ord.lut <- tibble(
+    birth_order = levels(WS.demo$birth_order),
+    birth_order_n = 1:8
+  )
 
 # Test for differences
 efa.demo <- WS.demo %>%
@@ -246,8 +252,8 @@ efa.half.l.list.test <- sapply(efa.half.l.list, function(x)
 # CFA doesn't seem to like the bootstrapped intervals, so redo it
 # mod2 <- structure.diagram(factor.analyses[[2]], cut = .9, errors = TRUE)
 
-fa_2fac <- fa(select(efa.half, -data_id, -age), 2, rotate = "Promax",
-           weight = NULL)
+fa_2fac <- fa(select(efa.half, -data_id, -age, -LEXICAL, -SYNTAX),
+              2, rotate = "Promax",  weight = NULL)
 model_2fac <- structure.diagram(fa_2fac, cut = 0.6, errors = TRUE)
 
 nobs <- list(nrow(cfa.half), nrow(efa.half))
@@ -266,6 +272,8 @@ mcdi.cfa.1r <- cfa(model = model_2fac$lavaan,
                     sample.nobs = nobs)
 
 summary(mcdi.cfa.1r, fit.measures = TRUE)
+
+write_rds(mcdi.cfa.1r, .data("results/wordbank-cfa-robust.rds"))
 
 # Now look at modification indices
 

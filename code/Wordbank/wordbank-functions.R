@@ -83,23 +83,25 @@ score.GasS <- function(gestures, sc.understands = FALSE,
 
   # Score and calculate n, sum, perc
   scored <- gestures %>%
+    select(data_id, age, type, definition, value) %>%
     filter(
       type == "word",
       definition != "in"
     ) %>%
+    left_join(mapping)%>%
     mutate(
-      s.category = mapping$s.cat[match(definition, mapping$definition)],
-      says = score.produces(value,
-                            produces = "says_and_understands",
-                            score.understands = sc.understands)
+      value = as.character(value),
+      says  = score.produces(value,
+                              produces = "produces",
+                              score.understands = sc.understands)
     ) %>%
-    group_by(data_id, age, s.category) %>%
+    group_by(data_id, age, s.cat) %>%
     summarise(
       n = n(),
       sum = sum(says)
     ) %>%
     rename(
-      category = s.category
+      category = s.cat
     ) %>%
     left_join(sent_n) %>%
     mutate(
@@ -134,7 +136,9 @@ score.GasS <- function(gestures, sc.understands = FALSE,
       WORD_ENDINGS_VERBS = 0,
       WORD_FORMS_NOUNS = 0,
       WORD_FORMS_VERBS = 0,
-      COMPLEXITY = 0
+      COMPLEXITY = 0,
+      TOTAL = select(., -data_id, -age) %>%
+        rowSums()
     ) %>%
     left_join(dplyr::select(lex.syn, -starts_with("PERC_"))) %>%
     rename(
@@ -152,7 +156,8 @@ score.GasS <- function(gestures, sc.understands = FALSE,
         WORD_ENDINGS_VERBS = 0,
         WORD_FORMS_NOUNS = 0,
         WORD_FORMS_VERBS = 0,
-        COMPLEXITY = 0
+        COMPLEXITY = 0,
+        TOTAL = scored2.n$TOTAL / sum(sent_n$n_WS)
       ) %>%
     left_join(dplyr::select(lex.syn, -starts_with("SUM_"))) %>%
     rename(
