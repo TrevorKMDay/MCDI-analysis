@@ -55,6 +55,13 @@ test <- read_csv(test_subjs) %>%
           arrange(data_id, age) %>%
           filter(data_id == 176427)
 
+test_ns <- read_csv(test_subjs) %>%
+  group_by(data_id) %>%
+  nest() %>%
+  mutate(
+    nobs = map(data, nrow)
+  )
+
 ```
 
 # Introduction
@@ -667,12 +674,13 @@ lexsyn <- read_csv("G:/My Drive/Research/MCDI/MCDI-analysis/data/other/lexsyn.cs
 three_or_more <- table(lexsyn$data_id)
 ID3 <- names(three_or_more)[three_or_more >= 3]
 
-lexsyn <- filter(lexsyn, data_id %in% ID3) %>%
-            arrange(data_id, age) %>%
-            select(-lex, -syn) %>%
-            group_by(data_id, age) %>%
-            pivot_longer(-c(data_id, age)) %>%
-            filter(age > 0)
+lexsyn <- lexsyn %>%
+  filter(data_id %in% ID3) %>%
+  arrange(data_id, age) %>%
+  select(-lex, -syn) %>%
+  group_by(data_id, age) %>%
+  pivot_longer(-c(data_id, age)) %>%
+  filter(age > 0)
 
 test <- filter(lexsyn, data_id == "116056")
 
@@ -828,38 +836,30 @@ syn.fits <- lapply(LS.vals$data_id,
 
 # Get values
 LS.vals <- LS.vals %>%
-            mutate(lex = sapply(lex.fits, coef),
-                   lex.se = sapply(lex.fits, 
-                                   function(x) coef(summary(x))[1, 2]),
-                   syn = sapply(syn.fits, 
-                                function(x) ifelse(class(x) != "nls", 
-                                                   NA, 
-                                                   coef(x))),
-                   syn.se = sapply(syn.fits, 
-                                   function(x) ifelse(class(x) != "nls", 
-                                                      NA,
-                                                      coef(summary(x))[1, 2])))
+  mutate(
+    lex = sapply(lex.fits, coef),
+    lex.se = sapply(lex.fits, function(x) coef(summary(x))[1, 2]),
+    syn = sapply(syn.fits, function(x) ifelse(class(x) != "nls", NA, coef(x))),
+    syn.se = sapply(syn.fits, 
+                    function(x) ifelse(class(x) != "nls", NA,
+                                       coef(summary(x))[1, 2]))
+  )
 
 # Value at Wi 
 W_i.1 <- 1 / exp(1)
 LS.vals <- LS.vals %>%
-            mutate(lex.m = solve.gomp2(y = W_i.1, k_g = lex, A = 1),
-                   lex.lo = solve.gomp2(y = W_i.1, k_g = lex - (2 * lex.se), 
-                                        A = 1),
-                   lex.hi = solve.gomp2(y = W_i.1, k_g = lex + (2 * lex.se),
-                                        A = 1),
-                   syn.m = solve.gomp2(y = W_i.1, k_g = syn, A = 1),
-                   syn.lo = solve.gomp2(y = W_i.1, k_g = syn - (2 * syn.se),
-                                        A = 1),
-                   syn.hi = solve.gomp2(y = W_i.1, k_g = syn + (2 * syn.se),
-                                        A = 1),
-                   synMlex = syn.m - lex.m)
-
-
+  mutate(
+    lex.m = solve.gomp2(y = W_i.1, k_g = lex, A = 1),
+    lex.lo = solve.gomp2(y = W_i.1, k_g = lex - (2 * lex.se), A = 1),
+    lex.hi = solve.gomp2(y = W_i.1, k_g = lex + (2 * lex.se), A = 1),
+    syn.m = solve.gomp2(y = W_i.1, k_g = syn, A = 1),
+    syn.lo = solve.gomp2(y = W_i.1, k_g = syn - (2 * syn.se), A = 1),
+    syn_hi = solve.gomp2(y = W_i.1, k_g = syn + (2 * syn.se), A = 1),
+    synMlex = syn.m - lex.m
+  )
 
 mean(LS.vals$synMlex, na.rm = TRUE)
 sd(LS.vals$synMlex, na.rm = TRUE)
-
 
 t.test(LS.vals$lex.m, LS.vals$syn.m, paired = TRUE)
 

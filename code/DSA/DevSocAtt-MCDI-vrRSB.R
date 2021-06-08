@@ -9,6 +9,7 @@ library(scales)
 library(MuMIn)
 
 select <- dplyr::select
+rename <- dplyr::rename
 
 source("../mcdi-setup.R")
 source("../BCP/format-BCP-funcs.R")
@@ -106,6 +107,15 @@ dsa_vrrsb %>%
     geom_density(alpha = 0.5) +
     facet_wrap(. ~ name, ncol = 1, scales = "free_x")
 
+dsa_vrrsb_flceil <- dsa_vrrsb %>%
+  mutate(age_y = round(age_vrrsb)) %>%
+  group_by(age_y) %>%
+  dplyr::summarize(
+    n = n(),
+    n_lt10 = sum(VRS < 32 * .1),
+    n_gt90 = sum(VRS > 32 * .9)
+  )
+
 ################################################################################
 
 ## MCDI ########################################################################
@@ -172,6 +182,25 @@ all <- dsa_mcdi_scored %>%
                 # Only two subjects with missing data, use median
                 # (for ANOVA)
                 ~replace(.x, is.na(.x), median(.x, na.rm = TRUE))))
+
+all_summary <- all %>%
+  mutate(age_y = round(age)) %>%
+  group_by(age_y) %>%
+  dplyr::summarize(
+    n = n(),
+    mcdi_sd = sd(TOTAL) / 396,
+    vrs_sd = sd(VRS)    / 32
+  ) %>%
+  pivot_longer(-c(age_y, n))
+
+ggplot(all_summary, aes(x = age_y, y = value, color = name)) +
+  geom_line() +
+  geom_smooth(method = "lm")
+
+ggplot(all, aes(x = age, y = VRS)) +
+  geom_point() +
+  scale_x_continuous(limits = c(16, 30), breaks = 16:30) +
+  theme_bw()
 
 # Check for missing data
 # all %>%

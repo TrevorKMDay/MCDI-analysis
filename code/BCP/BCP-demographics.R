@@ -44,14 +44,23 @@ get_education <- function(x) {
 
 library(tidyverse)
 rename <- dplyr::rename
+select <- dplyr::select
 library(readxl)
+library(moments)
 
 date <- "200609"
 
 source("G:/My Drive/Research/MCDI/MCDI-analysis/code/mcdi-setup.R")
 
-# National poverty threshold - could find one for Hennepin Co. or TC metro
-poverty = "G:/My Drive/Research/MCDI/MCDI-analysis/data/other/poverty_threshold2019.xlsx"
+################################################################################
+
+# National poverty threshold - couldn't find one for Hennepin Co. or TC metro
+
+# https://www.census.gov/data/tables/time-series/demo/income-poverty/...
+# ...historical-poverty-thresholds.html
+
+poverty <- .data("/other/poverty_threshold2019.xlsx")
+
 thresholds <- read_xlsx(poverty, sheet = 2) %>%
   pivot_longer(-family_size, names_to = "num_kids", values_to = "pthresh") %>%
   mutate(
@@ -63,12 +72,32 @@ thresholds <- read_xlsx(poverty, sheet = 2) %>%
   ) %>%
   na_omit()
 
+bcp_wg <- readRDS(.data("BCP/BCP_WG_scored-200609.rds"))
+bcp_ws <- readRDS(.data("BCP/BCP_WS_scored-200609.rds"))
+
+# Individuals who have at least one WG or WS
+bcp_ids <- unique(c(bcp_wg[[1]]$data_id, bcp_ws[[1]]$data_id))
+
+# Lookup table to easily convert buckets into numbers
+educ_lut <- tibble(
+    educ = c("jr_high", "some_high", "high", "some_college", "college",
+               "some_grad", "grad", "not_answered"),
+    educ_n = c(8, 10, 12, 14, 16, 18, 20, NA)
+  )
+
+################################################################################
+
 # Get demographic/demographic-eligibility data, just the education for now
 DE <- read_csv(.data(paste0("BCP/bcp-UMNUNC-demoeligb-", date, ".csv"))) %>%
   select_all(~gsub("demographics,", "demo.", .)) %>%
   select_all(~gsub("demographics_eligibility,", "de.", .)) %>%
-  filter(de.Administration == "All") %>%
+  filter(
+    de.Administration == "All",
+    demo.CandID %in% bcp_ids
+  ) %>%
   distinct()
+
+bcp_ids[!(bcp_ids %in% DE$demo.CandID)]
 
 N <- length(unique(DE$demo.CandID))
 ids <- table(DE$demo.CandID)
@@ -80,7 +109,7 @@ multiple.ids <- names(which(ids > 1))
 # Education
 #
 
-demo.eligb <- DE  %>%
+demo.eligb <- DE %>%
   select(demo.CandID, de.Candidate_Age, demo.Sex, ends_with("relationship"),
          ends_with("education")) %>%
   distinct()
@@ -122,7 +151,10 @@ del.wide <- del %>%
 ## 'non_specified' twice (this is ok), and two with two biomom entries.
 ## Presumably, those are errors
 multiple <- del.wide %>%
-  filter(biological_mother > 1 | non_specified > 1 | biological_father > 1 | nonbio_mother > 1 | not_answered > 1 | nonbio_father > 1)
+  filter(
+    biological_mother > 1 | non_specified > 1 | biological_father > 1 |
+      nonbio_mother > 1 | not_answered > 1
+  )
 
 # Take the higher education for these duplicates (so happens for all 3 to be
 ## 'grad'), will have to be fixed later
@@ -152,23 +184,33 @@ del.wide2 <- del4 %>%
     values_fn = list(education = na_omit)
   )
 
-# Lookup table to easily convert buckets into numbers
-educ_lut <- tibble(
-    mom_ed = c("jr_high", "some_high", "high", "some_college", "college",
-               "some_grad", "grad", "not_answered"),
-    mom_ed_n = c(8, 10, 12, 14, 16, 18, 20, NA)
+# By-parent education level
+educ <- del.wide2 %>%
+  pivot_longer(-c(demo.CandID, de.Candidate_Age), names_to = "parent",
+               values_to = "educ") %>%
+  filter(
+    !is.na(educ)
+  ) %>%
+  left_join(educ_lut)
+
+# Average education
+educ_mean <- educ %>%
+  group_by(demo.CandID) %>%
+  summarise(
+    mean_educ = mean(educ_n, na.rm = TRUE) %>%
+                  round(1),
+    sd_educ = sd(educ_n, na.rm = TRUE) %>%
+                round(2)
   )
 
-# Get education levels
-educ <- apply(del.wide2, 1, get_education) %>%
-  t() %>%
-  as_tibble(.name_repair = "unique") %>%
-  rename(mom_ed = ...1, parent_ed = ...2)
+ggplot(educ_mean, aes(x = mean_educ)) +
+  geom_histogram(binwidth = 2) +
+  scale_x_continuous(breaks = educ_lut$educ_n, labels = educ_lut$educ) +
+  theme_bw()
 
-# Join with ID#s
-educ <- left_join(educ, educ_lut) %>%
-  cbind(del.wide2[, 1:2], .) %>%
-  mutate(mom_ed = as_factor(mom_ed), parent_ed = as_factor(parent_ed))
+mean(educ_mean$mean_educ, na.rm = TRUE)
+sd(educ_mean$mean_educ, na.rm = TRUE)
+range(educ_mean$mean_educ, na.rm = TRUE)
 
 #
 # Gender
@@ -219,16 +261,17 @@ parents <- SES %>%
 
 # Calculate family size (don't forget to include the baby)
 SES$n_siblings  <- siblings
-SES$n_kids    <- siblings + 1
+SES$n_kids      <- siblings + 1
 SES$n_parents   <- parents
 SES$family_size <- SES$n_parents + SES$n_kids
 
-ggplot(na_omit(SES), aes(as.factor(income_n))) +
+ggplot(SES, aes(as.factor(income_n))) +
   geom_histogram(stat = "count") +
   scale_x_discrete(labels = c("<25k", "25-35k", "35-50k", "50-75k", "75-100k",
                               "100-150k", ">200k"))
 
 mean(SES$income_n, na.rm = TRUE)
+sd(SES$income_n, na.rm = TRUE)
 
 ggplot(SES, aes(family_size)) +
   geom_histogram(stat = "count") +
@@ -244,7 +287,9 @@ SES <- left_join(SES, income_lut) %>%
   mutate_at("income_mean", as.numeric) %>%
   left_join(thresholds,
             by = c("family_size", "n_kids" = "num_kids")) %>%
-  mutate(inr = income_mean / pthresh)
+  mutate(
+    inr = income_mean / pthresh
+  )
 
 ggplot(SES, aes(inr)) +
   geom_histogram(binwidth = 1) +
@@ -254,6 +299,14 @@ ggplot(SES, aes(inr)) +
   geom_vline(xintercept = c(mean(SES$inr, na.rm = TRUE),
                             median(SES$inr, na.rm = TRUE)),
              linetype = c("solid", "dashed"))
+
+mean(SES$inr, na.rm = TRUE)
+median(SES$inr, na.rm = TRUE)
+skewness(SES$inr, na.rm = TRUE)
+kurtosis(SES$inr, na.rm = TRUE)
+
+# n < each INR, 1/2/3
+sapply(1:3, function(x) (sum(SES$inr < x, na.rm = TRUE))) / sum(!is.na(SES$inr))
 
 # Round INR to same number of sig figs as input income (3)
 SES.short <- SES %>%
@@ -284,8 +337,6 @@ de.ethnicity <- DE %>%
   ) %>%
   mutate_at(vars(-CandID),
             function(x) as.factor(replace(x, x == "not_answered", NA)))
-
-
 
 demographics <- left_join(educ, sex) %>%
   left_join(SES.short) %>%
@@ -320,5 +371,5 @@ ggplot(demographics, aes(x = family_size, y = income_inr,
 # filter(demographics, demo.CandID %in% multiple.ids)
 
 write_csv(demographics,
-          path = paste0("data/BCP/BCP-demographics-", date, ".csv"))
+          file = paste0("data/BCP/BCP-demographics-", date, ".csv"))
 

@@ -9,6 +9,7 @@ if(.Platform$OS.type == "unix") {
 library(readxl)
 library(Hmisc)
 library(tidyverse)
+library(ggExtra)
 
 summarise <- dplyr::summarise
 rename <- dplyr::rename
@@ -182,3 +183,67 @@ test3 <- BCP_both %>%
 
 write_csv(test, .data("BCP/test-subjs-3.csv"))
 
+################################################################################
+
+mcdi_index <- mcdi_all %>%
+  filter(
+    gest.Administration == "All" | sent.Administration == "All"
+  ) %>%
+  select(data_id, age) %>%
+  arrange(data_id) %>%
+  group_by(data_id) %>%
+  summarise(
+    min_age = min(age, na.rm = TRUE),
+    max_age = max(age, na.rm = TRUE)
+  ) %>%
+  arrange(
+    min_age, max_age, data_id
+  ) %>%
+  mutate(
+    index = row_number()
+  )
+
+spag_plot <- mcdi_all %>%
+  filter(
+    gest.Administration == "All" | sent.Administration == "All"
+  ) %>%
+  select(data_id, age, sex) %>%
+  filter(
+    !is.na(age)
+  ) %>%
+  left_join(mcdi_index) %>%
+  arrange(index) %>%
+  na.omit()
+
+spaghetti <- ggplot(spag_plot, aes(x = age, y = index, color = sex)) +
+  geom_point(alpha = 0.5) +
+  geom_line(aes(group = index), alpha = 0.5) +
+  scale_y_discrete(labels = NULL) +
+  labs(x = "Age (mo)", y = "Individual") +
+  theme_bw()
+
+png("marginal_spaghetti_plot.png", width = 6, height = 3, units = "in",
+    res = 300)
+
+ggMarginal(spaghetti, type = "histogram", margins = "x")
+
+dev.off()
+
+################################################################################
+
+# Number of forms
+
+n_forms <- spag_plot %>%
+  group_by(data_id) %>%
+  summarise(
+    n_forms = n()
+  ) %>%
+  group_by(n_forms) %>%
+  summarise(
+    n = n()
+  ) %>%
+  arrange(desc(n_forms)) %>%
+  mutate(
+    cumsum = cumsum(n)
+  ) %>%
+  arrange(n_forms)

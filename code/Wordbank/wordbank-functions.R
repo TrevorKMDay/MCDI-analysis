@@ -96,7 +96,7 @@ score.GasS <- function(gestures, sc.understands = FALSE,
                               score.understands = sc.understands)
     ) %>%
     group_by(data_id, age, s.cat) %>%
-    summarise(
+    dplyr::summarize(
       n = n(),
       sum = sum(says)
     ) %>%
@@ -191,7 +191,7 @@ score.WS <- function(sentences) {
       category = as.character(category)
     ) %>%
     group_by(data_id, age, type, category) %>%
-    summarise(
+    dplyr::summarize(
       n = n(),
       sum = sum(says),
       perc = sum / n
@@ -207,7 +207,7 @@ score.WS <- function(sentences) {
       says = score.complexity(value)
     ) %>%
     group_by(data_id, age, type) %>%
-    summarise(
+    dplyr::summarize(
       n = n(),
       sum = sum(says)
     ) %>%
@@ -242,7 +242,7 @@ score.WS <- function(sentences) {
       syntactic = category %in% syntactic.categories
     ) %>%
     group_by(data_id, age, syntactic) %>%
-    summarise(
+    dplyr::summarize(
       N = sum(n),
       Sum = sum(sum),
       perc = Sum / N
@@ -297,23 +297,33 @@ score.WG <- function(gestures, inventory.only = TRUE, sc.understands = FALSE) {
   syntax.categories <- c("time_words", "descriptive_words", "pronouns",
                          "question_words", "locations", "quantifiers")
 
+  produces_value <- "says_and_understands"
+
+  if (sum(gestures$value == produces_value, na.rm = TRUE) == 0) {
+    stop("No says_and_understands values detected, check inputs or you'll get an all-0 matrix")
+  }
+
   if (inventory.only) {
 
     scored1 <- gestures %>%
       filter(type == "word") %>%
-      mutate(says = score.produces(value,
-                                   score.understands = sc.understands),
-             category = as.character(category),
-             syntactic = category %in% syntax.categories) %>%
+      mutate(
+        says      = score.produces(value, score.understands = sc.understands,
+                                   produces = produces_value),
+        category  = as.character(category),
+        syntactic = category %in% syntax.categories
+      ) %>%
       group_by(data_id, age, type, category, syntactic) %>%
-      summarise(n = n(),
-                sum = sum(says),
-                perc = sum / n) %>%
+      dplyr::summarize(
+        n = n(),
+        sum = sum(says),
+        perc = sum / n
+      ) %>%
       ungroup()
 
     scored2.lexsym <- scored1 %>%
       group_by(data_id, age, syntactic) %>%
-      summarise(
+      dplyr::summarize(
         N = sum(n),
         Sum = sum(sum),
         perc = Sum / N

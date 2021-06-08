@@ -1,13 +1,16 @@
 setwd("G:/My Drive/Research/MCDI/MCDI-analysis/code/EIRLI")
 
 library(tidyverse)
-library(psych)
 
 source("../Wordbank/wordbank-functions.R")
 source("format-BCP-funcs.R")
 source("../mcdi-setup.R")
 
-wb <- readRDS(.data("Wordbank/Wordbank-WS-191105.RDS"))
+select <- dplyr::select
+rename <- dplyr::rename
+summarize <- dplyr::summarize
+
+wb <- read_data("Wordbank/Wordbank-WS-191105.RDS")
 wb_cats <- sort(as.character(unique(wb$category)))
 
 ################################################################################
@@ -72,19 +75,19 @@ eirli_demo <- eirli[1:5] %>%
     follow_up = follow_up == "AnyOutcome",
     # Recode mom/dad ed to something shorter/more readable
     father_ed = recode(father_ed,
-                       "College Graduate" = "college",
+                       "College Graduate"                = "college",
                        "Graduate or Professional School" = "graduate",
-                       "High School Graduate" = "secondary",
-                       "Junior High School" = "some_secondary",
-                       "Partial College" = "some_college",
-                       "Partial High SChool" = "some_secondary"),
+                       "High School Graduate"            = "secondary",
+                       "Junior High School"              = "some_secondary",
+                       "Partial College"                 = "some_college",
+                       "Partial High School"             = "some_secondary"),
     mother_ed = recode(mother_ed,
-                       "College Graduate" = "college",
+                       "College Graduate"         = "college",
                        "Graduate or Professional" = "graduate",
-                       "High School Graduate" = "secondary",
-                       "Junior High School" = "some_secondary",
-                       "Partial College" = "some_college",
-                       "Partial High SChool" = "some_secondary")
+                       "High School Graduate"     = "secondary",
+                       "Junior High School"       = "some_secondary",
+                       "Partial College"          = "some_college",
+                       "Partial High School"      = "some_secondary"),
   ) %>%
   # Add dad ed in years and rename
   left_join(educ_lut, by = c("father_ed" = "ed")) %>%
@@ -105,6 +108,45 @@ eirli_demo <- eirli[1:5] %>%
     # Reorder to something nice
     data_id, gender, follow_up, contains("dx"), starts_with("father_ed"),
     starts_with("mother_ed"), parent_ed_n
+  )
+
+eirli_demo %>%
+  group_by(follow_up, dx) %>%
+  summarize(
+    n = n(),
+    n_f = sum(gender == "Female"),
+    n_dad_ed = sum(!is.na(father_ed_n)),
+    m_dad_ed = mean(father_ed_n, na.rm = TRUE),
+    sd_dad_ed = sd(father_ed_n, na.rm = TRUE),
+    n_mom_ed = sum(!is.na(mother_ed_n)),
+    m_mom_ed = mean(mother_ed_n, na.rm = TRUE),
+    sd_mom_ed = sd(mother_ed_n, na.rm = TRUE)
+  ) %>%
+  mutate(
+    p_f = n_f / n
+  ) %>%
+  View()
+
+eirli_demo %>%
+  summarize(
+    n = n(),
+    n_f = sum(gender == "Female"),
+    n_dad_ed = sum(!is.na(father_ed_n)),
+    m_dad_ed = mean(father_ed_n, na.rm = TRUE),
+    sd_dad_ed = sd(father_ed_n, na.rm = TRUE),
+    n_mom_ed = sum(!is.na(mother_ed_n)),
+    m_mom_ed = mean(mother_ed_n, na.rm = TRUE),
+    sd_mom_ed = sd(mother_ed_n, na.rm = TRUE)
+  ) %>%
+  mutate(
+    p_f = n_f / n
+  )
+
+sum(is.na(eirli_demo$father_ed_n))
+
+eirli_demo %>%
+  filter(
+    is.na(mother_ed_n)
   )
 
 # eirli_demo %>%
@@ -161,7 +203,6 @@ eirli_data_wide <- eirli_data %>%
     COMPLEXITY = replace_na(COMPLEXITY, 0)
   )
 
-
 write_csv(eirli_data_wide, .data("EIRLI/EIRLI_clean.csv"))
 saveRDS(eirli_data_wide, .data("EIRLI/EIRLI_clean.rds"))
 
@@ -192,28 +233,125 @@ totals <- eirli_data_wide %>%
     ntpt = n()
   ) %>%
   group_by(follow_up, dx) %>%
-  summarise(
+  summarize(
     n = n()
   )
 
 ################################################################################
-# Score
 
-eirli_data_wide3 <- eirli_data_wide %>%
+eirli_demo <- eirli_data_wide[, 1:13] %>%
+  select(-contains("age")) %>%
+  distinct()
+
+table(eirli_demo$follow_up, eirli_demo$dx)
+
+eirli_4 <- eirli_data_wide2 %>%
   rename(
-    complexity = COMPLEXITY
+    complexity = COMPLEXITY,
   ) %>%
-  select(-(1:13))
+  mutate(
+    LEXICAL = select(., all_of(eirli_lex)) %>%
+                rowSums(),
+    SYNTAX  = select(., all_of(eirli_syn)) %>%
+                rowSums()
+  ) %>%
+  filter(follow_up) %>%
+  select(data_id, dx, gender, exact_age, LEXICAL, SYNTAX)
 
-cat_maxes <- apply(eirli_data_wide3, 2, max)
+ggplot(eirli_4, aes(x = LEXICAL, y = SYNTAX)) +
+  geom_point()
 
-eirli_data_wide_p <- eirli_data_wide3 %>%
-  as.matrix() %>%
-  apply(1, function(x) x / cat_maxes) %>%
-  t() %>%
-  as_tibble()
+source("../growth_curving/growth-curve-functions.R")
 
-eirli_fa <- fa(eirli_data_wide_p, nfactors = 2)
+long_by_id <- eirli_4 %>%
+  group_by(data_id, gender, dx) %>%
+  nest() %>%
+  mutate(
+    n_obs   = map_int(data, nrow),
+    lex_fit = map(data, ~gomp2.fit(.x, response_var = "LEXICAL",
+                                   t_var = "exact_age", max = 513)),
+    lex_kg  = extract.kg(lex_fit),
+    syn_fit = map(data, ~gomp2.fit(.x, response_var = "SYNTAX",
+                                   t_var = "exact_age", max = 139)),
+    syn_kg  = extract.kg(syn_fit),
+  ) %>%
+  filter(n_obs >= 3)
 
-fa.diagram(eirli_fa)
+kgs <- long_by_id %>%
+  select(data_id, dx, gender, ends_with("_kg"))
 
+pos_lut <- tibble(
+    dx = c(0, 0, 1, 1),
+    name = rep(c("lex_kg", "syn_kg"), length.out = 4),
+    position = 1:4
+  )
+
+kgs_long <- kgs%>%
+  pivot_longer(-c(data_id, dx, gender), values_to = "kg") %>%
+  left_join(pos_lut)
+
+table(kgs$dx, kgs$gender) %>%
+  chisq.test()
+
+kgs_bydx <- kgs %>%
+  group_by(dx) %>%
+  nest() %>%
+  mutate(
+    n = map(data, nrow)
+  )
+
+
+# Hypothesize that no-dx is greater (steeper) than dx
+lex_test <- t.test(kgs_bydx$data[[1]]$lex_kg, kgs_bydx$data[[2]]$lex_kg,
+                   alternative = "greater")
+syn_test <- t.test(kgs_bydx$data[[1]]$syn_kg, kgs_bydx$data[[2]]$syn_kg,
+                   alternative = "greater")
+
+library(scales)
+colors <- hue_pal()(2)
+
+ggplot(kgs_long, aes(x = as.factor(dx), y = kg, fill = name)) +
+  geom_boxplot(notch = TRUE) +
+  labs(x = "Dx", y = "kg", fill = "Measure") +
+  scale_y_continuous(limits = c(NA, 0.425)) +
+  scale_x_discrete(labels = c("No Dx", "Dx")) +
+  geom_segment(aes(x = 0.8, y = 0.4,  xend = 1.8, yend = 0.4), size = 1.5,
+               color = colors[1]) +
+  geom_segment(aes(x = 1.2, y = 0.35, xend = 2.2, yend = 0.35), size = 1.5,
+               color = colors[2]) +
+  annotate("text", x = 1.3, y = 0.41, label = "***", color = colors[1]) +
+  annotate("text", x = 1.7, y = 0.36, label = "***", color = colors[2]) +
+  theme_bw()
+
+################################################################################
+
+eirli_data_wide %>%
+  group_by(data_id) %>%
+  summarize(
+    n = n()
+  ) %>%
+  group_by(n) %>%
+  summarize(
+    nn = n()
+  ) %>%
+  mutate(
+    x_or_fewer = cumsum(nn)
+  ) %>%
+  arrange(desc(n)) %>%
+  mutate(
+    x_or_more = cumsum(nn)
+  ) %>%
+  arrange(n)
+
+ eirli_data_wide %>%
+  group_by(age) %>%
+  summarize(
+    n = n(),
+    m_exact_age = mean(exact_age),
+    sd_exact_age = sd(exact_age)
+  ) %>%
+  mutate(
+    diff = m_exact_age - age,
+    diff_days = round(diff * 30),
+    sd_exact_age_days = round(sd_exact_age * 30, 1)
+  )

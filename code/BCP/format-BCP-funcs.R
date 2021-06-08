@@ -147,7 +147,8 @@ format.sentences <- function(sentences, s_dict_file) {
 
 format.gestures <- function(gestures, g_dict_file, inventory.only = TRUE) {
 
-  g_dict <- read_csv(g_dict_file)
+  words <- read_csv(g_dict_file) %>%
+    filter(type == "word")
 
   gest <- gestures %>%
     select(data_id, age, sex,
@@ -166,15 +167,15 @@ format.gestures <- function(gestures, g_dict_file, inventory.only = TRUE) {
     separate(x, into = c("subsection", "question"), fill = "left",
              convert = TRUE)
 
-  words <- g_dict
+  # words <- g_dict
 
   # Part I.D is the inventory
   gest.ID <- gest %>%
     filter(part == "I", section == "D") %>%
     mutate(
       type = "word",
-      item_id = rep(words$item_id, length.out = nrow(.)),
-      category = rep(words$category, length.out = nrow(.)),
+      item_id    = rep(words$item_id,    length.out = nrow(.)),
+      category   = rep(words$category,   length.out = nrow(.)),
       definition = rep(words$definition, length.out = nrow(.))
     ) %>%
     select(data_id, age, sex, value, item_id, type, category, definition) %>%

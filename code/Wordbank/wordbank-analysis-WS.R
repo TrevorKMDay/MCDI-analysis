@@ -602,3 +602,49 @@ ggplot(scored_pZ_long, aes(x = value, color = data_id)) +
 
 write_csv(head(WS), "head_WS.csv")
 write_csv(head(scored$n), "head_WS_wide.csv")
+
+################################################################################
+
+subgroups <- scored$n %>%
+  mutate(
+    group = cut(LEXICAL, 6)
+  )
+
+scored$n %>%
+  select(-c(data_id, age, LEXICAL, SYNTAX)) %>%
+  fa(nfactors = 2)
+
+
+subgroups_nest <- subgroups %>%
+  select(-c(data_id, age, LEXICAL, SYNTAX)) %>%
+  group_by(group) %>%
+  nest() %>%
+  arrange(group) %>%
+  mutate(
+    size     = map_int(data, nrow),
+    fa2      = map(data, ~fa(.x, nfactors = 2)),
+    r.scores = map_dbl(fa2, ~(.x$Phi)[1, 2]) %>%
+                round(2)
+  )
+
+ggplot(subgroups_nest, aes(x = group, y = r.scores))  +
+  geom_point() +
+  geom_hline(yintercept = 0) +
+  theme_bw()
+
+ggplot(subgroups, aes(x = LEXICAL, y = SYNTAX, color = group)) +
+  geom_point(color = "black", alpha = 0.1) +
+  geom_smooth(method = "lm")
+
+grouped_scores <- bind_cols(
+    select(WS.demo, data_id, age),
+    as_tibble(WS.scores$scores)
+  ) %>%
+  arrange(age, data_id) %>%
+  group_by(age) %>%
+  summarize(
+    r = cor(MR1, MR2)
+  )
+
+ggplot(grouped_scores, aes(x = age, y = r)) +
+  geom_point()
