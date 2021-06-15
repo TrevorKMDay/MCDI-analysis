@@ -1,6 +1,7 @@
 setwd("G:/My Drive/Research/MCDI/MCDI-analysis/code/EIRLI")
 
 library(tidyverse)
+library(patchwork)
 
 source("../Wordbank/wordbank-functions.R")
 source("format-BCP-funcs.R")
@@ -29,7 +30,8 @@ eirli_lut <- tibble(
                   "food_drink", "furniture_rooms", "games_routines",
                   "helping_verbs", "people", "locations", "pronouns",
                   "quantifiers", "question_words", "household", "sounds",
-                  "toys", "vehicles")
+                  "toys", "vehicles"),
+    lexical   = c(T, T, T, F, T, F, T, T, T, T, F, T, F, F, F, F, T, T, T, T)
   )
 
 wb_cats[!(wb_cats %in% eirli_lut$wb_cat)]
@@ -343,7 +345,7 @@ eirli_data_wide %>%
   ) %>%
   arrange(n)
 
- eirli_data_wide %>%
+eirli_data_wide %>%
   group_by(age) %>%
   summarize(
     n = n(),
@@ -355,3 +357,84 @@ eirli_data_wide %>%
     diff_days = round(diff * 30),
     sd_exact_age_days = round(sd_exact_age * 30, 1)
   )
+
+eirli_dx_wide <- eirli_data_wide %>%
+  filter(follow_up, dx) %>%
+  select(data_id, gender, age, exact_age)
+
+
+eirli_dx_count <- eirli_dx_wide %>%
+  group_by(data_id) %>%
+  summarize(
+    timepoints = n()
+  ) %>%
+  group_by(timepoints) %>%
+  summarize(
+    n = n()
+  ) %>%
+  arrange(desc(timepoints)) %>%
+  mutate(
+    x_or_more = cumsum(n)
+  ) %>%
+  arrange(timepoints)
+
+ggplot(eirli_dx_wide, aes(x = exact_age, y = data_id)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(. ~ gender) +
+  scale_y_discrete(labels = NULL) +
+  theme_bw
+
+################################################################################
+
+eirli_sum <- eirli_data_wide2 %>%
+  select(data_id, gender, dx, age, exact_age, all_of(eirli_lut$wb_cat)) %>%
+  mutate(
+    LEXICAL = select(., all_of(eirli_lut$wb_cat[eirli_lut$lexical])) %>%
+                rowSums(),
+    SYNTAX  = select(., all_of(eirli_lut$wb_cat[!eirli_lut$lexical])) %>%
+                rowSums(),
+    SUM = select(., all_of(eirli_lut$wb_cat)) %>%
+            rowSums()
+  )
+
+png("eirli_grid_plot.png", width = 6, height = 4, units = "in", res = 300)
+
+ggplot(eirli_sum, aes(x = exact_age, y = SUM, color = dx)) +
+  geom_point(alpha = 0.1) +
+  facet_grid(rows = vars(gender), cols = vars(dx)) +
+  geom_line(alpha = 0.1, aes(group = data_id)) +
+  geom_smooth(size = 1.5, aes(linetype = gender)) +
+  theme_bw() +
+  labs(x = "Age (mo)", y = "Total words",
+       title = "Total words spoken by Dx group and gender (EIRLI)")
+
+dev.off()
+
+png("eirli_smoothers.png", width = 5, height = 5, units = "in", res = 300)
+
+ggplot(eirli_sum, aes(x = exact_age, y = SUM, color = dx)) +
+  geom_smooth(aes(linetype = gender), se = FALSE) +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  labs(x = "Age (mo)", y = "Total words",
+       title = "Total words spoken by Dx group and gender (EIRLI)")
+
+dev.off()
+
+eirli_lexsyn <- eirli_sum %>%
+  select(exact_age, gender, dx, LEXICAL, SYNTAX) %>%
+  pivot_longer(-c(exact_age, gender, dx))
+
+
+png("eirli_lex_syn.png", width = 6, height = 4, units = "in", res = 300)
+
+ggplot(eirli_lexsyn, aes(x = exact_age, y = value, color = dx)) +
+  facet_wrap(facets = vars(name), scales = "free_y") +
+  geom_smooth(aes(linetype = gender), se = FALSE) +
+  theme_bw() +
+  labs(x = "Age (mo)", y = "Total words",
+       title = "MB-CDI subscores by Dx group and gender (EIRLI)") +
+  theme(legend.position = "bottom")
+
+dev.off()

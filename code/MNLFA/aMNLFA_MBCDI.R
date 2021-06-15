@@ -113,33 +113,16 @@ lex_ob <- aMNLFA.object(
   )
 
 syn_ob <- aMNLFA.object(
-  # location of data
   dir        = wd,
-  # read in dataframe from R
   mrdata     = df,
-  # list a set of indicators of a single factor; make names as short as
-  # possible
-  indicators = str_subset(colnames(df), "^L_"),
-  # age variable (can be centered)
+  indicators = str_subset(colnames(df), "^S_"),
   time       = "AGE",
-  # mean and var are for things you are substantively interested in
-  # mean: what your moderators of interest are
-  #       Contrast coding of nominal variables
   meanimpact =  c("AGE", "MALE"),
-  # var: contrast coding of nominal variables; this is computationally
-  #      expensive; JUST DO TIME VARIABLE
   varimpact  = "AGE",
-  # this part: specific indicators impacted by mods? should included all
-  #      mean/var impact items
   measinvar  = c("AGE", "MALE"),
-  # which of variables are factors
   factors    = c("MALE"),
   ID         = "ID",
-  # All variables are used in analysis
   auxiliary  = NULL,
-  # indicate whether you would like to test measurement invariance of
-  # thresholds for ordinal indicators. SET TO TRUE. seems to require at
-  # least one categorical indicator?
   thresholds = FALSE
 )
 
