@@ -1,8 +1,14 @@
-if(.Platform$OS.type == "unix") {
-  mcdi_root <- "/Volumes/GoogleDrive/My Drive/Research/MCDI/MCDI-analysis"
-} else {
-  mcdi_root <- "G:/My Drive/Research/MCDI/MCDI-analysis/"
-}
+# if(.Platform$OS.type == "unix") {
+#   mcdi_root <- "/Volumes/GoogleDrive/My Drive/Research/MCDI/MCDI-analysis"
+# } else {
+#   mcdi_root <- "G:/My Drive/Research/MCDI/MCDI-analysis/"
+# }
+
+path <- "/Research/MCDI/MCDI-analysis/"
+locs <- c("G:/My Drive", "I:", "/Volumes")
+for (i in locs)
+  if (dir.exists(paste0(i, path)))
+    mcdi_root <- paste0(i, path)
 
 code_dir <- paste0(mcdi_root, "/code")
 data_dir <- paste0(mcdi_root, "/data")

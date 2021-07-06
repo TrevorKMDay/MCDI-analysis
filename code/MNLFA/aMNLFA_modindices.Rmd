@@ -1,0 +1,292 @@
+---
+title: "Wordbank MB-CDI model improvement"
+author: "Trevor K.M. Day"
+output: 
+  pdf_document:
+    toc: true
+---
+
+# Setup
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(
+	warning = FALSE
+)
+
+path <- "/Research/MCDI/MCDI-analysis/code/MNLFA"
+locs <- c("G:/My Drive", "I:", "/Volumes")
+for (i in locs)
+  if (dir.exists(paste0(i, path)))
+    setwd(paste0(i, path))
+
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(lavaan))
+
+source("../mcdi-setup.R")
+
+wbws <- read_data("Wordbank/WS-scored.rds")$p 
+
+show_model <- function(model){
+  
+  FMs <- fitMeasures(model, c("pvalue", "cfi", "tli", "rmsea", "srmr"))
+  print(FMs)
+  
+  MIs <- modificationindices(model, standardized = TRUE, sort. = TRUE, 
+                             minimum.value = 10) 
+  
+  print(nrow(MIs))
+  print(head(MIs))
+  
+  return(FMs)
+}
+
+```
+
+Packages loaded: `tidyverse` (1.3.1), `lavaan` (0.6-9)
+
+# Data
+
+Wordbank (WB) Words and Sentences (WS) data:
+
+```{r data}
+head(wbws) %>%
+  mutate(
+    across(where(is.numeric), ~round(.x, 3))
+  )
+```
+
+# Initial models
+
+The initial models are given below, with no cross-correlations.
+
+```{r setup-formulae}
+
+lex <- 'MR1 =~ animals + body_parts + clothing + food_drink + furniture_rooms + 
+                games_routines + household + sounds + toys + vehicles'
+
+syn <- 'MR2 =~ connecting_words + helping_verbs + pronouns + quantifiers + 
+                question_words + COMPLEXITY'
+
+# Fit measures to evaluate
+fitms <- c("pvalue", "cfi", "tli", "rmsea", "srmr")
+
+lex_models <- list()
+lex_fitms <- list()
+syn_models <- list()
+syn_fitms <- list()
+
+```
+
+# Lexical modeling
+
+## Step 1
+
+```{r lex1}
+
+lex_models[[1]] <- cfa(model = lex, data = wbws)
+lex_fitms[[1]] <- show_model(lex_models[[1]])
+
+```
+
+This results in 37 MIs > 10, but only one < 1000.
+
+## Step 2
+
+```{r lex2}
+
+lex[2] <- 'MR1 =~ animals + body_parts + clothing + food_drink + 
+                  furniture_rooms + games_routines + household + sounds + 
+                  toys + vehicles
+
+            furniture_rooms ~~ household'
+
+lex_models[[2]] <- cfa(model = lex[2], data = wbws)
+lex_fitms[[2]] <- show_model(lex_models[[2]])
+
+```
+
+## Step 3
+
+Now I'm going to add the four that exceed 200. 
+
+```{r lex3}
+
+lex[3] <- 'MR1 =~ animals + body_parts + clothing + food_drink + 
+                  furniture_rooms + games_routines + household + sounds + 
+                  toys + vehicles
+
+            furniture_rooms ~~ household
+            animals ~~ sounds
+            animals ~~ vehicles
+            games_routines ~~ sounds
+            body_parts ~~ games_routines
+'
+
+lex_models[[3]] <- cfa(model = lex[3], data = wbws)
+lex_fitms[[3]] <- show_model(lex_models[[3]])
+
+```
+
+## Model improvement
+
+This removed four MIs from 35, resulting in only 23 that exceed 10. Let's take
+a step back and evaluate model improvement.
+
+```{r}
+
+lex_fitms_all <- lex_fitms %>%
+  unlist() %>%
+  matrix(ncol = 3) %>%
+  t() %>%
+  as_tibble()
+
+colnames(lex_fitms_all) <- fitms
+
+lex_fitms_all <- lex_fitms_all %>%
+  mutate(
+    n = 1:nrow(lex_fitms_all)
+  ) %>%
+  pivot_longer(-n)
+
+ggplot(lex_fitms_all, aes(x = n, y = value, color = name)) +
+  geom_point() + 
+  geom_line() + 
+  geom_hline(yintercept = c(0.9, 0.08)) + 
+  theme_bw()
+
+
+```
+CFI and TLI are both larger = better, and were above threshold to begin with.
+SRMR and RMSEA are both smaller = better, and RMSEA seems to be trending the 
+right way.  Chi-squared $p$-value is irrelevant at this sample size but is 
+included for completeness. 
+
+## Step 4
+
+Let's try removing >200 again.
+
+
+```{r lex4}
+
+lex[4] <- 'MR1 =~ animals + body_parts + clothing + food_drink + 
+                  furniture_rooms + games_routines + household + sounds + 
+                  toys + vehicles
+
+            furniture_rooms ~~ household
+            animals ~~ sounds
+            animals ~~ vehicles
+            games_routines ~~ sounds
+            body_parts ~~ games_routines
+            sounds ~~ vehicles
+            body_parts ~~ sounds
+'
+
+lex_models[[4]] <- cfa(model = lex[4], data = wbws)
+lex_fitms[[4]] <- show_model(lex_models[[4]])
+
+```
+
+## Step 5
+
+RMSEA is not quite sub-threshold, so now >100.
+
+```{r lex5}
+
+lex[5] <- 'MR1 =~ animals + body_parts + clothing + food_drink + 
+                  furniture_rooms + games_routines + household + sounds + 
+                  toys + vehicles
+
+            furniture_rooms ~~ household
+            animals ~~ sounds
+            animals ~~ vehicles
+            games_routines ~~ sounds
+            body_parts ~~ games_routines
+            sounds ~~ vehicles
+            body_parts ~~ sounds
+            body_parts ~~ furniture_rooms 
+            furniture_rooms ~~ games_routines 
+            clothing ~~ furniture_rooms
+            body_parts ~~ household
+'
+
+lex_models[[5]] <- cfa(model = lex[5], data = wbws)
+lex_fitms[[5]] <- show_model(lex_models[[5]])
+
+lex_fitms_all <- lex_fitms %>%
+  unlist() %>%
+  matrix(ncol = length(lex_fitms)) %>%
+  t() %>%
+  as_tibble()
+
+colnames(lex_fitms_all) <- fitms
+
+lex_fitms_all <- lex_fitms_all %>%
+  mutate(
+    n = 1:nrow(lex_fitms_all)
+  ) %>%
+  pivot_longer(-n)
+
+ggplot(lex_fitms_all, aes(x = n, y = value, color = name)) +
+  geom_point() + 
+  geom_line() + 
+  geom_hline(yintercept = c(0.9, 0.08)) + 
+  theme_bw()
+
+```
+
+This is the most parsimonious model that satisifes the criteria for CFI, TLI,
+RMSEA, and SRMR. 
+
+# Syntactic modeling
+
+## Step 1 
+
+```{r syn1}
+
+syn_models[[1]] <- cfa(model = syn, data = wbws)
+syn_fitms[[1]] <- show_model(syn_models[[1]])
+
+```
+
+This leaves only a single MI > 100 (to align with lexical).
+
+## Step 2
+
+```{r syn2}
+
+syn[[2]] <- 'MR2 =~ connecting_words + helping_verbs + pronouns + quantifiers + 
+                question_words + COMPLEXITY
+
+              connecting_words ~~ helping_verbs
+'
+
+syn_models[[2]] <- cfa(model = syn[[2]], data = wbws)
+syn_fitms[[2]] <- show_model(syn_models[[2]])
+
+```
+
+What luck, this works and satisifes the same criterion as lexical. I'm not going
+to plot two points per measure. 
+
+# Final models
+
+```{r final-models}
+writeLines(lex[length(lex)])
+
+writeLines(syn[length(syn)])
+```
+```{r fit-stats}
+
+final_model <- paste(lex[length(lex)], syn[length(syn)])
+final_cfa <- cfa(final_model, wbws)
+
+fitmeasures(final_cfa, fit.measures = fitms)
+
+```
+
+# Appendix: Session Info
+
+```{r packages}
+sessionInfo()
+```
