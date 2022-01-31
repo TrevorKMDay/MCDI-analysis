@@ -81,7 +81,8 @@ plot.curves <- function(list_of_curves, max_val,
     geom_hline(yintercept = c(max_val, max_val / exp(1)),
                size = 1,
                linetype = "dashed",
-               color = "darkred")
+               color = "darkred")+
+    theme_bw()
 
   for (i in list_of_curves) {
     p <- p + i

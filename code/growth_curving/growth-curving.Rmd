@@ -13,7 +13,7 @@ bibliography: growth-curving-bib.json
 
 ```{r setup, include=FALSE}
 
-if(.Platform$OS.type == "unix") {
+if (.Platform$OS.type == "unix") {
   setwd("/Volumes/GoogleDrive/My Drive/Research/MCDI/MCDI-analysis/code/growth_curving")
 } else {
   setwd("G:/My Drive/Research/MCDI/MCDI-analysis/code/growth_curving")
@@ -42,6 +42,8 @@ library(growthcurver)
 # library(devtools)
 # devtools::install_github("zief0002/educate")
 library(educate)
+
+select <- dplyr::select
 
 ```
 
@@ -117,10 +119,10 @@ We write a quick function to calculate the fit over a given range. We use
 
 ```{r gomp_fit}
 
-predict.gomp <- function(fit, range = seq(0, 36, by = 0.01), max = 681,
-                         ci = FALSE) {
+predict.gomp <- function(fit = NULL, range = seq(0, 36, by = 0.01), max = 681,
+                         ci = FALSE, kg = NULL, kg.se = NULL) {
   
-  if (class(fit) == "gcfit"){
+  if (class(fit) == "gcfit") {
     
     # Result from growth curver
     A <- fit$vals$k
@@ -150,9 +152,28 @@ predict.gomp <- function(fit, range = seq(0, 36, by = 0.01), max = 681,
     result.lo <- W_0 * (A / W_0) ^ (1 - exp(-1 * (k_g - k_g.se) * range))
     result.hi <- W_0 * (A / W_0) ^ (1 - exp(-1 * (k_g + k_g.se) * range))
     
+  } else if (class(fit) == "NULL") {
+    
+    if (!is.null(kg) & !is.null(kg.se)) {
+      
+      A <- max
+      W_0 <- .Machine$double.eps
+      k_g <- kg
+      k_g.se <- kg.se 
+      
+      if (ci)
+        k_g.se <- 1.96 * k_g.se
+    
+
+      result <- W_0 * (A / W_0) ^ (1 - exp(-1 * k_g * range))
+      result.lo <- W_0 * (A / W_0) ^ (1 - exp(-1 * (k_g - k_g.se) * range))
+      result.hi <- W_0 * (A / W_0) ^ (1 - exp(-1 * (k_g + k_g.se) * range))
+      
+      
+    }
     
   }
-  
+
   
   out <- cbind(range, result, result.lo, result.hi) %>%
           as.data.frame()
@@ -619,7 +640,7 @@ points.
 
 ```{r dist-ku}
 
-kgs5 <- sapply(all.fits5, function(x) if(is.list(x)) {summary(x)$coefficients[1, 1]} else {NA})
+kgs5 <- sapply(all.fits5, function(x) if (is.list(x)) {summary(x)$coefficients[1, 1]} else {NA})
 kgs4 <- sapply(all.fits4, function(x) summary(x)$coefficients[1, 1])
 kgs3 <- sapply(all.fits3, function(x) summary(x)$coefficients[1, 1])
 
@@ -629,6 +650,13 @@ all.kUs <- (A * all.kgs / exp(1)) %>%
             rownames_to_column() %>%
             pivot_longer(-rowname) %>%
             na.omit()
+
+all.kUs %>%
+  filter(
+    name == "kgs4"
+  ) %>%
+  ggplot(aes(value)) +
+    geom_density()
 
 # max_vals <- bind_rows(test_all) %>%
 #               group_by(data_id) %>%
@@ -845,14 +873,25 @@ LS.vals <- LS.vals %>%
                                        coef(summary(x))[1, 2]))
   )
 
+LS.vals %>%
+  select(data_id, lex.m, syn.m) %>%
+  pivot_longer(-data_id) %>%
+  ggplot(aes(value, fill = name)) +
+    geom_histogram(position = "dodge") +
+    scale_y_continuous(breaks = 1:22) +
+    theme_bw()
+
+ggplot(LS.vals, aes(x = lex.m, y = syn.m)) +
+  geom_point()
+
 # Value at Wi 
 W_i.1 <- 1 / exp(1)
 LS.vals <- LS.vals %>%
   mutate(
-    lex.m = solve.gomp2(y = W_i.1, k_g = lex, A = 1),
+    lex.m  = solve.gomp2(y = W_i.1, k_g = lex, A = 1),
     lex.lo = solve.gomp2(y = W_i.1, k_g = lex - (2 * lex.se), A = 1),
     lex.hi = solve.gomp2(y = W_i.1, k_g = lex + (2 * lex.se), A = 1),
-    syn.m = solve.gomp2(y = W_i.1, k_g = syn, A = 1),
+    syn.m  = solve.gomp2(y = W_i.1, k_g = syn, A = 1),
     syn.lo = solve.gomp2(y = W_i.1, k_g = syn - (2 * syn.se), A = 1),
     syn_hi = solve.gomp2(y = W_i.1, k_g = syn + (2 * syn.se), A = 1),
     synMlex = syn.m - lex.m
@@ -862,6 +901,8 @@ mean(LS.vals$synMlex, na.rm = TRUE)
 sd(LS.vals$synMlex, na.rm = TRUE)
 
 t.test(LS.vals$lex.m, LS.vals$syn.m, paired = TRUE)
+
+ggplot()
 
 
 ```

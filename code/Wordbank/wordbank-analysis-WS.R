@@ -31,8 +31,9 @@ select <- dplyr::select
 # (but fine on modern machines)
 rotation <- "oblimin"
 
-source("wordbank-csv2rds.R")
+# source("wordbank-csv2rds.R")
 source("wordbank-functions.R")
+source("../mcdi-setup.R")
 
 ################################################################################
 # Extract demographics
@@ -70,6 +71,38 @@ if (file.exists(datafile)) {
 }
 
 ################################################################################
+# Basic demographic information
+################################################################################
+
+scored_demo <- scored$n %>%
+  select(-matches("^[WCLS]")) %>%
+  mutate(
+    TOTAL = select(., -data_id, -age) %>%
+              rowSums()
+  ) %>%
+  select(data_id, age, TOTAL) %>%
+  left_join(WS.demo) %>%
+  select(-instrument) %>%
+  mutate(
+    mom_college = ifelse(!is.na(mom_ed),
+                         ifelse(mom_ed %in% c("College", "Some Graduate",
+                                              "Graduate"),
+                            "college_ed", "no_college"),
+                         NA),
+    first_born = ifelse(birth_order == "First", "first_born", "later_born")
+  )
+
+basic_demo <- lm(TOTAL ~ age + sex + mom_college + first_born,
+                 data = scored_demo)
+
+ggplot(scored_demo, aes(x = ethnicity, y = TOTAL, fill = ethnicity)) +
+  geom_boxplot(notch = TRUE, alpha = 0.7) +
+  geom_jitter(aes(color = ethnicity), alpha = 0.25) +
+  theme_minimal()
+
+table(!is.na(scored_demo$mom_college), !is.na(scored_demo$first_born))
+
+################################################################################
 # Correlation plot
 ################################################################################
 
@@ -98,7 +131,9 @@ set.seed(55455)
 
 WS.merge1 <- WS.demo %>%
   # Create explicit NA category for all demo variables
-  mutate(across(sex:ethnicity, ~fct_explicit_na(.x, na_level = "Missing"))) %>%
+  mutate(
+    across(sex:ethnicity, ~fct_explicit_na(.x, na_level = "Missing"))
+  ) %>%
   # Although we later identified birth order and ethnicity, leave original
   # balancing call.
   group_by(age, sex, mom_ed) %>%
@@ -360,6 +395,8 @@ WS.scores <- factor.scores(dplyr::select(scored$n,
                                          all_of(FA_col_order)),
                             factor.analyses[[2]],
                             method = "Thurstone")
+
+saveRDS(WS.scores, .data("Wordbank/WS-FA_scores.rds"))
 
 plot.scores <- cbind.data.frame(WS.demo, WS.scores$scores) %>%
   as_tibble() %>%

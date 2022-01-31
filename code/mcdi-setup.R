@@ -5,7 +5,8 @@
 # }
 
 path <- "/Research/MCDI/MCDI-analysis/"
-locs <- c("G:/My Drive", "I:", "/Volumes")
+locs <- c("G:/My Drive", "I:", "/Volumes",
+          "/home/tkmd/Insync/day00096@umn.edu/Google Drive")
 for (i in locs)
   if (dir.exists(paste0(i, path)))
     mcdi_root <- paste0(i, path)

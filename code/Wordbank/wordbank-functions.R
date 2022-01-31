@@ -33,7 +33,7 @@ score.SONy <- function(v) {
 
   # Score {often, 2}, {sometimes, 1}, {not yet, 0}
   score <- ifelse(v == "often", 2,
-                  ifelse(v == "sometimes"), 1, 0)
+                  ifelse(v == "sometimes", 1, 0))
 
   return(score)
 
@@ -172,7 +172,7 @@ score.GasS <- function(gestures, sc.understands = FALSE,
 
 }
 
-score.WS <- function(sentences) {
+score.WS <- function(sentences, include.totals = FALSE) {
 
   categories <- c("sounds", "animals", "vehicles", "toys", "food_drink",
                   "clothing", "body_parts", "household", "furniture_rooms",
@@ -183,17 +183,37 @@ score.WS <- function(sentences) {
                   "WORD_FORMS_VERBS", "WORD_ENDINGS_NOUNS",
                   "WORD_ENDINGS_VERBS", "COMPLEXITY")
 
+  syntactic.categories <- c("complexity", "connecting_words", "helping_verbs",
+                            "locations", "pronouns", "quantifiers",
+                            "question_words", "time_words",
+                            "word_endings_nouns", "word_endings_verbs",
+                            "word_forms_nouns", "word_forms_verbs")
+
+  n_per_cat <- sentences %>%
+    filter(
+      data_id == data_id[1],
+      type == "word"
+    ) %>%
+    group_by(category) %>%
+    summarize(
+      n = n()
+    )
+
   # Score non-complexity
   scored1 <- sentences %>%
-    filter(type != "complexity") %>%
+    filter(
+      type != "complexity"
+    ) %>%
     mutate(
-      says = score.produces(value),
+      says     = score.produces(value),
       category = as.character(category)
     ) %>%
     group_by(data_id, age, type, category) %>%
     dplyr::summarize(
-      n = n(),
+      n   = n(),
       sum = sum(says),
+    ) %>%
+    mutate(
       perc = sum / n
     ) %>%
     ungroup()
@@ -202,21 +222,24 @@ score.WS <- function(sentences) {
   # Replace NA n with 0, since that's what NA represents before scoring, for
   # parsimony
   scored.cx <- sentences %>%
-    filter(type == "complexity") %>%
+    filter(
+      type == "complexity"
+    ) %>%
     mutate(
       says = score.complexity(value)
     ) %>%
     group_by(data_id, age, type) %>%
     dplyr::summarize(
-      n = n(),
+      n   = n(),
       sum = sum(says)
     ) %>%
     mutate(
-      sum = replace(sum, is.na(sum), 0),
+      sum  = replace(sum, is.na(sum), 0),
       perc = sum / n
     ) %>%
     ungroup()
 
+  # Combine words and complexity
   scored3 <- bind_rows(scored1, scored.cx) %>%
     arrange(data_id, age, type, category) %>%
     mutate(
@@ -228,14 +251,19 @@ score.WS <- function(sentences) {
   scored3$category[cat.NA] <- scored3$type[cat.NA]
 
   # Drop old label
-  scored4 <- scored3 %>%
-    dplyr::select(-type)
+  scored4 <- scored3
 
-  syntactic.categories <- c("complexity", "connecting_words", "helping_verbs",
-                            "locations", "pronouns", "quantifiers",
-                            "question_words", "time_words",
-                            "word_endings_nouns", "word_endings_verbs",
-                            "word_forms_nouns", "word_forms_verbs")
+  scored4.totals <- scored4 %>%
+    filter(
+      type == "word"
+    ) %>%
+    group_by(data_id, age) %>%
+    summarize(
+      n_words = sum(sum)
+    ) %>%
+    mutate(
+      pct_words = n_words / sum(n_per_cat$n)
+    )
 
   scored4.lexsym <- scored4 %>%
     mutate(
@@ -260,14 +288,14 @@ score.WS <- function(sentences) {
   scored5.raw <- scored4 %>%
     pivot_wider(c(data_id, age), names_from = "category",
                 values_from = sum) %>%
-    dplyr::select(all_of(c("data_id", "age",
-                           tolower(categories)))) %>%
+    dplyr::select(all_of(c("data_id", "age", tolower(categories)))) %>%
     left_join(select(scored4.lexsym, data_id, age, starts_with("N"))) %>%
+    left_join(select(scored4.totals, data_id, age, n_words)) %>%
     rename(
-      SYNTAX = N_SYNTAX,
-      LEXICAL = N_LEXICAL
+      SYNTAX  = N_SYNTAX,
+      LEXICAL = N_LEXICAL,
+      TOTAL = n_words
     )
-  colnames(scored5.raw)[25:29] <- toupper(colnames(scored5.raw)[25:29])
 
   # Spread percent
   scored5.perc <- scored4 %>%
@@ -276,14 +304,21 @@ score.WS <- function(sentences) {
     dplyr::select(all_of(c("data_id", "age",
                            tolower(categories)))) %>%
     left_join(select(scored4.lexsym, data_id, age, starts_with("P"))) %>%
-    rename(SYNTAX = P_SYNTAX,
-           LEXICAL = P_LEXICAL)
-  colnames(scored5.perc)[25:29] <- toupper(colnames(scored5.perc)[25:29])
+    left_join(select(scored4.totals, data_id, age, pct_words)) %>%
+    rename(
+      SYNTAX = P_SYNTAX,
+      LEXICAL = P_LEXICAL,
+      TOTAL = pct_words) %>%
+    rename_with(toupper, c(starts_with("word_"), complexity))
 
-  scored5 <- list(scored5.raw, scored5.perc)
-  names(scored5) <- c("n", "p")
+  if (!include.totals) {
+    # Drop total columns
+    scored5.raw  <- select(scored5.raw, -SYNTAX, -LEXICAL, -TOTAL)
+    scored5.perc <- select(scored5.perc, -SYNTAX, -LEXICAL, -TOTAL)
+  }
 
   # Return both raw numbers and percentages
+  scored5 <- list(n = scored5.raw, p = scored5.perc)
   return(scored5)
 
 }
