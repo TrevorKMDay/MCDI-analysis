@@ -1,0 +1,2 @@
+2021-10-15 10:14:27:: Starting aMNLFA.initial for lex_3d
+2021-10-15 10:15:59:: Starting aMNLFA.initial for lex_3d

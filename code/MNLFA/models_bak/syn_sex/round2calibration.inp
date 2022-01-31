@@ -1,0 +1,122 @@
+TITLE: Round 2 Calibration Model
+DATA: FILE = "models/syn_sex/calibration.dat";
+VARIABLE: 
+NAMES = ID S_CONJ S_HELPV S_PRON S_QUANT S_QWORDS S_TIME S_WF_N S_WF_V S_WE_N S_WE_V
+     S_COMPLX D_AGE_C D_MALE D_AGE_C2; 
+MISSING=.;
+!
+!
+!
+USEVARIABLES= S_CONJ S_HELPV S_PRON S_QUANT S_QWORDS S_TIME S_WF_N S_WF_V S_WE_N S_WE_V 
+ S_COMPLX D_AGE_C D_MALE;
+AUXILIARY= ID ;
+!
+!
+CONSTRAINT= D_AGE_C D_MALE ;
+ANALYSIS: ESTIMATOR=ML;ALGORITHM=INTEGRATION;INTEGRATION=MONTECARLO;PROCESSORS=4;
+MODEL: [ETA@0];ETA*(veta);
+ETA BY S_CONJ*(l_1);
+ETA BY S_HELPV*(l_2);
+ETA BY S_PRON*(l_3);
+ETA BY S_QUANT*(l_4);
+ETA BY S_QWORDS*(l_5);
+ETA BY S_TIME*(l_6);
+ETA BY S_WF_N*(l_7);
+ETA BY S_WF_V*(l_8);
+ETA BY S_WE_N*(l_9);
+ETA BY S_WE_V*(l_10);
+ETA BY S_COMPLX*(l_11);
+ETA ON D_AGE_C; ETA ON D_MALE;
+S_CONJ on D_AGE_C;
+
+S_HELPV on D_AGE_C D_MALE;
+
+
+S_PRON on D_AGE_C;
+
+
+
+S_QUANT on D_AGE_C;
+
+
+
+
+S_QWORDS on D_AGE_C;
+
+
+
+
+
+S_TIME on D_AGE_C;
+
+
+
+
+
+
+S_WF_N on D_AGE_C;
+
+
+
+
+
+
+
+S_WF_V on D_AGE_C D_MALE;
+
+
+
+
+
+
+
+
+!
+
+
+
+
+
+
+
+
+
+!
+
+
+
+
+
+
+
+
+
+
+S_COMPLX on D_AGE_C D_MALE;
+MODEL CONSTRAINT: new( !
+l1_0*1   l1_1*0
+l2_0*1   l2_1*0  l2_2*0
+l3_0*1   l3_1*0
+l4_0*1   l4_1*0
+! !
+l6_0*1   l6_1*0
+l7_0*1   l7_1*0
+l8_0*1   l8_1*0  l8_2*0
+! !
+! !
+l11_0*1   l11_1*0
+);
+veta=1*exp(
+0);
+l_1=l1_0 +l1_1*D_AGE_C;
+l_2=l2_0 +l2_1*D_AGE_C +l2_2*D_MALE;
+l_3=l3_0 +l3_1*D_AGE_C;
+l_4=l4_0 +l4_1*D_AGE_C;
+! !;
+l_6=l6_0 +l6_1*D_AGE_C;
+l_7=l7_0 +l7_1*D_AGE_C;
+l_8=l8_0 +l8_1*D_AGE_C +l8_2*D_MALE;
+! !;
+! !;
+l_11=l11_0 +l11_1*D_AGE_C;
+OUTPUT: tech1;

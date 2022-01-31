@@ -1,0 +1,881 @@
+Mplus VERSION 8.3
+MUTHEN & MUTHEN
+09/27/2021   2:54 PM
+
+INPUT INSTRUCTIONS
+
+  TITLE: Scoring Model
+  DATA: FILE = "syn/full.dat";
+  VARIABLE:
+  NAMES = ID S_CONJ S_HELPV S_PRON S_QUANT S_QWORDS S_TIME S_WF_N S_WF_V S_WE_N S_WE_V
+       S_COMPLX AGE FIRST_B MALE;
+  MISSING=.;
+  !
+  !
+  !
+  USEVARIABLES= S_CONJ S_HELPV S_PRON S_QUANT S_QWORDS S_TIME S_WF_N S_WF_V S_WE_N S_WE_V
+   S_COMPLX AGE MALE FIRST_B;
+  AUXILIARY=ID;
+  !
+  !
+  !
+  CONSTRAINT= AGE FIRST_B ;
+  ANALYSIS: ESTIMATOR=ML; ALGORITHM=INTEGRATION; INTEGRATION=MONTECARLO; PROCESSORS=4;
+  MODEL: [ETA@0];ETA*(veta);
+  ETA BY S_CONJ*(l_1);
+  ETA BY S_HELPV*(l_2);
+  ETA BY S_PRON @0.196;
+  ETA BY S_QUANT @0.2;
+  ETA BY S_QWORDS*(l_5);
+  ETA BY S_TIME @0.204;
+  ETA BY S_WF_N*(l_7);
+  ETA BY S_WF_V*(l_8);
+  ETA BY S_WE_N*(l_9);
+  ETA BY S_WE_V*(l_10);
+  ETA BY S_COMPLX*(l_11);
+  ETA ON AGE@0.198;
+  ETA ON MALE@-0.171;
+  S_CONJ ON AGE@-0.045;
+  S_HELPV ON AGE@-0.024;
+  S_QWORDS ON AGE@-0.012;
+  S_WF_N ON AGE@0.033;
+  S_WF_N ON FIRST_B@0.02;
+  S_WF_N ON MALE@-0.005;
+  S_WF_V ON AGE@-0.021;
+  S_WE_N ON AGE@0.011;
+  S_WE_N ON FIRST_B@0.019;
+  S_WE_V ON FIRST_B@0.019;
+  S_COMPLX ON AGE@-0.014;
+  [S_CONJ@0.496];
+  [S_HELPV@-0.128];
+  [S_PRON@-0.627];
+  [S_QUANT@-0.666];
+  [S_QWORDS@-0.297];
+  [S_TIME@-0.693];
+  [S_WF_N@-1.048];
+  [S_WF_V@-0.132];
+  [S_WE_N@-0.393];
+  [S_WE_V@-0.131];
+  [S_COMPLX@-0.252];
+  MODEL CONSTRAINT:
+    veta=1*exp(
+    0);
+    l_1=-0.087 +0.01*AGE;
+    l_2=0.066 +0.005*AGE;
+    ! !;
+    ! !;
+    l_5=0.09 +0.004*AGE;
+    ! !;
+    l_7=0.284 -0.006*AGE;
+    l_8=0.059 +0.005*AGE;
+    l_9=0.104 -0.002*AGE -0.005*FIRST_B;
+    l_10=0.038 -0.005*FIRST_B;
+    l_11=0.051 +0.006*AGE;
+
+
+
+  OUTPUT: tech1;
+  SAVEDATA: SAVE=FSCORES; FILE=scores.dat;
+
+
+
+*** WARNING
+  Data set contains cases with missing on x-variables.
+  These cases were not included in the analysis.
+  Number of cases with missing on x-variables:  2744
+   1 WARNING(S) FOUND IN THE INPUT INSTRUCTIONS
+
+
+
+Scoring Model
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                        2776
+
+Number of dependent variables                                   11
+Number of independent variables                                  3
+Number of continuous latent variables                            1
+
+Observed dependent variables
+
+  Continuous
+   S_CONJ      S_HELPV     S_PRON      S_QUANT     S_QWORDS    S_TIME
+   S_WF_N      S_WF_V      S_WE_N      S_WE_V      S_COMPLX
+
+Observed independent variables
+   AGE         MALE        FIRST_B
+
+Observed auxiliary variables
+   ID
+
+Continuous latent variables
+   ETA
+
+
+Estimator                                                       ML
+Information matrix                                        OBSERVED
+Optimization Specifications for the Quasi-Newton Algorithm for
+Continuous Outcomes
+  Maximum number of iterations                                 100
+  Convergence criterion                                  0.100D-05
+Optimization Specifications for the EM Algorithm
+  Maximum number of iterations                                 500
+  Convergence criteria
+    Loglikelihood change                                 0.100D-02
+    Relative loglikelihood change                        0.100D-05
+    Derivative                                           0.100D-02
+Optimization Specifications for the M step of the EM Algorithm for
+Categorical Latent variables
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-02
+  Basis for M step termination                           ITERATION
+Optimization Specifications for the M step of the EM Algorithm for
+Censored, Binary or Ordered Categorical (Ordinal), Unordered
+Categorical (Nominal) and Count Outcomes
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-02
+  Basis for M step termination                           ITERATION
+  Maximum value for logit thresholds                            15
+  Minimum value for logit thresholds                           -15
+  Minimum expected cell size for chi-square              0.100D-01
+Maximum number of iterations for H1                           2000
+Convergence criterion for H1                             0.100D-03
+Optimization algorithm                                         EMA
+Integration Specifications
+  Type                                                  MONTECARLO
+  Number of integration points                                   1
+  Dimensions of numerical integration                            0
+  Adaptive quadrature                                           ON
+  Monte Carlo integration seed                                   0
+Cholesky                                                       OFF
+
+Input data file(s)
+  syn/full.dat
+Input data format  FREE
+
+
+SUMMARY OF DATA
+
+     Number of missing data patterns             1
+
+
+COVARIANCE COVERAGE OF DATA
+
+Minimum covariance coverage value   0.100
+
+
+     PROPORTION OF DATA PRESENT FOR Y
+
+
+           Covariance Coverage
+              S_CONJ        S_HELPV       S_PRON        S_QUANT       S_QWORDS
+              ________      ________      ________      ________      ________
+ S_CONJ         1.000
+ S_HELPV        1.000         1.000
+ S_PRON         1.000         1.000         1.000
+ S_QUANT        1.000         1.000         1.000         1.000
+ S_QWORDS       1.000         1.000         1.000         1.000         1.000
+ S_TIME         1.000         1.000         1.000         1.000         1.000
+ S_WF_N         1.000         1.000         1.000         1.000         1.000
+ S_WF_V         1.000         1.000         1.000         1.000         1.000
+ S_WE_N         1.000         1.000         1.000         1.000         1.000
+ S_WE_V         1.000         1.000         1.000         1.000         1.000
+ S_COMPLX       1.000         1.000         1.000         1.000         1.000
+ AGE            1.000         1.000         1.000         1.000         1.000
+ MALE           1.000         1.000         1.000         1.000         1.000
+ FIRST_B        1.000         1.000         1.000         1.000         1.000
+
+
+           Covariance Coverage
+              S_TIME        S_WF_N        S_WF_V        S_WE_N        S_WE_V
+              ________      ________      ________      ________      ________
+ S_TIME         1.000
+ S_WF_N         1.000         1.000
+ S_WF_V         1.000         1.000         1.000
+ S_WE_N         1.000         1.000         1.000         1.000
+ S_WE_V         1.000         1.000         1.000         1.000         1.000
+ S_COMPLX       1.000         1.000         1.000         1.000         1.000
+ AGE            1.000         1.000         1.000         1.000         1.000
+ MALE           1.000         1.000         1.000         1.000         1.000
+ FIRST_B        1.000         1.000         1.000         1.000         1.000
+
+
+           Covariance Coverage
+              S_COMPLX      AGE           MALE          FIRST_B
+              ________      ________      ________      ________
+ S_COMPLX       1.000
+ AGE            1.000         1.000
+ MALE           1.000         1.000         1.000
+ FIRST_B        1.000         1.000         1.000         1.000
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     S_CONJ                0.132       2.173       0.000   67.36%       0.000      0.000      0.000
+            2776.000       0.062       4.018       1.000    3.39%       0.000      0.167
+     S_HELPV               0.211       1.403       0.000   36.71%       0.000      0.048      0.048
+            2776.000       0.080       0.858       1.000    2.95%       0.143      0.429
+     S_PRON                0.256       1.250       0.000   15.31%       0.040      0.120      0.160
+            2776.000       0.075       0.583       1.000    2.49%       0.200      0.480
+     S_QUANT               0.236       1.246       0.000   27.09%       0.000      0.059      0.118
+            2776.000       0.078       0.452       1.000    2.34%       0.176      0.471
+     S_QWORDS              0.248       1.105       0.000   42.94%       0.000      0.000      0.143
+            2776.000       0.090       0.109       1.000    4.65%       0.286      0.571
+     S_TIME                0.228       1.287       0.000   42.33%       0.000      0.000      0.083
+            2776.000       0.090       0.471       1.000    4.29%       0.167      0.500
+     S_WF_N                0.322       0.491       0.000   25.76%       0.000      0.200      0.400
+            2776.000       0.066      -0.177       1.000    2.85%       0.400      0.600
+     S_WF_V                0.186       1.569       0.000   42.40%       0.000      0.000      0.050
+            2776.000       0.072       1.445       1.000    2.13%       0.100      0.350
+     S_WE_N                0.066       2.605       0.000   66.21%       0.000      0.000      0.000
+            2776.000       0.016       8.702       1.000    0.11%       0.000      0.143
+     S_WE_V                0.038       4.396       0.000   70.50%       0.000      0.000      0.000
+            2776.000       0.008      28.720       1.000    0.11%       0.000      0.065
+     S_COMPLX              0.240       1.164       0.000   37.90%       0.000      0.027      0.081
+            2776.000       0.095       0.041       1.000    2.81%       0.162      0.541
+     AGE                  22.731       0.089      16.000    6.66%      18.000     21.000     23.500
+            2776.000      18.016      -1.116      30.000    8.14%      24.000     27.000
+     MALE                  0.014      -0.029      -1.000   49.28%      -1.000     -1.000      1.000
+            2776.000       1.000      -1.999       1.000   50.72%       1.000      1.000
+     FIRST_B               0.030      -0.059      -1.000   48.52%      -1.000     -1.000      1.000
+            2776.000       0.999      -1.997       1.000   51.48%       1.000      1.000
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       11
+
+Loglikelihood
+
+          H0 Value                       17714.876
+
+Information Criteria
+
+          Akaike (AIC)                  -35407.753
+          Bayesian (BIC)                -35342.537
+          Sample-Size Adjusted BIC      -35377.487
+            (n* = (n + 2) / 24)
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ ETA      BY
+    S_CONJ           999.000      0.000    999.000    999.000
+    S_HELPV          999.000      0.000    999.000    999.000
+    S_PRON             0.196      0.000    999.000    999.000
+    S_QUANT            0.200      0.000    999.000    999.000
+    S_QWORDS         999.000      0.000    999.000    999.000
+    S_TIME             0.204      0.000    999.000    999.000
+    S_WF_N           999.000      0.000    999.000    999.000
+    S_WF_V           999.000      0.000    999.000    999.000
+    S_WE_N           999.000      0.000    999.000    999.000
+    S_WE_V           999.000      0.000    999.000    999.000
+    S_COMPLX         999.000      0.000    999.000    999.000
+
+ ETA        ON
+    AGE                0.198      0.000    999.000    999.000
+    MALE              -0.171      0.000    999.000    999.000
+
+ S_CONJ     ON
+    AGE               -0.045      0.000    999.000    999.000
+
+ S_HELPV    ON
+    AGE               -0.024      0.000    999.000    999.000
+
+ S_QWORDS   ON
+    AGE               -0.012      0.000    999.000    999.000
+
+ S_WF_N     ON
+    AGE                0.033      0.000    999.000    999.000
+    FIRST_B            0.020      0.000    999.000    999.000
+    MALE              -0.005      0.000    999.000    999.000
+
+ S_WF_V     ON
+    AGE               -0.021      0.000    999.000    999.000
+
+ S_WE_N     ON
+    AGE                0.011      0.000    999.000    999.000
+    FIRST_B            0.019      0.000    999.000    999.000
+
+ S_WE_V     ON
+    FIRST_B            0.019      0.000    999.000    999.000
+
+ S_COMPLX   ON
+    AGE               -0.014      0.000    999.000    999.000
+
+ Intercepts
+    S_CONJ             0.496      0.000    999.000    999.000
+    S_HELPV           -0.128      0.000    999.000    999.000
+    S_PRON            -0.627      0.000    999.000    999.000
+    S_QUANT           -0.666      0.000    999.000    999.000
+    S_QWORDS          -0.297      0.000    999.000    999.000
+    S_TIME            -0.693      0.000    999.000    999.000
+    S_WF_N            -1.048      0.000    999.000    999.000
+    S_WF_V            -0.132      0.000    999.000    999.000
+    S_WE_N            -0.393      0.000    999.000    999.000
+    S_WE_V            -0.131      0.000    999.000    999.000
+    S_COMPLX          -0.252      0.000    999.000    999.000
+    ETA                0.000      0.000    999.000    999.000
+
+ Residual Variances
+    S_CONJ             0.017      0.000     34.606      0.000
+    S_HELPV            0.013      0.000     32.864      0.000
+    S_PRON             0.008      0.000     29.828      0.000
+    S_QUANT            0.008      0.000     30.066      0.000
+    S_QWORDS           0.021      0.001     34.713      0.000
+    S_TIME             0.017      0.000     33.577      0.000
+    S_WF_N             0.030      0.001     36.095      0.000
+    S_WF_V             0.012      0.000     32.953      0.000
+    S_WE_N             0.015      0.000     36.951      0.000
+    S_WE_V             0.006      0.000     36.885      0.000
+    S_COMPLX           0.021      0.001     34.280      0.000
+    ETA                1.000      0.000    999.000    999.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.271E-07
+       (ratio of smallest to largest eigenvalue)
+
+
+TECHNICAL 1 OUTPUT
+
+
+     PARAMETER SPECIFICATION
+
+
+           NU
+              S_CONJ        S_HELPV       S_PRON        S_QUANT       S_QWORDS
+              ________      ________      ________      ________      ________
+                    0             0             0             0             0
+
+
+           NU
+              S_TIME        S_WF_N        S_WF_V        S_WE_N        S_WE_V
+              ________      ________      ________      ________      ________
+                    0             0             0             0             0
+
+
+           NU
+              S_COMPLX      AGE           MALE          FIRST_B
+              ________      ________      ________      ________
+                    0             0             0             0
+
+
+           LAMBDA
+              ETA           S_CONJ        S_HELPV       S_QWORDS      S_WF_N
+              ________      ________      ________      ________      ________
+ S_CONJ             0             0             0             0             0
+ S_HELPV            0             0             0             0             0
+ S_PRON             0             0             0             0             0
+ S_QUANT            0             0             0             0             0
+ S_QWORDS           0             0             0             0             0
+ S_TIME             0             0             0             0             0
+ S_WF_N             0             0             0             0             0
+ S_WF_V             0             0             0             0             0
+ S_WE_N             0             0             0             0             0
+ S_WE_V             0             0             0             0             0
+ S_COMPLX           0             0             0             0             0
+ AGE                0             0             0             0             0
+ MALE               0             0             0             0             0
+ FIRST_B            0             0             0             0             0
+
+
+           LAMBDA
+              S_WF_V        S_WE_N        S_WE_V        S_COMPLX      AGE
+              ________      ________      ________      ________      ________
+ S_CONJ             0             0             0             0             0
+ S_HELPV            0             0             0             0             0
+ S_PRON             0             0             0             0             0
+ S_QUANT            0             0             0             0             0
+ S_QWORDS           0             0             0             0             0
+ S_TIME             0             0             0             0             0
+ S_WF_N             0             0             0             0             0
+ S_WF_V             0             0             0             0             0
+ S_WE_N             0             0             0             0             0
+ S_WE_V             0             0             0             0             0
+ S_COMPLX           0             0             0             0             0
+ AGE                0             0             0             0             0
+ MALE               0             0             0             0             0
+ FIRST_B            0             0             0             0             0
+
+
+           LAMBDA
+              MALE          FIRST_B
+              ________      ________
+ S_CONJ             0             0
+ S_HELPV            0             0
+ S_PRON             0             0
+ S_QUANT            0             0
+ S_QWORDS           0             0
+ S_TIME             0             0
+ S_WF_N             0             0
+ S_WF_V             0             0
+ S_WE_N             0             0
+ S_WE_V             0             0
+ S_COMPLX           0             0
+ AGE                0             0
+ MALE               0             0
+ FIRST_B            0             0
+
+
+           THETA
+              S_CONJ        S_HELPV       S_PRON        S_QUANT       S_QWORDS
+              ________      ________      ________      ________      ________
+ S_CONJ             0
+ S_HELPV            0             0
+ S_PRON             0             0             1
+ S_QUANT            0             0             0             2
+ S_QWORDS           0             0             0             0             0
+ S_TIME             0             0             0             0             0
+ S_WF_N             0             0             0             0             0
+ S_WF_V             0             0             0             0             0
+ S_WE_N             0             0             0             0             0
+ S_WE_V             0             0             0             0             0
+ S_COMPLX           0             0             0             0             0
+ AGE                0             0             0             0             0
+ MALE               0             0             0             0             0
+ FIRST_B            0             0             0             0             0
+
+
+           THETA
+              S_TIME        S_WF_N        S_WF_V        S_WE_N        S_WE_V
+              ________      ________      ________      ________      ________
+ S_TIME             3
+ S_WF_N             0             0
+ S_WF_V             0             0             0
+ S_WE_N             0             0             0             0
+ S_WE_V             0             0             0             0             0
+ S_COMPLX           0             0             0             0             0
+ AGE                0             0             0             0             0
+ MALE               0             0             0             0             0
+ FIRST_B            0             0             0             0             0
+
+
+           THETA
+              S_COMPLX      AGE           MALE          FIRST_B
+              ________      ________      ________      ________
+ S_COMPLX           0
+ AGE                0             0
+ MALE               0             0             0
+ FIRST_B            0             0             0             0
+
+
+           ALPHA
+              ETA           S_CONJ        S_HELPV       S_QWORDS      S_WF_N
+              ________      ________      ________      ________      ________
+                    0             0             0             0             0
+
+
+           ALPHA
+              S_WF_V        S_WE_N        S_WE_V        S_COMPLX      AGE
+              ________      ________      ________      ________      ________
+                    0             0             0             0             0
+
+
+           ALPHA
+              MALE          FIRST_B
+              ________      ________
+                    0             0
+
+
+           BETA
+              ETA           S_CONJ        S_HELPV       S_QWORDS      S_WF_N
+              ________      ________      ________      ________      ________
+ ETA                0             0             0             0             0
+ S_CONJ             4             0             0             0             0
+ S_HELPV            5             0             0             0             0
+ S_QWORDS           6             0             0             0             0
+ S_WF_N             7             0             0             0             0
+ S_WF_V             8             0             0             0             0
+ S_WE_N             9             0             0             0             0
+ S_WE_V            10             0             0             0             0
+ S_COMPLX          11             0             0             0             0
+ AGE                0             0             0             0             0
+ MALE               0             0             0             0             0
+ FIRST_B            0             0             0             0             0
+
+
+           BETA
+              S_WF_V        S_WE_N        S_WE_V        S_COMPLX      AGE
+              ________      ________      ________      ________      ________
+ ETA                0             0             0             0             0
+ S_CONJ             0             0             0             0             0
+ S_HELPV            0             0             0             0             0
+ S_QWORDS           0             0             0             0             0
+ S_WF_N             0             0             0             0             0
+ S_WF_V             0             0             0             0             0
+ S_WE_N             0             0             0             0             0
+ S_WE_V             0             0             0             0             0
+ S_COMPLX           0             0             0             0             0
+ AGE                0             0             0             0             0
+ MALE               0             0             0             0             0
+ FIRST_B            0             0             0             0             0
+
+
+           BETA
+              MALE          FIRST_B
+              ________      ________
+ ETA                0             0
+ S_CONJ             0             0
+ S_HELPV            0             0
+ S_QWORDS           0             0
+ S_WF_N             0             0
+ S_WF_V             0             0
+ S_WE_N             0             0
+ S_WE_V             0             0
+ S_COMPLX           0             0
+ AGE                0             0
+ MALE               0             0
+ FIRST_B            0             0
+
+
+           PSI
+              ETA           S_CONJ        S_HELPV       S_QWORDS      S_WF_N
+              ________      ________      ________      ________      ________
+ ETA               12
+ S_CONJ             0            13
+ S_HELPV            0             0            14
+ S_QWORDS           0             0             0            15
+ S_WF_N             0             0             0             0            16
+ S_WF_V             0             0             0             0             0
+ S_WE_N             0             0             0             0             0
+ S_WE_V             0             0             0             0             0
+ S_COMPLX           0             0             0             0             0
+ AGE                0             0             0             0             0
+ MALE               0             0             0             0             0
+ FIRST_B            0             0             0             0             0
+
+
+           PSI
+              S_WF_V        S_WE_N        S_WE_V        S_COMPLX      AGE
+              ________      ________      ________      ________      ________
+ S_WF_V            17
+ S_WE_N             0            18
+ S_WE_V             0             0            19
+ S_COMPLX           0             0             0            20
+ AGE                0             0             0             0             0
+ MALE               0             0             0             0             0
+ FIRST_B            0             0             0             0             0
+
+
+           PSI
+              MALE          FIRST_B
+              ________      ________
+ MALE               0
+ FIRST_B            0             0
+
+
+     STARTING VALUES
+
+
+           NU
+              S_CONJ        S_HELPV       S_PRON        S_QUANT       S_QWORDS
+              ________      ________      ________      ________      ________
+                0.000         0.000        -0.627        -0.666         0.000
+
+
+           NU
+              S_TIME        S_WF_N        S_WF_V        S_WE_N        S_WE_V
+              ________      ________      ________      ________      ________
+               -0.693         0.000         0.000         0.000         0.000
+
+
+           NU
+              S_COMPLX      AGE           MALE          FIRST_B
+              ________      ________      ________      ________
+                0.000         0.000         0.000         0.000
+
+
+           LAMBDA
+              ETA           S_CONJ        S_HELPV       S_QWORDS      S_WF_N
+              ________      ________      ________      ________      ________
+ S_CONJ         0.000         1.000         0.000         0.000         0.000
+ S_HELPV        0.000         0.000         1.000         0.000         0.000
+ S_PRON         0.196         0.000         0.000         0.000         0.000
+ S_QUANT        0.200         0.000         0.000         0.000         0.000
+ S_QWORDS       0.000         0.000         0.000         1.000         0.000
+ S_TIME         0.204         0.000         0.000         0.000         0.000
+ S_WF_N         0.000         0.000         0.000         0.000         1.000
+ S_WF_V         0.000         0.000         0.000         0.000         0.000
+ S_WE_N         0.000         0.000         0.000         0.000         0.000
+ S_WE_V         0.000         0.000         0.000         0.000         0.000
+ S_COMPLX       0.000         0.000         0.000         0.000         0.000
+ AGE            0.000         0.000         0.000         0.000         0.000
+ MALE           0.000         0.000         0.000         0.000         0.000
+ FIRST_B        0.000         0.000         0.000         0.000         0.000
+
+
+           LAMBDA
+              S_WF_V        S_WE_N        S_WE_V        S_COMPLX      AGE
+              ________      ________      ________      ________      ________
+ S_CONJ         0.000         0.000         0.000         0.000         0.000
+ S_HELPV        0.000         0.000         0.000         0.000         0.000
+ S_PRON         0.000         0.000         0.000         0.000         0.000
+ S_QUANT        0.000         0.000         0.000         0.000         0.000
+ S_QWORDS       0.000         0.000         0.000         0.000         0.000
+ S_TIME         0.000         0.000         0.000         0.000         0.000
+ S_WF_N         0.000         0.000         0.000         0.000         0.000
+ S_WF_V         1.000         0.000         0.000         0.000         0.000
+ S_WE_N         0.000         1.000         0.000         0.000         0.000
+ S_WE_V         0.000         0.000         1.000         0.000         0.000
+ S_COMPLX       0.000         0.000         0.000         1.000         0.000
+ AGE            0.000         0.000         0.000         0.000         1.000
+ MALE           0.000         0.000         0.000         0.000         0.000
+ FIRST_B        0.000         0.000         0.000         0.000         0.000
+
+
+           LAMBDA
+              MALE          FIRST_B
+              ________      ________
+ S_CONJ         0.000         0.000
+ S_HELPV        0.000         0.000
+ S_PRON         0.000         0.000
+ S_QUANT        0.000         0.000
+ S_QWORDS       0.000         0.000
+ S_TIME         0.000         0.000
+ S_WF_N         0.000         0.000
+ S_WF_V         0.000         0.000
+ S_WE_N         0.000         0.000
+ S_WE_V         0.000         0.000
+ S_COMPLX       0.000         0.000
+ AGE            0.000         0.000
+ MALE           1.000         0.000
+ FIRST_B        0.000         1.000
+
+
+           THETA
+              S_CONJ        S_HELPV       S_PRON        S_QUANT       S_QWORDS
+              ________      ________      ________      ________      ________
+ S_CONJ         0.000
+ S_HELPV        0.000         0.000
+ S_PRON         0.000         0.000         0.037
+ S_QUANT        0.000         0.000         0.000         0.039
+ S_QWORDS       0.000         0.000         0.000         0.000         0.000
+ S_TIME         0.000         0.000         0.000         0.000         0.000
+ S_WF_N         0.000         0.000         0.000         0.000         0.000
+ S_WF_V         0.000         0.000         0.000         0.000         0.000
+ S_WE_N         0.000         0.000         0.000         0.000         0.000
+ S_WE_V         0.000         0.000         0.000         0.000         0.000
+ S_COMPLX       0.000         0.000         0.000         0.000         0.000
+ AGE            0.000         0.000         0.000         0.000         0.000
+ MALE           0.000         0.000         0.000         0.000         0.000
+ FIRST_B        0.000         0.000         0.000         0.000         0.000
+
+
+           THETA
+              S_TIME        S_WF_N        S_WF_V        S_WE_N        S_WE_V
+              ________      ________      ________      ________      ________
+ S_TIME         0.045
+ S_WF_N         0.000         0.000
+ S_WF_V         0.000         0.000         0.000
+ S_WE_N         0.000         0.000         0.000         0.000
+ S_WE_V         0.000         0.000         0.000         0.000         0.000
+ S_COMPLX       0.000         0.000         0.000         0.000         0.000
+ AGE            0.000         0.000         0.000         0.000         0.000
+ MALE           0.000         0.000         0.000         0.000         0.000
+ FIRST_B        0.000         0.000         0.000         0.000         0.000
+
+
+           THETA
+              S_COMPLX      AGE           MALE          FIRST_B
+              ________      ________      ________      ________
+ S_COMPLX       0.000
+ AGE            0.000         0.000
+ MALE           0.000         0.000         0.000
+ FIRST_B        0.000         0.000         0.000         0.000
+
+
+           ALPHA
+              ETA           S_CONJ        S_HELPV       S_QWORDS      S_WF_N
+              ________      ________      ________      ________      ________
+                0.000         0.496        -0.128        -0.297        -1.048
+
+
+           ALPHA
+              S_WF_V        S_WE_N        S_WE_V        S_COMPLX      AGE
+              ________      ________      ________      ________      ________
+               -0.132        -0.393        -0.131        -0.252         0.000
+
+
+           ALPHA
+              MALE          FIRST_B
+              ________      ________
+                0.000         0.000
+
+
+           BETA
+              ETA           S_CONJ        S_HELPV       S_QWORDS      S_WF_N
+              ________      ________      ________      ________      ________
+ ETA            0.000         0.000         0.000         0.000         0.000
+ S_CONJ         1.000         0.000         0.000         0.000         0.000
+ S_HELPV        1.000         0.000         0.000         0.000         0.000
+ S_QWORDS       1.000         0.000         0.000         0.000         0.000
+ S_WF_N         1.000         0.000         0.000         0.000         0.000
+ S_WF_V         1.000         0.000         0.000         0.000         0.000
+ S_WE_N         1.000         0.000         0.000         0.000         0.000
+ S_WE_V         1.000         0.000         0.000         0.000         0.000
+ S_COMPLX       1.000         0.000         0.000         0.000         0.000
+ AGE            0.000         0.000         0.000         0.000         0.000
+ MALE           0.000         0.000         0.000         0.000         0.000
+ FIRST_B        0.000         0.000         0.000         0.000         0.000
+
+
+           BETA
+              S_WF_V        S_WE_N        S_WE_V        S_COMPLX      AGE
+              ________      ________      ________      ________      ________
+ ETA            0.000         0.000         0.000         0.000         0.198
+ S_CONJ         0.000         0.000         0.000         0.000        -0.045
+ S_HELPV        0.000         0.000         0.000         0.000        -0.024
+ S_QWORDS       0.000         0.000         0.000         0.000        -0.012
+ S_WF_N         0.000         0.000         0.000         0.000         0.033
+ S_WF_V         0.000         0.000         0.000         0.000        -0.021
+ S_WE_N         0.000         0.000         0.000         0.000         0.011
+ S_WE_V         0.000         0.000         0.000         0.000         0.000
+ S_COMPLX       0.000         0.000         0.000         0.000        -0.014
+ AGE            0.000         0.000         0.000         0.000         0.000
+ MALE           0.000         0.000         0.000         0.000         0.000
+ FIRST_B        0.000         0.000         0.000         0.000         0.000
+
+
+           BETA
+              MALE          FIRST_B
+              ________      ________
+ ETA           -0.171         0.000
+ S_CONJ         0.000         0.000
+ S_HELPV        0.000         0.000
+ S_QWORDS       0.000         0.000
+ S_WF_N        -0.005         0.020
+ S_WF_V         0.000         0.000
+ S_WE_N         0.000         0.019
+ S_WE_V         0.000         0.019
+ S_COMPLX       0.000         0.000
+ AGE            0.000         0.000
+ MALE           0.000         0.000
+ FIRST_B        0.000         0.000
+
+
+           PSI
+              ETA           S_CONJ        S_HELPV       S_QWORDS      S_WF_N
+              ________      ________      ________      ________      ________
+ ETA            0.050
+ S_CONJ         0.000         0.031
+ S_HELPV        0.000         0.000         0.040
+ S_QWORDS       0.000         0.000         0.000         0.045
+ S_WF_N         0.000         0.000         0.000         0.000         0.033
+ S_WF_V         0.000         0.000         0.000         0.000         0.000
+ S_WE_N         0.000         0.000         0.000         0.000         0.000
+ S_WE_V         0.000         0.000         0.000         0.000         0.000
+ S_COMPLX       0.000         0.000         0.000         0.000         0.000
+ AGE            0.000         0.000         0.000         0.000         0.000
+ MALE           0.000         0.000         0.000         0.000         0.000
+ FIRST_B        0.000         0.000         0.000         0.000         0.000
+
+
+           PSI
+              S_WF_V        S_WE_N        S_WE_V        S_COMPLX      AGE
+              ________      ________      ________      ________      ________
+ S_WF_V         0.036
+ S_WE_N         0.000         0.008
+ S_WE_V         0.000         0.000         0.004
+ S_COMPLX       0.000         0.000         0.000         0.047
+ AGE            0.000         0.000         0.000         0.000         9.008
+ MALE           0.000         0.000         0.000         0.000         0.000
+ FIRST_B        0.000         0.000         0.000         0.000         0.000
+
+
+           PSI
+              MALE          FIRST_B
+              ________      ________
+ MALE           0.500
+ FIRST_B        0.000         0.500
+
+
+SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES
+
+
+     SAMPLE STATISTICS
+
+
+           Means
+              ETA
+              ________
+                4.294
+
+
+           Covariances
+              ETA
+              ________
+ ETA            2.034
+
+
+           Correlations
+              ETA
+              ________
+ ETA            1.000
+
+
+SAVEDATA INFORMATION
+
+
+  Save file
+    scores.dat
+
+  Order and format of variables
+
+    S_CONJ         F10.3
+    S_HELPV        F10.3
+    S_PRON         F10.3
+    S_QUANT        F10.3
+    S_QWORDS       F10.3
+    S_TIME         F10.3
+    S_WF_N         F10.3
+    S_WF_V         F10.3
+    S_WE_N         F10.3
+    S_WE_V         F10.3
+    S_COMPLX       F10.3
+    AGE            F10.3
+    MALE           F10.3
+    FIRST_B        F10.3
+    ID             F10.3
+    ETA            F10.3
+
+  Save file format
+    16F10.3
+
+  Save file record length    10000
+
+
+     Beginning Time:  14:54:01
+        Ending Time:  14:55:57
+       Elapsed Time:  00:01:56
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2019 Muthen & Muthen

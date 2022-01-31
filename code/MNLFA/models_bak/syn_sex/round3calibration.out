@@ -1,0 +1,429 @@
+Mplus VERSION 8.4
+MUTHEN & MUTHEN
+11/02/2021  10:49 PM
+
+INPUT INSTRUCTIONS
+
+  TITLE: Final Model to Get Scoring Parameters
+  DATA: FILE = "models/syn_sex/calibration.dat";
+  VARIABLE:
+  NAMES = ID S_CONJ S_HELPV S_PRON S_QUANT S_QWORDS S_TIME S_WF_N S_WF_V S_WE_N S_WE_V
+       S_COMPLX D_AGE_C D_MALE D_AGE_C2;
+  MISSING=.;
+  !
+  !
+  !
+  USEVARIABLES= S_CONJ S_HELPV S_PRON S_QUANT S_QWORDS S_TIME S_WF_N S_WF_V S_WE_N S_WE_V
+   S_COMPLX D_AGE_C D_MALE;
+  AUXILIARY= ID ;
+  !
+  !
+  CONSTRAINT= D_AGE_C ;
+  ANALYSIS: ESTIMATOR=ML;ALGORITHM=INTEGRATION;INTEGRATION=MONTECARLO;PROCESSORS=4;
+  MODEL: [ETA@0];ETA*(veta);
+  ETA BY S_CONJ*(l_1);
+  ETA BY S_HELPV*(l_2);
+  ETA BY S_PRON*(l_3);
+  ETA BY S_QUANT*(l_4);
+  ETA BY S_QWORDS*(l_5);
+  ETA BY S_TIME*(l_6);
+  ETA BY S_WF_N*(l_7);
+  ETA BY S_WF_V*(l_8);
+  ETA BY S_WE_N*(l_9);
+  ETA BY S_WE_V*(l_10);
+  ETA BY S_COMPLX*(l_11);
+  ETA ON D_AGE_C; ETA ON D_MALE;
+  S_CONJ on D_AGE_C;
+
+  S_HELPV on D_AGE_C;
+
+
+  S_PRON on D_AGE_C;
+
+
+
+  S_QUANT on D_AGE_C;
+
+
+
+
+  !
+
+
+
+
+
+  S_TIME on D_AGE_C;
+
+
+
+
+
+
+  S_WF_N on D_AGE_C;
+
+
+
+
+
+
+
+  S_WF_V on D_AGE_C;
+
+
+
+
+
+
+
+
+  !
+
+
+
+
+
+
+
+
+
+  !
+
+
+
+
+
+
+
+
+
+
+  S_COMPLX on D_AGE_C;
+  MODEL CONSTRAINT: new(
+  !
+  l1_0*1   l1_1*0
+  l2_0*1   l2_1*0
+  l3_0*1   l3_1*0
+  l4_0*1   l4_1*0
+  ! !
+  l6_0*1   l6_1*0
+  l7_0*1   l7_1*0
+  l8_0*1   l8_1*0
+  ! !
+  ! !
+  l11_0*1   l11_1*0
+  );
+  veta=1*exp(
+  0);
+  l_1=l1_0 +l1_1*D_AGE_C;
+  l_2=l2_0 +l2_1*D_AGE_C;
+  l_3=l3_0 +l3_1*D_AGE_C;
+  l_4=l4_0 +l4_1*D_AGE_C;
+  ! !;
+  l_6=l6_0 +l6_1*D_AGE_C;
+  l_7=l7_0 +l7_1*D_AGE_C;
+  l_8=l8_0 +l8_1*D_AGE_C;
+  ! !;
+  ! !;
+  l_11=l11_0 +l11_1*D_AGE_C;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+Final Model to Get Scoring Parameters
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                        1308
+
+Number of dependent variables                                   11
+Number of independent variables                                  2
+Number of continuous latent variables                            1
+
+Observed dependent variables
+
+  Continuous
+   S_CONJ      S_HELPV     S_PRON      S_QUANT     S_QWORDS    S_TIME
+   S_WF_N      S_WF_V      S_WE_N      S_WE_V      S_COMPLX
+
+Observed independent variables
+   D_AGE_C     D_MALE
+
+Observed auxiliary variables
+   ID
+
+Continuous latent variables
+   ETA
+
+
+Estimator                                                       ML
+Information matrix                                        OBSERVED
+Optimization Specifications for the Quasi-Newton Algorithm for
+Continuous Outcomes
+  Maximum number of iterations                                 100
+  Convergence criterion                                  0.100D-05
+Optimization Specifications for the EM Algorithm
+  Maximum number of iterations                                 500
+  Convergence criteria
+    Loglikelihood change                                 0.100D-02
+    Relative loglikelihood change                        0.100D-05
+    Derivative                                           0.100D-02
+Optimization Specifications for the M step of the EM Algorithm for
+Categorical Latent variables
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-02
+  Basis for M step termination                           ITERATION
+Optimization Specifications for the M step of the EM Algorithm for
+Censored, Binary or Ordered Categorical (Ordinal), Unordered
+Categorical (Nominal) and Count Outcomes
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-02
+  Basis for M step termination                           ITERATION
+  Maximum value for logit thresholds                            15
+  Minimum value for logit thresholds                           -15
+  Minimum expected cell size for chi-square              0.100D-01
+Maximum number of iterations for H1                           2000
+Convergence criterion for H1                             0.100D-03
+Optimization algorithm                                         EMA
+Integration Specifications
+  Type                                                  MONTECARLO
+  Number of integration points                                   1
+  Dimensions of numerical integration                            0
+  Adaptive quadrature                                           ON
+  Monte Carlo integration seed                                   0
+Cholesky                                                       OFF
+
+Input data file(s)
+  models/syn_sex/calibration.dat
+Input data format  FREE
+
+
+SUMMARY OF DATA
+
+     Number of missing data patterns             1
+
+
+COVARIANCE COVERAGE OF DATA
+
+Minimum covariance coverage value   0.100
+
+
+     PROPORTION OF DATA PRESENT FOR Y
+
+
+           Covariance Coverage
+              S_CONJ        S_HELPV       S_PRON        S_QUANT       S_QWORDS
+              ________      ________      ________      ________      ________
+ S_CONJ         1.000
+ S_HELPV        1.000         1.000
+ S_PRON         1.000         1.000         1.000
+ S_QUANT        1.000         1.000         1.000         1.000
+ S_QWORDS       1.000         1.000         1.000         1.000         1.000
+ S_TIME         1.000         1.000         1.000         1.000         1.000
+ S_WF_N         1.000         1.000         1.000         1.000         1.000
+ S_WF_V         1.000         1.000         1.000         1.000         1.000
+ S_WE_N         1.000         1.000         1.000         1.000         1.000
+ S_WE_V         1.000         1.000         1.000         1.000         1.000
+ S_COMPLX       1.000         1.000         1.000         1.000         1.000
+ D_AGE_C        1.000         1.000         1.000         1.000         1.000
+ D_MALE         1.000         1.000         1.000         1.000         1.000
+
+
+           Covariance Coverage
+              S_TIME        S_WF_N        S_WF_V        S_WE_N        S_WE_V
+              ________      ________      ________      ________      ________
+ S_TIME         1.000
+ S_WF_N         1.000         1.000
+ S_WF_V         1.000         1.000         1.000
+ S_WE_N         1.000         1.000         1.000         1.000
+ S_WE_V         1.000         1.000         1.000         1.000         1.000
+ S_COMPLX       1.000         1.000         1.000         1.000         1.000
+ D_AGE_C        1.000         1.000         1.000         1.000         1.000
+ D_MALE         1.000         1.000         1.000         1.000         1.000
+
+
+           Covariance Coverage
+              S_COMPLX      D_AGE_C       D_MALE
+              ________      ________      ________
+ S_COMPLX       1.000
+ D_AGE_C        1.000         1.000
+ D_MALE         1.000         1.000         1.000
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     S_CONJ                0.176       1.715       0.000   63.53%       0.000      0.000      0.000
+            1308.000       0.089       1.732       1.000    6.12%       0.000      0.333
+     S_HELPV               0.265       0.969       0.000   45.11%       0.000      0.000      0.048
+            1308.000       0.114      -0.530       1.000    4.89%       0.190      0.619
+     S_PRON                0.300       0.879       0.000   25.76%       0.000      0.080      0.160
+            1308.000       0.108      -0.594       1.000    5.35%       0.280      0.640
+     S_QUANT               0.279       0.896       0.000   33.33%       0.000      0.059      0.118
+            1308.000       0.106      -0.623       1.000    4.13%       0.235      0.647
+     S_QWORDS              0.292       0.816       0.000   44.72%       0.000      0.000      0.143
+            1308.000       0.116      -0.733       1.000    7.49%       0.286      0.571
+     S_TIME                0.272       0.974       0.000   48.85%       0.000      0.000      0.083
+            1308.000       0.124      -0.554       1.000    8.49%       0.167      0.667
+     S_WF_N                0.300       0.702       0.000   38.91%       0.000      0.200      0.200
+            1308.000       0.093      -0.500       1.000    5.58%       0.400      0.600
+     S_WF_V                0.233       1.131       0.000   50.92%       0.000      0.000      0.000
+            1308.000       0.102      -0.105       1.000    3.90%       0.150      0.550
+     S_WE_N                0.048       3.598       0.000   74.85%       0.000      0.000      0.000
+            1308.000       0.013      17.278       1.000    0.23%       0.000      0.071
+     S_WE_V                0.039       4.718       0.000   71.79%       0.000      0.000      0.000
+            1308.000       0.010      30.995       1.000    0.23%       0.000      0.065
+     S_COMPLX              0.296       0.772       0.000   48.32%       0.000      0.000      0.027
+            1308.000       0.131      -0.974       1.000    5.20%       0.297      0.703
+     D_AGE_C              -0.992      -0.002      -7.000   49.77%      -7.000     -7.000      2.500
+            1308.000      35.960      -1.999       6.000    0.08%       5.000      5.000
+     D_MALE                0.060      -0.119      -1.000   47.02%      -1.000     -1.000      1.000
+            1308.000       0.996      -1.986       1.000   52.98%       1.000      1.000
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       51
+
+Loglikelihood
+
+          H0 Value                        9661.514
+
+Information Criteria
+
+          Akaike (AIC)                  -19221.028
+          Bayesian (BIC)                -18957.039
+          Sample-Size Adjusted BIC      -19119.042
+            (n* = (n + 2) / 24)
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ ETA      BY
+    S_CONJ           999.000      0.000    999.000    999.000
+    S_HELPV          999.000      0.000    999.000    999.000
+    S_PRON           999.000      0.000    999.000    999.000
+    S_QUANT          999.000      0.000    999.000    999.000
+    S_QWORDS           0.170      0.005     31.632      0.000
+    S_TIME           999.000      0.000    999.000    999.000
+    S_WF_N           999.000      0.000    999.000    999.000
+    S_WF_V           999.000      0.000    999.000    999.000
+    S_WE_N             0.028      0.002     15.934      0.000
+    S_WE_V             0.026      0.002     16.907      0.000
+    S_COMPLX         999.000      0.000    999.000    999.000
+
+ ETA        ON
+    D_AGE_C            0.249      0.010     25.322      0.000
+    D_MALE            -0.125      0.030     -4.145      0.000
+
+ S_CONJ     ON
+    D_AGE_C            0.003      0.002      2.089      0.037
+
+ S_HELPV    ON
+    D_AGE_C            0.012      0.001      8.965      0.000
+
+ S_PRON     ON
+    D_AGE_C            0.011      0.001      8.185      0.000
+
+ S_QUANT    ON
+    D_AGE_C            0.012      0.001      9.421      0.000
+
+ S_TIME     ON
+    D_AGE_C            0.015      0.002      9.856      0.000
+
+ S_WF_N     ON
+    D_AGE_C            0.014      0.002      7.318      0.000
+
+ S_WF_V     ON
+    D_AGE_C            0.012      0.001      8.346      0.000
+
+ S_COMPLX   ON
+    D_AGE_C            0.023      0.001     15.757      0.000
+
+ Intercepts
+    S_CONJ             0.045      0.010      4.576      0.000
+    S_HELPV            0.158      0.008     19.383      0.000
+    S_PRON             0.227      0.008     28.000      0.000
+    S_QUANT            0.190      0.008     23.996      0.000
+    S_QWORDS           0.336      0.006     52.663      0.000
+    S_TIME             0.163      0.009     17.496      0.000
+    S_WF_N             0.298      0.010     29.436      0.000
+    S_WF_V             0.127      0.009     14.544      0.000
+    S_WE_N             0.055      0.003     18.663      0.000
+    S_WE_V             0.046      0.003     17.878      0.000
+    S_COMPLX           0.206      0.009     23.220      0.000
+    ETA                0.000      0.000    999.000    999.000
+
+ Residual Variances
+    S_CONJ             0.019      0.001     23.500      0.000
+    S_HELPV            0.006      0.000     19.044      0.000
+    S_PRON             0.009      0.000     21.681      0.000
+    S_QUANT            0.007      0.000     20.961      0.000
+    S_QWORDS           0.023      0.001     22.384      0.000
+    S_TIME             0.014      0.001     22.802      0.000
+    S_WF_N             0.025      0.001     24.608      0.000
+    S_WF_V             0.012      0.001     22.646      0.000
+    S_WE_N             0.010      0.000     25.503      0.000
+    S_WE_V             0.008      0.000     25.484      0.000
+    S_COMPLX           0.015      0.001     23.491      0.000
+    ETA                1.000      0.000    999.000    999.000
+
+New/Additional Parameters
+    L1_0               0.140      0.005     28.183      0.000
+    L1_1               0.018      0.001     22.555      0.000
+    L2_0               0.157      0.004     39.143      0.000
+    L2_1               0.017      0.001     28.529      0.000
+    L3_0               0.151      0.004     36.332      0.000
+    L3_1               0.013      0.001     20.631      0.000
+    L4_0               0.148      0.004     37.160      0.000
+    L4_1               0.015      0.001     24.743      0.000
+    L6_0               0.149      0.005     31.653      0.000
+    L6_1               0.018      0.001     23.193      0.000
+    L7_0               0.109      0.006     19.608      0.000
+    L7_1               0.005      0.001      4.811      0.000
+    L8_0               0.140      0.004     31.774      0.000
+    L8_1               0.017      0.001     23.736      0.000
+    L11_0              0.131      0.005     29.021      0.000
+    L11_1              0.016      0.001     21.369      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.163E-07
+       (ratio of smallest to largest eigenvalue)
+
+
+     Beginning Time:  22:49:34
+        Ending Time:  22:50:11
+       Elapsed Time:  00:00:37
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2019 Muthen & Muthen

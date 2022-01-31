@@ -1,0 +1,153 @@
+VERSION 1.1.0
+INPUT
+TITLE:
+ Scoring Model
+DATA:
+ FILE = "models_nomeanimpact/syn_3d/full.dat";
+VARIABLE:
+NAMES = ID S_CONJ S_HELPV S_PRON S_QUANT S_QWORDS S_TIME S_WF_N S_WF_V S_WE_N S_WE_V
+     S_COMPLX D_AGE_C D_AGE_C2 D_MALE D_FIRSTB D_MOMCOL D_AGESEX D_AG2SEX;
+MISSING=.;
+USEVARIABLES= S_CONJ S_HELPV S_PRON S_QUANT S_QWORDS S_TIME S_WF_N S_WF_V S_WE_N S_WE_V
+ S_COMPLX D_AGE_C D_MALE D_FIRSTB D_MOMCOL D_AGESEX D_AGE_C2;
+AUXILIARY=ID;
+CONSTRAINT= D_AGE_C2 D_AGE_C D_AGESEX D_MOMCOL D_FIRSTB ;
+ANALYSIS:
+ ESTIMATOR=ML; ALGORITHM=INTEGRATION; INTEGRATION=MONTECARLO; PROCESSORS=4;
+OUTPUT:
+ tech1;
+SAVEDATA:
+ SAVE=FSCORES; FILE=scores.dat;
+MODEL:
+ [ETA@0];ETA*(veta);
+ETA BY S_CONJ*(l_1);
+ETA BY S_HELPV*(l_2);
+ETA BY S_PRON*(l_3);
+ETA BY S_QUANT*(l_4);
+ETA BY S_QWORDS*(l_5);
+ETA BY S_TIME*(l_6);
+ETA BY S_WF_N*(l_7);
+ETA BY S_WF_V*(l_8);
+ETA BY S_WE_N*(l_9);
+ETA BY S_WE_V*(l_10);
+ETA BY S_COMPLX*(l_11);
+S_CONJ ON D_AGE_C@0.015;
+S_HELPV ON D_AGE_C@0.022;
+S_PRON ON D_AGE_C@0.023;
+S_QUANT ON D_AGE_C@0.021;
+S_QWORDS ON D_AGE_C@0.025;
+S_TIME ON D_AGE_C@0.023;
+S_TIME ON D_FIRSTB@0.011;
+S_TIME ON D_AGESEX@0.001;
+S_WF_N ON D_AGE_C@0.017;
+S_WF_N ON D_AGE_C2@0;
+S_WF_N ON D_FIRSTB@0.019;
+S_WF_V ON D_AGE_C@0.02;
+S_WE_N ON D_AGE_C@0.005;
+S_WE_N ON D_MOMCOL@-0.009;
+S_WE_V ON D_AGE_C@0.004;
+S_WE_V ON D_FIRSTB@-0.004;
+S_WE_V ON D_MOMCOL@-0.006;
+S_COMPLX ON D_AGE_C@0.03;
+S_COMPLX ON D_MALE@-0.009;
+S_COMPLX ON D_MOMCOL@0.012;
+[S_CONJ@0.094];
+[S_HELPV@0.178];
+[S_PRON@0.229];
+[S_QUANT@0.208];
+[S_QWORDS@0.221];
+[S_TIME@0.201];
+[S_WF_N@0.336];
+[S_WF_V@0.158];
+[S_WE_N@0.07];
+[S_WE_V@0.035];
+[S_COMPLX@0.209];
+INPUT_END
+2
+0
+0
+0
+ML
+1
+GENERAL
+0
+11
+1
+6
+s_conj s_helpv s_pron s_quant s_qwords s_time s_wf_n s_wf_v s_we_n s_we_v s_complx eta d_age_c d_male d_firstb d_momcol d_agesex d_age_c2
+1
+-1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0
+0
+1
+eta
+s_conj s_helpv s_pron s_quant s_qwords s_time s_wf_n s_wf_v s_we_n s_we_v s_complx
+1 1 eta s_conj  999.000    0.000
+91 1 eta s_conj l_1
+1 1 eta s_helpv  999.000    0.000
+91 1 eta s_helpv l_2
+1 1 eta s_pron  999.000    0.000
+91 1 eta s_pron l_3
+1 1 eta s_quant  999.000    0.000
+91 1 eta s_quant l_4
+1 1 eta s_qwords  999.000    0.000
+91 1 eta s_qwords l_5
+1 1 eta s_time  999.000    0.000
+91 1 eta s_time l_6
+1 1 eta s_wf_n  999.000    0.000
+91 1 eta s_wf_n l_7
+1 1 eta s_wf_v  999.000    0.000
+91 1 eta s_wf_v l_8
+1 1 eta s_we_n  999.000    0.000
+91 1 eta s_we_n l_9
+1 1 eta s_we_v  999.000    0.000
+91 1 eta s_we_v l_10
+1 1 eta s_complx  999.000    0.000
+91 1 eta s_complx l_11
+1 1 d_age_c s_conj    0.015    0.000
+1 1 d_age_c s_helpv    0.022    0.000
+1 1 d_age_c s_pron    0.023    0.000
+1 1 d_age_c s_quant    0.021    0.000
+1 1 d_age_c s_qwords    0.025    0.000
+1 1 d_age_c s_time    0.023    0.000
+1 1 d_firstb s_time    0.011    0.000
+1 1 d_agesex s_time    0.001    0.000
+1 1 d_age_c s_wf_n    0.017    0.000
+1 1 d_age_c2 s_wf_n    0.000    0.000
+1 1 d_firstb s_wf_n    0.019    0.000
+1 1 d_age_c s_wf_v    0.020    0.000
+1 1 d_age_c s_we_n    0.005    0.000
+1 1 d_momcol s_we_n   -0.009    0.000
+1 1 d_age_c s_we_v    0.004    0.000
+1 1 d_firstb s_we_v   -0.004    0.000
+1 1 d_momcol s_we_v   -0.006    0.000
+1 1 d_age_c s_complx    0.030    0.000
+1 1 d_male s_complx   -0.009    0.000
+1 1 d_momcol s_complx    0.012    0.000
+4 1 s_conj    0.017    0.000
+4 1 s_helpv    0.007    0.000
+4 1 s_pron    0.008    0.000
+4 1 s_quant    0.008    0.000
+4 1 s_qwords    0.021    0.001
+4 1 s_time    0.017    0.000
+4 1 s_wf_n    0.029    0.001
+4 1 s_wf_v    0.012    0.000
+4 1 s_we_n    0.012    0.000
+4 1 s_we_v    0.006    0.000
+4 1 s_complx    0.017    0.000
+5 1 eta  999.000    0.000
+95 1 eta veta
+2 1 d_age_c d_male  999.000  999.000
+2 1 d_age_c d_firstb  999.000  999.000
+2 1 d_age_c d_momcol  999.000  999.000
+2 1 d_age_c d_agesex  999.000  999.000
+2 1 d_age_c d_age_c2  999.000  999.000
+2 1 d_male d_firstb  999.000  999.000
+2 1 d_male d_momcol  999.000  999.000
+2 1 d_male d_agesex  999.000  999.000
+2 1 d_male d_age_c2  999.000  999.000
+2 1 d_firstb d_momcol  999.000  999.000
+2 1 d_firstb d_agesex  999.000  999.000
+2 1 d_firstb d_age_c2  999.000  999.000
+2 1 d_momcol d_agesex  999.000  999.000
+2 1 d_momcol d_age_c2  999.000  999.000
+2 1 d_agesex d_age_c2  999.000  999.000

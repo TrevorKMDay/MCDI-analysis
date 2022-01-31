@@ -1,0 +1,209 @@
+TITLE: Final Model to Get Scoring Parameters
+DATA: FILE = "models/lex_sex/calibration.dat";
+VARIABLE: 
+NAMES = ID L_ACTION L_ANIMAL L_BODYP L_CLOTH L_DESCRB L_FOOD L_ROOMS L_GAMES
+     L_HOUSEH L_LOCATE L_OUTSDE L_PEOPLE L_PLACES L_SOUNDS L_TOYS L_VEHICL D_AGE_C
+     D_MALE D_AGE_C2; 
+MISSING=.;
+!
+!
+USEVARIABLES= L_ACTION L_ANIMAL L_BODYP L_CLOTH L_DESCRB L_FOOD L_ROOMS L_GAMES L_HOUSEH 
+ L_LOCATE L_OUTSDE L_PEOPLE L_PLACES L_SOUNDS L_TOYS L_VEHICL D_AGE_C D_MALE;
+AUXILIARY= ID ;
+!
+!
+CONSTRAINT= D_AGE_C D_MALE ;
+ANALYSIS: ESTIMATOR=ML;ALGORITHM=INTEGRATION;INTEGRATION=MONTECARLO;PROCESSORS=4;
+MODEL: [ETA@0];ETA*(veta);
+ETA BY L_ACTION*(l_1);
+ETA BY L_ANIMAL*(l_2);
+ETA BY L_BODYP*(l_3);
+ETA BY L_CLOTH*(l_4);
+ETA BY L_DESCRB*(l_5);
+ETA BY L_FOOD*(l_6);
+ETA BY L_ROOMS*(l_7);
+ETA BY L_GAMES*(l_8);
+ETA BY L_HOUSEH*(l_9);
+ETA BY L_LOCATE*(l_10);
+ETA BY L_OUTSDE*(l_11);
+ETA BY L_PEOPLE*(l_12);
+ETA BY L_PLACES*(l_13);
+ETA BY L_SOUNDS*(l_14);
+ETA BY L_TOYS*(l_15);
+ETA BY L_VEHICL*(l_16);
+ETA ON D_AGE_C; ETA ON D_MALE;
+L_ACTION on D_AGE_C;
+
+L_ANIMAL on D_AGE_C;
+
+
+L_BODYP on D_AGE_C;
+
+
+
+L_CLOTH on D_AGE_C D_MALE;
+
+
+
+
+L_DESCRB on D_AGE_C D_MALE;
+
+
+
+
+
+L_FOOD on D_AGE_C;
+
+
+
+
+
+
+L_ROOMS on D_AGE_C;
+
+
+
+
+
+
+
+L_GAMES on D_AGE_C D_MALE;
+
+
+
+
+
+
+
+
+!
+
+
+
+
+
+
+
+
+
+L_LOCATE on D_AGE_C;
+
+
+
+
+
+
+
+
+
+
+L_OUTSDE on D_AGE_C D_MALE;
+
+
+
+
+
+
+
+
+
+
+
+L_PEOPLE on D_AGE_C;
+
+
+
+
+
+
+
+
+
+
+
+
+L_PLACES on D_AGE_C;
+
+
+
+
+
+
+
+
+
+
+
+
+
+L_SOUNDS on D_AGE_C;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+L_TOYS on D_AGE_C;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+L_VEHICL on D_AGE_C D_MALE;
+MODEL CONSTRAINT: new(
+V1*0
+!
+l1_0*1   l1_1*0
+l2_0*1   l2_1*0
+l3_0*1   l3_1*0
+l4_0*1   l4_2*0
+l5_0*1   l5_1*0  l5_2*0
+l6_0*1   l6_1*0
+l7_0*1   l7_1*0
+l8_0*1   l8_1*0  l8_2*0
+! !
+l10_0*1   l10_1*0
+l11_0*1   l11_1*0  l11_2*0
+l12_0*1   l12_1*0
+l13_0*1   l13_1*0
+l14_0*1   l14_1*0
+l15_0*1   l15_1*0
+l16_0*1   l16_1*0
+);
+veta=1*exp(
+v1*D_AGE_C+
+0);
+l_1=l1_0 +l1_1*D_AGE_C;
+l_2=l2_0 +l2_1*D_AGE_C;
+l_3=l3_0 +l3_1*D_AGE_C;
+l_4=l4_0 +l4_2*D_MALE;
+l_5=l5_0 +l5_1*D_AGE_C +l5_2*D_MALE;
+l_6=l6_0 +l6_1*D_AGE_C;
+l_7=l7_0 +l7_1*D_AGE_C;
+l_8=l8_0 +l8_1*D_AGE_C +l8_2*D_MALE;
+! !;
+l_10=l10_0 +l10_1*D_AGE_C;
+l_11=l11_0 +l11_1*D_AGE_C +l11_2*D_MALE;
+l_12=l12_0 +l12_1*D_AGE_C;
+l_13=l13_0 +l13_1*D_AGE_C;
+l_14=l14_0 +l14_1*D_AGE_C;
+l_15=l15_0 +l15_1*D_AGE_C;
+l_16=l16_0 +l16_1*D_AGE_C;

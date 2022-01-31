@@ -1,0 +1,660 @@
+Mplus VERSION 8.4
+MUTHEN & MUTHEN
+11/02/2021   3:32 PM
+
+INPUT INSTRUCTIONS
+
+  TITLE: Measurement Invariance Model for L_PLACES
+  DATA: FILE = "models/lex_sex/calibration.dat";
+  VARIABLE:
+  NAMES = ID L_ACTION L_ANIMAL L_BODYP L_CLOTH L_DESCRB L_FOOD L_ROOMS L_GAMES
+       L_HOUSEH L_LOCATE L_OUTSDE L_PEOPLE L_PLACES L_SOUNDS L_TOYS L_VEHICL D_AGE_C
+       D_MALE D_AGE_C2;
+  MISSING=.;
+  !
+  !
+  USEVARIABLES= L_ACTION L_ANIMAL L_BODYP L_CLOTH L_DESCRB L_FOOD L_ROOMS L_GAMES L_HOUSEH
+   L_LOCATE L_OUTSDE L_PEOPLE L_PLACES L_SOUNDS L_TOYS L_VEHICL D_AGE_C D_MALE ;
+  AUXILIARY= ID ;
+  !
+  !
+  CONSTRAINT= D_AGE_C D_MALE ;
+  ANALYSIS: ESTIMATOR=ML;ALGORITHM=INTEGRATION;INTEGRATION=MONTECARLO;PROCESSORS=4;
+  MODEL: [ETA@0]; ETA@1;
+  ETA BY L_ACTION*(l1);
+  ETA BY L_ANIMAL*(l2);
+  ETA BY L_BODYP*(l3);
+  ETA BY L_CLOTH*(l4);
+  ETA BY L_DESCRB*(l5);
+  ETA BY L_FOOD*(l6);
+  ETA BY L_ROOMS*(l7);
+  ETA BY L_GAMES*(l8);
+  ETA BY L_HOUSEH*(l9);
+  ETA BY L_LOCATE*(l10);
+  ETA BY L_OUTSDE*(l11);
+  ETA BY L_PEOPLE*(l12);
+  ETA BY L_PLACES*(l13);
+  ETA BY L_SOUNDS*(l14);
+  ETA BY L_TOYS*(l15);
+  ETA BY L_VEHICL*(l16);
+  L_PLACES on D_AGE_C D_MALE;
+  MODEL CONSTRAINT: new(
+  l13_00*1
+  l13_1*0
+  l13_2*0
+  );
+  l13=l13_00
+  +l13_1*D_AGE_C
+  +l13_2*D_MALE
+  ;
+  OUTPUT: tech1;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+Measurement Invariance Model for L_PLACES
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                        1308
+
+Number of dependent variables                                   16
+Number of independent variables                                  2
+Number of continuous latent variables                            1
+
+Observed dependent variables
+
+  Continuous
+   L_ACTION    L_ANIMAL    L_BODYP     L_CLOTH     L_DESCRB    L_FOOD
+   L_ROOMS     L_GAMES     L_HOUSEH    L_LOCATE    L_OUTSDE    L_PEOPLE
+   L_PLACES    L_SOUNDS    L_TOYS      L_VEHICL
+
+Observed independent variables
+   D_AGE_C     D_MALE
+
+Observed auxiliary variables
+   ID
+
+Continuous latent variables
+   ETA
+
+
+Estimator                                                       ML
+Information matrix                                        OBSERVED
+Optimization Specifications for the Quasi-Newton Algorithm for
+Continuous Outcomes
+  Maximum number of iterations                                 100
+  Convergence criterion                                  0.100D-05
+Optimization Specifications for the EM Algorithm
+  Maximum number of iterations                                 500
+  Convergence criteria
+    Loglikelihood change                                 0.100D-02
+    Relative loglikelihood change                        0.100D-05
+    Derivative                                           0.100D-02
+Optimization Specifications for the M step of the EM Algorithm for
+Categorical Latent variables
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-02
+  Basis for M step termination                           ITERATION
+Optimization Specifications for the M step of the EM Algorithm for
+Censored, Binary or Ordered Categorical (Ordinal), Unordered
+Categorical (Nominal) and Count Outcomes
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-02
+  Basis for M step termination                           ITERATION
+  Maximum value for logit thresholds                            15
+  Minimum value for logit thresholds                           -15
+  Minimum expected cell size for chi-square              0.100D-01
+Maximum number of iterations for H1                           2000
+Convergence criterion for H1                             0.100D-03
+Optimization algorithm                                         EMA
+Integration Specifications
+  Type                                                  MONTECARLO
+  Number of integration points                                   1
+  Dimensions of numerical integration                            0
+  Adaptive quadrature                                           ON
+  Monte Carlo integration seed                                   0
+Cholesky                                                       OFF
+
+Input data file(s)
+  models/lex_sex/calibration.dat
+Input data format  FREE
+
+
+SUMMARY OF DATA
+
+     Number of missing data patterns             1
+
+
+COVARIANCE COVERAGE OF DATA
+
+Minimum covariance coverage value   0.100
+
+
+     PROPORTION OF DATA PRESENT FOR Y
+
+
+           Covariance Coverage
+              L_ACTION      L_ANIMAL      L_BODYP       L_CLOTH       L_DESCRB
+              ________      ________      ________      ________      ________
+ L_ACTION       1.000
+ L_ANIMAL       1.000         1.000
+ L_BODYP        1.000         1.000         1.000
+ L_CLOTH        1.000         1.000         1.000         1.000
+ L_DESCRB       1.000         1.000         1.000         1.000         1.000
+ L_FOOD         1.000         1.000         1.000         1.000         1.000
+ L_ROOMS        1.000         1.000         1.000         1.000         1.000
+ L_GAMES        1.000         1.000         1.000         1.000         1.000
+ L_HOUSEH       1.000         1.000         1.000         1.000         1.000
+ L_LOCATE       1.000         1.000         1.000         1.000         1.000
+ L_OUTSDE       1.000         1.000         1.000         1.000         1.000
+ L_PEOPLE       1.000         1.000         1.000         1.000         1.000
+ L_PLACES       1.000         1.000         1.000         1.000         1.000
+ L_SOUNDS       1.000         1.000         1.000         1.000         1.000
+ L_TOYS         1.000         1.000         1.000         1.000         1.000
+ L_VEHICL       1.000         1.000         1.000         1.000         1.000
+ D_AGE_C        1.000         1.000         1.000         1.000         1.000
+ D_MALE         1.000         1.000         1.000         1.000         1.000
+
+
+           Covariance Coverage
+              L_FOOD        L_ROOMS       L_GAMES       L_HOUSEH      L_LOCATE
+              ________      ________      ________      ________      ________
+ L_FOOD         1.000
+ L_ROOMS        1.000         1.000
+ L_GAMES        1.000         1.000         1.000
+ L_HOUSEH       1.000         1.000         1.000         1.000
+ L_LOCATE       1.000         1.000         1.000         1.000         1.000
+ L_OUTSDE       1.000         1.000         1.000         1.000         1.000
+ L_PEOPLE       1.000         1.000         1.000         1.000         1.000
+ L_PLACES       1.000         1.000         1.000         1.000         1.000
+ L_SOUNDS       1.000         1.000         1.000         1.000         1.000
+ L_TOYS         1.000         1.000         1.000         1.000         1.000
+ L_VEHICL       1.000         1.000         1.000         1.000         1.000
+ D_AGE_C        1.000         1.000         1.000         1.000         1.000
+ D_MALE         1.000         1.000         1.000         1.000         1.000
+
+
+           Covariance Coverage
+              L_OUTSDE      L_PEOPLE      L_PLACES      L_SOUNDS      L_TOYS
+              ________      ________      ________      ________      ________
+ L_OUTSDE       1.000
+ L_PEOPLE       1.000         1.000
+ L_PLACES       1.000         1.000         1.000
+ L_SOUNDS       1.000         1.000         1.000         1.000
+ L_TOYS         1.000         1.000         1.000         1.000         1.000
+ L_VEHICL       1.000         1.000         1.000         1.000         1.000
+ D_AGE_C        1.000         1.000         1.000         1.000         1.000
+ D_MALE         1.000         1.000         1.000         1.000         1.000
+
+
+           Covariance Coverage
+              L_VEHICL      D_AGE_C       D_MALE
+              ________      ________      ________
+ L_VEHICL       1.000
+ D_AGE_C        1.000         1.000
+ D_MALE         1.000         1.000         1.000
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     L_ACTION              0.402       0.325       0.000   22.40%       0.000      0.039      0.194
+            1308.000       0.169      -1.671       1.000    4.97%       0.563      0.922
+     L_ANIMAL              0.493       0.079       0.000    5.89%       0.070      0.209      0.442
+            1308.000       0.153      -1.720       1.000   14.07%       0.721      0.953
+     L_BODYP               0.502      -0.037       0.000   17.81%       0.037      0.222      0.519
+            1308.000       0.168      -1.785       1.000   10.40%       0.815      0.963
+     L_CLOTH               0.414       0.274       0.000   18.27%       0.036      0.143      0.286
+            1308.000       0.138      -1.562       1.000    5.81%       0.571      0.857
+     L_DESCRB              0.390       0.372       0.000   18.50%       0.016      0.063      0.206
+            1308.000       0.154      -1.586       1.000    5.50%       0.524      0.873
+     L_FOOD                0.446       0.174       0.000   10.32%       0.029      0.132      0.338
+            1308.000       0.153      -1.709       1.000    6.12%       0.662      0.897
+     L_ROOMS               0.394       0.324       0.000   31.73%       0.000      0.061      0.212
+            1308.000       0.159      -1.646       1.000    5.28%       0.545      0.879
+     L_GAMES               0.544      -0.024       0.000    4.36%       0.160      0.320      0.520
+            1308.000       0.135      -1.628       1.000   18.88%       0.760      0.960
+     L_HOUSEH              0.438       0.191       0.000   17.13%       0.020      0.120      0.340
+            1308.000       0.162      -1.725       1.000    7.11%       0.680      0.920
+     L_LOCATE              0.341       0.586       0.000   25.23%       0.000      0.077      0.192
+            1308.000       0.119      -1.167       1.000    4.13%       0.385      0.731
+     L_OUTSDE              0.420       0.269       0.000   25.61%       0.000      0.097      0.290
+            1308.000       0.161      -1.650       1.000   11.24%       0.581      0.903
+     L_PEOPLE              0.423       0.455       0.000    1.76%       0.103      0.207      0.310
+            1308.000       0.102      -1.261       1.000    4.97%       0.483      0.759
+     L_PLACES              0.339       0.498       0.000   33.94%       0.000      0.045      0.182
+            1308.000       0.125      -1.315       1.000    4.97%       0.455      0.727
+     L_SOUNDS              0.720      -0.775       0.000    1.91%       0.417      0.667      0.833
+            1308.000       0.091      -0.688       1.000   35.55%       0.917      1.000
+     L_TOYS                0.506       0.080       0.000    9.10%       0.111      0.278      0.444
+            1308.000       0.145      -1.666       1.000   18.35%       0.722      0.944
+     L_VEHICL              0.479       0.033       0.000   23.01%       0.000      0.214      0.464
+            1308.000       0.160      -1.717       1.000   14.53%       0.714      0.929
+     D_AGE_C              -0.992      -0.002      -7.000   49.77%      -7.000     -7.000      2.500
+            1308.000      35.960      -1.999       6.000    0.08%       5.000      5.000
+     D_MALE                0.060      -0.119      -1.000   47.02%      -1.000     -1.000      1.000
+            1308.000       0.996      -1.986       1.000   52.98%       1.000      1.000
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       52
+
+Loglikelihood
+
+          H0 Value                       17192.912
+
+Information Criteria
+
+          Akaike (AIC)                  -34281.824
+          Bayesian (BIC)                -34012.658
+          Sample-Size Adjusted BIC      -34177.838
+            (n* = (n + 2) / 24)
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ ETA      BY
+    L_ACTION           0.403      0.008     49.134      0.000
+    L_ANIMAL           0.379      0.008     48.141      0.000
+    L_BODYP            0.396      0.008     47.838      0.000
+    L_CLOTH            0.364      0.007     49.146      0.000
+    L_DESCRB           0.383      0.008     48.732      0.000
+    L_FOOD             0.387      0.008     49.831      0.000
+    L_ROOMS            0.392      0.008     49.413      0.000
+    L_GAMES            0.353      0.007     47.324      0.000
+    L_HOUSEH           0.398      0.008     50.104      0.000
+    L_LOCATE           0.323      0.007     45.212      0.000
+    L_OUTSDE           0.395      0.008     49.602      0.000
+    L_PEOPLE           0.306      0.006     47.206      0.000
+    L_PLACES         999.000      0.000    999.000    999.000
+    L_SOUNDS           0.243      0.007     35.415      0.000
+    L_TOYS             0.372      0.008     48.768      0.000
+    L_VEHICL           0.386      0.008     47.519      0.000
+
+ L_PLACES   ON
+    D_AGE_C            0.003      0.001      2.937      0.003
+    D_MALE             0.002      0.002      0.664      0.507
+
+ Means
+    ETA                0.000      0.000    999.000    999.000
+
+ Intercepts
+    L_ACTION           0.402      0.011     35.358      0.000
+    L_ANIMAL           0.493      0.011     45.602      0.000
+    L_BODYP            0.502      0.011     44.243      0.000
+    L_CLOTH            0.414      0.010     40.334      0.000
+    L_DESCRB           0.390      0.011     35.959      0.000
+    L_FOOD             0.446      0.011     41.219      0.000
+    L_ROOMS            0.394      0.011     35.729      0.000
+    L_GAMES            0.544      0.010     53.564      0.000
+    L_HOUSEH           0.438      0.011     39.398      0.000
+    L_LOCATE           0.341      0.010     35.753      0.000
+    L_OUTSDE           0.420      0.011     37.844      0.000
+    L_PEOPLE           0.423      0.009     47.987      0.000
+    L_PLACES           0.259      0.011     23.765      0.000
+    L_SOUNDS           0.720      0.008     86.126      0.000
+    L_TOYS             0.506      0.011     48.009      0.000
+    L_VEHICL           0.479      0.011     43.253      0.000
+
+ Variances
+    ETA                1.000      0.000    999.000    999.000
+
+ Residual Variances
+    L_ACTION           0.007      0.000     23.373      0.000
+    L_ANIMAL           0.009      0.000     24.193      0.000
+    L_BODYP            0.011      0.000     24.312      0.000
+    L_CLOTH            0.005      0.000     23.637      0.000
+    L_DESCRB           0.007      0.000     23.750      0.000
+    L_FOOD             0.004      0.000     22.459      0.000
+    L_ROOMS            0.005      0.000     23.151      0.000
+    L_GAMES            0.010      0.000     24.573      0.000
+    L_HOUSEH           0.003      0.000     21.638      0.000
+    L_LOCATE           0.015      0.001     24.918      0.000
+    L_OUTSDE           0.005      0.000     23.010      0.000
+    L_PEOPLE           0.008      0.000     24.571      0.000
+    L_PLACES           0.007      0.000     23.740      0.000
+    L_SOUNDS           0.032      0.001     25.403      0.000
+    L_TOYS             0.007      0.000     23.846      0.000
+    L_VEHICL           0.012      0.000     24.442      0.000
+
+New/Additional Parameters
+    L13_00             0.329      0.009     37.274      0.000
+    L13_1              0.015      0.001     13.570      0.000
+    L13_2              0.002      0.002      0.635      0.526
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.670E-07
+       (ratio of smallest to largest eigenvalue)
+
+
+TECHNICAL 1 OUTPUT
+
+
+     PARAMETER SPECIFICATION
+
+
+           NU
+              L_ACTION      L_ANIMAL      L_BODYP       L_CLOTH       L_DESCRB
+              ________      ________      ________      ________      ________
+                    1             2             3             4             5
+
+
+           NU
+              L_FOOD        L_ROOMS       L_GAMES       L_HOUSEH      L_LOCATE
+              ________      ________      ________      ________      ________
+                    6             7             8             9            10
+
+
+           NU
+              L_OUTSDE      L_PEOPLE      L_PLACES      L_SOUNDS      L_TOYS
+              ________      ________      ________      ________      ________
+                   11            12             0            13            14
+
+
+           NU
+              L_VEHICL      D_AGE_C       D_MALE
+              ________      ________      ________
+                   15             0             0
+
+
+           LAMBDA
+              ETA           L_PLACES      D_AGE_C       D_MALE
+              ________      ________      ________      ________
+ L_ACTION          16             0             0             0
+ L_ANIMAL          17             0             0             0
+ L_BODYP           18             0             0             0
+ L_CLOTH           19             0             0             0
+ L_DESCRB          20             0             0             0
+ L_FOOD            21             0             0             0
+ L_ROOMS           22             0             0             0
+ L_GAMES           23             0             0             0
+ L_HOUSEH          24             0             0             0
+ L_LOCATE          25             0             0             0
+ L_OUTSDE          26             0             0             0
+ L_PEOPLE          27             0             0             0
+ L_PLACES           0             0             0             0
+ L_SOUNDS          28             0             0             0
+ L_TOYS            29             0             0             0
+ L_VEHICL          30             0             0             0
+ D_AGE_C            0             0             0             0
+ D_MALE             0             0             0             0
+
+
+           THETA
+              L_ACTION      L_ANIMAL      L_BODYP       L_CLOTH       L_DESCRB
+              ________      ________      ________      ________      ________
+ L_ACTION          31
+ L_ANIMAL           0            32
+ L_BODYP            0             0            33
+ L_CLOTH            0             0             0            34
+ L_DESCRB           0             0             0             0            35
+ L_FOOD             0             0             0             0             0
+ L_ROOMS            0             0             0             0             0
+ L_GAMES            0             0             0             0             0
+ L_HOUSEH           0             0             0             0             0
+ L_LOCATE           0             0             0             0             0
+ L_OUTSDE           0             0             0             0             0
+ L_PEOPLE           0             0             0             0             0
+ L_PLACES           0             0             0             0             0
+ L_SOUNDS           0             0             0             0             0
+ L_TOYS             0             0             0             0             0
+ L_VEHICL           0             0             0             0             0
+ D_AGE_C            0             0             0             0             0
+ D_MALE             0             0             0             0             0
+
+
+           THETA
+              L_FOOD        L_ROOMS       L_GAMES       L_HOUSEH      L_LOCATE
+              ________      ________      ________      ________      ________
+ L_FOOD            36
+ L_ROOMS            0            37
+ L_GAMES            0             0            38
+ L_HOUSEH           0             0             0            39
+ L_LOCATE           0             0             0             0            40
+ L_OUTSDE           0             0             0             0             0
+ L_PEOPLE           0             0             0             0             0
+ L_PLACES           0             0             0             0             0
+ L_SOUNDS           0             0             0             0             0
+ L_TOYS             0             0             0             0             0
+ L_VEHICL           0             0             0             0             0
+ D_AGE_C            0             0             0             0             0
+ D_MALE             0             0             0             0             0
+
+
+           THETA
+              L_OUTSDE      L_PEOPLE      L_PLACES      L_SOUNDS      L_TOYS
+              ________      ________      ________      ________      ________
+ L_OUTSDE          41
+ L_PEOPLE           0            42
+ L_PLACES           0             0             0
+ L_SOUNDS           0             0             0            43
+ L_TOYS             0             0             0             0            44
+ L_VEHICL           0             0             0             0             0
+ D_AGE_C            0             0             0             0             0
+ D_MALE             0             0             0             0             0
+
+
+           THETA
+              L_VEHICL      D_AGE_C       D_MALE
+              ________      ________      ________
+ L_VEHICL          45
+ D_AGE_C            0             0
+ D_MALE             0             0             0
+
+
+           ALPHA
+              ETA           L_PLACES      D_AGE_C       D_MALE
+              ________      ________      ________      ________
+                    0            46             0             0
+
+
+           BETA
+              ETA           L_PLACES      D_AGE_C       D_MALE
+              ________      ________      ________      ________
+ ETA                0             0             0             0
+ L_PLACES          47             0            48            49
+ D_AGE_C            0             0             0             0
+ D_MALE             0             0             0             0
+
+
+           PSI
+              ETA           L_PLACES      D_AGE_C       D_MALE
+              ________      ________      ________      ________
+ ETA                0
+ L_PLACES           0            50
+ D_AGE_C            0             0             0
+ D_MALE             0             0             0             0
+
+
+     PARAMETER SPECIFICATION FOR THE ADDITIONAL PARAMETERS
+
+
+           NEW/ADDITIONAL PARAMETERS
+              L13_00        L13_1         L13_2
+              ________      ________      ________
+                   51            52            53
+
+
+     STARTING VALUES
+
+
+           NU
+              L_ACTION      L_ANIMAL      L_BODYP       L_CLOTH       L_DESCRB
+              ________      ________      ________      ________      ________
+                0.402         0.493         0.502         0.414         0.390
+
+
+           NU
+              L_FOOD        L_ROOMS       L_GAMES       L_HOUSEH      L_LOCATE
+              ________      ________      ________      ________      ________
+                0.446         0.394         0.544         0.438         0.341
+
+
+           NU
+              L_OUTSDE      L_PEOPLE      L_PLACES      L_SOUNDS      L_TOYS
+              ________      ________      ________      ________      ________
+                0.420         0.423         0.000         0.720         0.506
+
+
+           NU
+              L_VEHICL      D_AGE_C       D_MALE
+              ________      ________      ________
+                0.479         0.000         0.000
+
+
+           LAMBDA
+              ETA           L_PLACES      D_AGE_C       D_MALE
+              ________      ________      ________      ________
+ L_ACTION       1.000         0.000         0.000         0.000
+ L_ANIMAL       1.000         0.000         0.000         0.000
+ L_BODYP        1.000         0.000         0.000         0.000
+ L_CLOTH        1.000         0.000         0.000         0.000
+ L_DESCRB       1.000         0.000         0.000         0.000
+ L_FOOD         1.000         0.000         0.000         0.000
+ L_ROOMS        1.000         0.000         0.000         0.000
+ L_GAMES        1.000         0.000         0.000         0.000
+ L_HOUSEH       1.000         0.000         0.000         0.000
+ L_LOCATE       1.000         0.000         0.000         0.000
+ L_OUTSDE       1.000         0.000         0.000         0.000
+ L_PEOPLE       1.000         0.000         0.000         0.000
+ L_PLACES       0.000         1.000         0.000         0.000
+ L_SOUNDS       1.000         0.000         0.000         0.000
+ L_TOYS         1.000         0.000         0.000         0.000
+ L_VEHICL       1.000         0.000         0.000         0.000
+ D_AGE_C        0.000         0.000         1.000         0.000
+ D_MALE         0.000         0.000         0.000         1.000
+
+
+           THETA
+              L_ACTION      L_ANIMAL      L_BODYP       L_CLOTH       L_DESCRB
+              ________      ________      ________      ________      ________
+ L_ACTION       0.084
+ L_ANIMAL       0.000         0.076
+ L_BODYP        0.000         0.000         0.084
+ L_CLOTH        0.000         0.000         0.000         0.069
+ L_DESCRB       0.000         0.000         0.000         0.000         0.077
+ L_FOOD         0.000         0.000         0.000         0.000         0.000
+ L_ROOMS        0.000         0.000         0.000         0.000         0.000
+ L_GAMES        0.000         0.000         0.000         0.000         0.000
+ L_HOUSEH       0.000         0.000         0.000         0.000         0.000
+ L_LOCATE       0.000         0.000         0.000         0.000         0.000
+ L_OUTSDE       0.000         0.000         0.000         0.000         0.000
+ L_PEOPLE       0.000         0.000         0.000         0.000         0.000
+ L_PLACES       0.000         0.000         0.000         0.000         0.000
+ L_SOUNDS       0.000         0.000         0.000         0.000         0.000
+ L_TOYS         0.000         0.000         0.000         0.000         0.000
+ L_VEHICL       0.000         0.000         0.000         0.000         0.000
+ D_AGE_C        0.000         0.000         0.000         0.000         0.000
+ D_MALE         0.000         0.000         0.000         0.000         0.000
+
+
+           THETA
+              L_FOOD        L_ROOMS       L_GAMES       L_HOUSEH      L_LOCATE
+              ________      ________      ________      ________      ________
+ L_FOOD         0.077
+ L_ROOMS        0.000         0.079
+ L_GAMES        0.000         0.000         0.068
+ L_HOUSEH       0.000         0.000         0.000         0.081
+ L_LOCATE       0.000         0.000         0.000         0.000         0.060
+ L_OUTSDE       0.000         0.000         0.000         0.000         0.000
+ L_PEOPLE       0.000         0.000         0.000         0.000         0.000
+ L_PLACES       0.000         0.000         0.000         0.000         0.000
+ L_SOUNDS       0.000         0.000         0.000         0.000         0.000
+ L_TOYS         0.000         0.000         0.000         0.000         0.000
+ L_VEHICL       0.000         0.000         0.000         0.000         0.000
+ D_AGE_C        0.000         0.000         0.000         0.000         0.000
+ D_MALE         0.000         0.000         0.000         0.000         0.000
+
+
+           THETA
+              L_OUTSDE      L_PEOPLE      L_PLACES      L_SOUNDS      L_TOYS
+              ________      ________      ________      ________      ________
+ L_OUTSDE       0.081
+ L_PEOPLE       0.000         0.051
+ L_PLACES       0.000         0.000         0.000
+ L_SOUNDS       0.000         0.000         0.000         0.046
+ L_TOYS         0.000         0.000         0.000         0.000         0.073
+ L_VEHICL       0.000         0.000         0.000         0.000         0.000
+ D_AGE_C        0.000         0.000         0.000         0.000         0.000
+ D_MALE         0.000         0.000         0.000         0.000         0.000
+
+
+           THETA
+              L_VEHICL      D_AGE_C       D_MALE
+              ________      ________      ________
+ L_VEHICL       0.080
+ D_AGE_C        0.000         0.000
+ D_MALE         0.000         0.000         0.000
+
+
+           ALPHA
+              ETA           L_PLACES      D_AGE_C       D_MALE
+              ________      ________      ________      ________
+                0.000         0.339         0.000         0.000
+
+
+           BETA
+              ETA           L_PLACES      D_AGE_C       D_MALE
+              ________      ________      ________      ________
+ ETA            0.000         0.000         0.000         0.000
+ L_PLACES       1.000         0.000         0.000         0.000
+ D_AGE_C        0.000         0.000         0.000         0.000
+ D_MALE         0.000         0.000         0.000         0.000
+
+
+           PSI
+              ETA           L_PLACES      D_AGE_C       D_MALE
+              ________      ________      ________      ________
+ ETA            1.000
+ L_PLACES       0.000         0.062
+ D_AGE_C        0.000         0.000        17.980
+ D_MALE         0.000         0.000         0.000         0.498
+
+
+     STARTING VALUES FOR THE ADDITIONAL PARAMETERS
+
+
+           NEW/ADDITIONAL PARAMETERS
+              L13_00        L13_1         L13_2
+              ________      ________      ________
+                1.000         0.000         0.000
+
+
+     Beginning Time:  15:32:07
+        Ending Time:  15:32:32
+       Elapsed Time:  00:00:25
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2019 Muthen & Muthen

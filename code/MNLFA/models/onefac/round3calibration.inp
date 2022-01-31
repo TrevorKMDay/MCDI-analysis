@@ -1,0 +1,487 @@
+TITLE: Final Model to Get Scoring Parameters
+DATA: FILE = "models/onefac/calibration.dat";
+VARIABLE: 
+NAMES = ID L_ACTION L_ANIMAL L_BODYP L_CLOTH L_DESCRB L_FOOD L_ROOMS L_GAMES
+     L_HOUSEH L_LOCATE L_OUTSDE L_PEOPLE L_PLACES L_SOUNDS L_TOYS L_VEHICL S_CONJ
+     S_HELPV S_PRON S_QUANT S_QWORDS S_TIME S_WF_N S_WF_V S_WE_N S_WE_V S_COMPLX
+     D_MALE D_FIRSTB D_MOMCOL D_AGE_C D_AGE_C2 D_AGCMLE D_AC2MLE; 
+MISSING=.;
+!
+USEVARIABLES= L_ACTION L_ANIMAL L_BODYP L_CLOTH L_DESCRB L_FOOD L_ROOMS L_GAMES L_HOUSEH 
+ L_LOCATE L_OUTSDE L_PEOPLE L_PLACES L_SOUNDS L_TOYS L_VEHICL S_CONJ S_HELPV S_PRON 
+ S_QUANT S_QWORDS S_TIME S_WF_N S_WF_V S_WE_N S_WE_V S_COMPLX D_MALE D_FIRSTB 
+ D_MOMCOL D_AGE_C D_AGE_C2 D_AGCMLE D_AC2MLE;
+AUXILIARY= ID ;
+!
+!
+CONSTRAINT= D_AGE_C2 D_MALE D_FIRSTB D_MOMCOL D_AGE_C D_AGCMLE ;
+ANALYSIS: ESTIMATOR=ML;ALGORITHM=INTEGRATION;INTEGRATION=MONTECARLO;PROCESSORS=4;
+MODEL: [ETA@0];ETA*(veta);
+ETA BY L_ACTION*(l_1);
+ETA BY L_ANIMAL*(l_2);
+ETA BY L_BODYP*(l_3);
+ETA BY L_CLOTH*(l_4);
+ETA BY L_DESCRB*(l_5);
+ETA BY L_FOOD*(l_6);
+ETA BY L_ROOMS*(l_7);
+ETA BY L_GAMES*(l_8);
+ETA BY L_HOUSEH*(l_9);
+ETA BY L_LOCATE*(l_10);
+ETA BY L_OUTSDE*(l_11);
+ETA BY L_PEOPLE*(l_12);
+ETA BY L_PLACES*(l_13);
+ETA BY L_SOUNDS*(l_14);
+ETA BY L_TOYS*(l_15);
+ETA BY L_VEHICL*(l_16);
+ETA BY S_CONJ*(l_17);
+ETA BY S_HELPV*(l_18);
+ETA BY S_PRON*(l_19);
+ETA BY S_QUANT*(l_20);
+ETA BY S_QWORDS*(l_21);
+ETA BY S_TIME*(l_22);
+ETA BY S_WF_N*(l_23);
+ETA BY S_WF_V*(l_24);
+ETA BY S_WE_N*(l_25);
+ETA BY S_WE_V*(l_26);
+ETA BY S_COMPLX*(l_27);
+ETA ON D_MALE; ETA ON D_FIRSTB; ETA ON D_MOMCOL; ETA ON D_AGE_C; ETA ON D_AC2MLE; ETA ON 
+ D_AGE_C2;
+L_ACTION on D_AGE_C2;
+
+L_ANIMAL on D_FIRSTB D_MOMCOL D_AGE_C D_AGE_C2;
+
+
+L_BODYP on D_MALE D_MOMCOL D_AGE_C;
+
+
+
+L_CLOTH on D_MALE D_AGE_C;
+
+
+
+
+L_DESCRB on D_FIRSTB D_AGE_C;
+
+
+
+
+
+L_FOOD on D_AGE_C D_AGE_C2;
+
+
+
+
+
+
+L_ROOMS on D_MOMCOL D_AGE_C;
+
+
+
+
+
+
+
+L_GAMES on D_AGE_C;
+
+
+
+
+
+
+
+
+L_HOUSEH on D_MALE D_MOMCOL D_AGE_C;
+
+
+
+
+
+
+
+
+
+L_LOCATE on D_AGE_C;
+
+
+
+
+
+
+
+
+
+
+L_OUTSDE on D_MALE D_FIRSTB D_AGE_C;
+
+
+
+
+
+
+
+
+
+
+
+L_PEOPLE on D_AGE_C;
+
+
+
+
+
+
+
+
+
+
+
+
+L_PLACES on D_FIRSTB D_AGE_C;
+
+
+
+
+
+
+
+
+
+
+
+
+
+L_SOUNDS on D_FIRSTB D_MOMCOL D_AGE_C D_AGE_C2;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+L_TOYS on D_AGE_C;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+L_VEHICL on D_MALE D_MOMCOL D_AGE_C D_AGCMLE;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+S_CONJ on D_MALE D_AGE_C D_AGE_C2;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+S_HELPV on D_AGE_C;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+S_PRON on D_MALE D_AGE_C;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+S_QUANT on D_AGE_C D_AGCMLE;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+S_QWORDS on D_FIRSTB D_AGE_C;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+S_TIME on D_MALE D_FIRSTB D_MOMCOL D_AGE_C;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+S_WF_N on D_FIRSTB D_AGE_C D_AGE_C2;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+S_WF_V on D_MALE D_FIRSTB D_AGE_C D_AGE_C2;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+S_WE_N on D_MALE D_MOMCOL D_AGE_C;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+S_WE_V on D_MOMCOL D_AGE_C;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+S_COMPLX on D_MALE D_MOMCOL D_AGE_C;
+MODEL CONSTRAINT: new(
+V2*0
+!
+l1_0*1   l1_5*0
+! !
+l3_0*1   l3_1*0  l3_4*0
+! !
+l5_0*1   l5_4*0
+! !
+! !
+! !
+l9_0*1   l9_1*0
+l10_0*1   l10_4*0
+l11_0*1   l11_1*0
+l12_0*1   l12_4*0
+! !
+l14_0*1   l14_4*0  l14_5*0
+! !
+l16_0*1   l16_4*0  l16_6*0
+l17_0*1   l17_1*0  l17_4*0  l17_5*0
+l18_0*1   l18_4*0
+l19_0*1   l19_1*0  l19_4*0
+l20_0*1   l20_4*0  l20_6*0
+l21_0*1   l21_4*0
+l22_0*1   l22_1*0  l22_2*0  l22_4*0
+l23_0*1   l23_5*0
+l24_0*1   l24_1*0  l24_4*0
+l25_0*1   l25_3*0
+l26_0*1   l26_3*0  l26_4*0
+l27_0*1   l27_1*0  l27_3*0  l27_4*0
+);
+veta=1*exp(
+v2*D_FIRSTB+
+0);
+l_1=l1_0 +l1_5*D_AGE_C2;
+! !;
+l_3=l3_0 +l3_1*D_MALE +l3_4*D_AGE_C;
+! !;
+l_5=l5_0 +l5_4*D_AGE_C;
+! !;
+! !;
+! !;
+l_9=l9_0 +l9_1*D_MALE;
+l_10=l10_0 +l10_4*D_AGE_C;
+l_11=l11_0 +l11_1*D_MALE;
+l_12=l12_0 +l12_4*D_AGE_C;
+! !;
+l_14=l14_0 +l14_4*D_AGE_C +l14_5*D_AGE_C2;
+! !;
+l_16=l16_0 +l16_4*D_AGE_C +l16_6*D_AGCMLE;
+l_17=l17_0 +l17_1*D_MALE +l17_4*D_AGE_C +l17_5*D_AGE_C2;
+l_18=l18_0 +l18_4*D_AGE_C;
+l_19=l19_0 +l19_1*D_MALE +l19_4*D_AGE_C;
+l_20=l20_0 +l20_4*D_AGE_C +l20_6*D_AGCMLE;
+l_21=l21_0 +l21_4*D_AGE_C;
+l_22=l22_0 +l22_1*D_MALE +l22_2*D_FIRSTB +l22_4*D_AGE_C;
+l_23=l23_0 +l23_5*D_AGE_C2;
+l_24=l24_0 +l24_1*D_MALE +l24_4*D_AGE_C;
+l_25=l25_0 +l25_3*D_MOMCOL;
+l_26=l26_0 +l26_3*D_MOMCOL +l26_4*D_AGE_C;
+l_27=l27_0 +l27_1*D_MALE +l27_3*D_MOMCOL +l27_4*D_AGE_C;

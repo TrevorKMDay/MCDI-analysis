@@ -1,0 +1,660 @@
+Mplus VERSION 8.4
+MUTHEN & MUTHEN
+11/02/2021  10:07 PM
+
+INPUT INSTRUCTIONS
+
+  TITLE: Final Model to Get Scoring Parameters
+  DATA: FILE = "models/lex_3d/calibration.dat";
+  VARIABLE:
+  NAMES = ID L_ACTION L_ANIMAL L_BODYP L_CLOTH L_DESCRB L_FOOD L_ROOMS L_GAMES
+       L_HOUSEH L_LOCATE L_OUTSDE L_PEOPLE L_PLACES L_SOUNDS L_TOYS L_VEHICL D_AGE_C
+       D_AGE_C2 D_MALE D_FIRSTB D_MOMCOL D_AGESEX D_AG2SEX;
+  MISSING=.;
+  !
+  !
+  USEVARIABLES= L_ACTION L_ANIMAL L_BODYP L_CLOTH L_DESCRB L_FOOD L_ROOMS L_GAMES L_HOUSEH
+   L_LOCATE L_OUTSDE L_PEOPLE L_PLACES L_SOUNDS L_TOYS L_VEHICL D_AGE_C D_AGE_C2 D_MALE
+   D_FIRSTB D_MOMCOL D_AGESEX D_AG2SEX;
+  AUXILIARY= ID ;
+  !
+  !
+  CONSTRAINT= D_AGE_C2 D_AGE_C D_MALE D_FIRSTB D_AGESEX ;
+  ANALYSIS: ESTIMATOR=ML;ALGORITHM=INTEGRATION;INTEGRATION=MONTECARLO;PROCESSORS=4;
+  MODEL: [ETA@0];ETA*(veta);
+  ETA BY L_ACTION*(l_1);
+  ETA BY L_ANIMAL*(l_2);
+  ETA BY L_BODYP*(l_3);
+  ETA BY L_CLOTH*(l_4);
+  ETA BY L_DESCRB*(l_5);
+  ETA BY L_FOOD*(l_6);
+  ETA BY L_ROOMS*(l_7);
+  ETA BY L_GAMES*(l_8);
+  ETA BY L_HOUSEH*(l_9);
+  ETA BY L_LOCATE*(l_10);
+  ETA BY L_OUTSDE*(l_11);
+  ETA BY L_PEOPLE*(l_12);
+  ETA BY L_PLACES*(l_13);
+  ETA BY L_SOUNDS*(l_14);
+  ETA BY L_TOYS*(l_15);
+  ETA BY L_VEHICL*(l_16);
+  ETA ON D_AGE_C; ETA ON D_AGE_C2; ETA ON D_MALE; ETA ON D_FIRSTB; ETA ON D_MOMCOL; ETA ON
+   D_AG2SEX;
+  L_ACTION on D_AGE_C;
+
+  L_ANIMAL on D_AGE_C D_FIRSTB D_MOMCOL;
+
+
+  L_BODYP on D_AGE_C D_MALE D_MOMCOL;
+
+
+
+  L_CLOTH on D_AGE_C D_MALE;
+
+
+
+
+  L_DESCRB on D_AGE_C;
+
+
+
+
+
+  L_FOOD on D_AGE_C D_FIRSTB;
+
+
+
+
+
+
+  L_ROOMS on D_AGE_C D_MOMCOL;
+
+
+
+
+
+
+
+  L_GAMES on D_AGE_C;
+
+
+
+
+
+
+
+
+  L_HOUSEH on D_AGE_C D_MOMCOL;
+
+
+
+
+
+
+
+
+
+  L_LOCATE on D_AGE_C;
+
+
+
+
+
+
+
+
+
+
+  L_OUTSDE on D_AGE_C D_MALE;
+
+
+
+
+
+
+
+
+
+
+
+  L_PEOPLE on D_AGE_C;
+
+
+
+
+
+
+
+
+
+
+
+
+  L_PLACES on D_AGE_C D_FIRSTB;
+
+
+
+
+
+
+
+
+
+
+
+
+
+  L_SOUNDS on D_AGE_C2 D_FIRSTB D_MOMCOL;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  L_TOYS on D_AGE_C D_FIRSTB;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  L_VEHICL on D_AGE_C D_MALE D_MOMCOL D_AGESEX;
+  MODEL CONSTRAINT: new(
+  V2*0
+  !
+  l1_0*1   l1_1*0
+  ! !
+  l3_0*1   l3_3*0
+  l4_0*1   l4_1*0  l4_3*0
+  l5_0*1   l5_1*0
+  ! !
+  l7_0*1   l7_1*0
+  ! !
+  ! !
+  l10_0*1   l10_1*0
+  l11_0*1   l11_1*0
+  l12_0*1   l12_1*0
+  l13_0*1   l13_1*0
+  l14_0*1   l14_2*0
+  l15_0*1   l15_4*0
+  l16_0*1   l16_6*0
+  );
+  veta=1*exp(
+  v2*D_AGE_C2+
+  0);
+  l_1=l1_0 +l1_1*D_AGE_C;
+  ! !;
+  l_3=l3_0 +l3_3*D_MALE;
+  l_4=l4_0 +l4_1*D_AGE_C +l4_3*D_MALE;
+  l_5=l5_0 +l5_1*D_AGE_C;
+  ! !;
+  l_7=l7_0 +l7_1*D_AGE_C;
+  ! !;
+  ! !;
+  l_10=l10_0 +l10_1*D_AGE_C;
+  l_11=l11_0 +l11_1*D_AGE_C;
+  l_12=l12_0 +l12_1*D_AGE_C;
+  l_13=l13_0 +l13_1*D_AGE_C;
+  l_14=l14_0 +l14_2*D_AGE_C2;
+  l_15=l15_0 +l15_4*D_FIRSTB;
+  l_16=l16_0 +l16_6*D_AGESEX;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+Final Model to Get Scoring Parameters
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                        2766
+
+Number of dependent variables                                   16
+Number of independent variables                                  7
+Number of continuous latent variables                            1
+
+Observed dependent variables
+
+  Continuous
+   L_ACTION    L_ANIMAL    L_BODYP     L_CLOTH     L_DESCRB    L_FOOD
+   L_ROOMS     L_GAMES     L_HOUSEH    L_LOCATE    L_OUTSDE    L_PEOPLE
+   L_PLACES    L_SOUNDS    L_TOYS      L_VEHICL
+
+Observed independent variables
+   D_AGE_C     D_AGE_C2    D_MALE      D_FIRSTB    D_MOMCOL    D_AGESEX
+   D_AG2SEX
+
+Observed auxiliary variables
+   ID
+
+Continuous latent variables
+   ETA
+
+
+Estimator                                                       ML
+Information matrix                                        OBSERVED
+Optimization Specifications for the Quasi-Newton Algorithm for
+Continuous Outcomes
+  Maximum number of iterations                                 100
+  Convergence criterion                                  0.100D-05
+Optimization Specifications for the EM Algorithm
+  Maximum number of iterations                                 500
+  Convergence criteria
+    Loglikelihood change                                 0.100D-02
+    Relative loglikelihood change                        0.100D-05
+    Derivative                                           0.100D-02
+Optimization Specifications for the M step of the EM Algorithm for
+Categorical Latent variables
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-02
+  Basis for M step termination                           ITERATION
+Optimization Specifications for the M step of the EM Algorithm for
+Censored, Binary or Ordered Categorical (Ordinal), Unordered
+Categorical (Nominal) and Count Outcomes
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-02
+  Basis for M step termination                           ITERATION
+  Maximum value for logit thresholds                            15
+  Minimum value for logit thresholds                           -15
+  Minimum expected cell size for chi-square              0.100D-01
+Maximum number of iterations for H1                           2000
+Convergence criterion for H1                             0.100D-03
+Optimization algorithm                                         EMA
+Integration Specifications
+  Type                                                  MONTECARLO
+  Number of integration points                                   1
+  Dimensions of numerical integration                            0
+  Adaptive quadrature                                           ON
+  Monte Carlo integration seed                                   0
+Cholesky                                                       OFF
+
+Input data file(s)
+  models/lex_3d/calibration.dat
+Input data format  FREE
+
+
+SUMMARY OF DATA
+
+     Number of missing data patterns             1
+
+
+COVARIANCE COVERAGE OF DATA
+
+Minimum covariance coverage value   0.100
+
+
+     PROPORTION OF DATA PRESENT FOR Y
+
+
+           Covariance Coverage
+              L_ACTION      L_ANIMAL      L_BODYP       L_CLOTH       L_DESCRB
+              ________      ________      ________      ________      ________
+ L_ACTION       1.000
+ L_ANIMAL       1.000         1.000
+ L_BODYP        1.000         1.000         1.000
+ L_CLOTH        1.000         1.000         1.000         1.000
+ L_DESCRB       1.000         1.000         1.000         1.000         1.000
+ L_FOOD         1.000         1.000         1.000         1.000         1.000
+ L_ROOMS        1.000         1.000         1.000         1.000         1.000
+ L_GAMES        1.000         1.000         1.000         1.000         1.000
+ L_HOUSEH       1.000         1.000         1.000         1.000         1.000
+ L_LOCATE       1.000         1.000         1.000         1.000         1.000
+ L_OUTSDE       1.000         1.000         1.000         1.000         1.000
+ L_PEOPLE       1.000         1.000         1.000         1.000         1.000
+ L_PLACES       1.000         1.000         1.000         1.000         1.000
+ L_SOUNDS       1.000         1.000         1.000         1.000         1.000
+ L_TOYS         1.000         1.000         1.000         1.000         1.000
+ L_VEHICL       1.000         1.000         1.000         1.000         1.000
+ D_AGE_C        1.000         1.000         1.000         1.000         1.000
+ D_AGE_C2       1.000         1.000         1.000         1.000         1.000
+ D_MALE         1.000         1.000         1.000         1.000         1.000
+ D_FIRSTB       1.000         1.000         1.000         1.000         1.000
+ D_MOMCOL       1.000         1.000         1.000         1.000         1.000
+ D_AGESEX       1.000         1.000         1.000         1.000         1.000
+ D_AG2SEX       1.000         1.000         1.000         1.000         1.000
+
+
+           Covariance Coverage
+              L_FOOD        L_ROOMS       L_GAMES       L_HOUSEH      L_LOCATE
+              ________      ________      ________      ________      ________
+ L_FOOD         1.000
+ L_ROOMS        1.000         1.000
+ L_GAMES        1.000         1.000         1.000
+ L_HOUSEH       1.000         1.000         1.000         1.000
+ L_LOCATE       1.000         1.000         1.000         1.000         1.000
+ L_OUTSDE       1.000         1.000         1.000         1.000         1.000
+ L_PEOPLE       1.000         1.000         1.000         1.000         1.000
+ L_PLACES       1.000         1.000         1.000         1.000         1.000
+ L_SOUNDS       1.000         1.000         1.000         1.000         1.000
+ L_TOYS         1.000         1.000         1.000         1.000         1.000
+ L_VEHICL       1.000         1.000         1.000         1.000         1.000
+ D_AGE_C        1.000         1.000         1.000         1.000         1.000
+ D_AGE_C2       1.000         1.000         1.000         1.000         1.000
+ D_MALE         1.000         1.000         1.000         1.000         1.000
+ D_FIRSTB       1.000         1.000         1.000         1.000         1.000
+ D_MOMCOL       1.000         1.000         1.000         1.000         1.000
+ D_AGESEX       1.000         1.000         1.000         1.000         1.000
+ D_AG2SEX       1.000         1.000         1.000         1.000         1.000
+
+
+           Covariance Coverage
+              L_OUTSDE      L_PEOPLE      L_PLACES      L_SOUNDS      L_TOYS
+              ________      ________      ________      ________      ________
+ L_OUTSDE       1.000
+ L_PEOPLE       1.000         1.000
+ L_PLACES       1.000         1.000         1.000
+ L_SOUNDS       1.000         1.000         1.000         1.000
+ L_TOYS         1.000         1.000         1.000         1.000         1.000
+ L_VEHICL       1.000         1.000         1.000         1.000         1.000
+ D_AGE_C        1.000         1.000         1.000         1.000         1.000
+ D_AGE_C2       1.000         1.000         1.000         1.000         1.000
+ D_MALE         1.000         1.000         1.000         1.000         1.000
+ D_FIRSTB       1.000         1.000         1.000         1.000         1.000
+ D_MOMCOL       1.000         1.000         1.000         1.000         1.000
+ D_AGESEX       1.000         1.000         1.000         1.000         1.000
+ D_AG2SEX       1.000         1.000         1.000         1.000         1.000
+
+
+           Covariance Coverage
+              L_VEHICL      D_AGE_C       D_AGE_C2      D_MALE        D_FIRSTB
+              ________      ________      ________      ________      ________
+ L_VEHICL       1.000
+ D_AGE_C        1.000         1.000
+ D_AGE_C2       1.000         1.000         1.000
+ D_MALE         1.000         1.000         1.000         1.000
+ D_FIRSTB       1.000         1.000         1.000         1.000         1.000
+ D_MOMCOL       1.000         1.000         1.000         1.000         1.000
+ D_AGESEX       1.000         1.000         1.000         1.000         1.000
+ D_AG2SEX       1.000         1.000         1.000         1.000         1.000
+
+
+           Covariance Coverage
+              D_MOMCOL      D_AGESEX      D_AG2SEX
+              ________      ________      ________
+ D_MOMCOL       1.000
+ D_AGESEX       1.000         1.000
+ D_AG2SEX       1.000         1.000         1.000
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     L_ACTION              0.381       0.465       0.000   10.09%       0.029      0.146      0.272
+            2766.000       0.124      -1.319       1.000    2.02%       0.437      0.796
+     L_ANIMAL              0.502       0.006       0.000    3.25%       0.140      0.372      0.512
+            2766.000       0.109      -1.413       1.000    6.69%       0.651      0.860
+     L_BODYP               0.559      -0.333       0.000    8.13%       0.148      0.481      0.667
+            2766.000       0.120      -1.406       1.000    4.66%       0.778      0.926
+     L_CLOTH               0.429       0.197       0.000    9.54%       0.071      0.286      0.429
+            2766.000       0.100      -1.290       1.000    2.71%       0.536      0.750
+     L_DESCRB              0.361       0.570       0.000    9.65%       0.048      0.143      0.254
+            2766.000       0.109      -1.095       1.000    2.28%       0.397      0.730
+     L_FOOD                0.470       0.063       0.000    5.89%       0.103      0.309      0.485
+            2766.000       0.112      -1.432       1.000    3.29%       0.603      0.838
+     L_ROOMS               0.392       0.352       0.000   17.75%       0.030      0.182      0.333
+            2766.000       0.119      -1.378       1.000    2.13%       0.485      0.788
+     L_GAMES               0.580      -0.160       0.000    1.99%       0.240      0.480      0.600
+            2766.000       0.096      -1.277       1.000   11.35%       0.720      0.920
+     L_HOUSEH              0.456       0.111       0.000    8.79%       0.060      0.280      0.440
+            2766.000       0.122      -1.486       1.000    3.69%       0.600      0.840
+     L_LOCATE              0.306       0.862       0.000   17.03%       0.038      0.154      0.231
+            2766.000       0.084      -0.356       1.000    2.17%       0.308      0.577
+     L_OUTSDE              0.418       0.301       0.000   14.24%       0.032      0.226      0.355
+            2766.000       0.117      -1.327       1.000    4.92%       0.516      0.806
+     L_PEOPLE              0.418       0.559       0.000    1.19%       0.172      0.276      0.345
+            2766.000       0.071      -0.751       1.000    2.71%       0.448      0.690
+     L_PLACES              0.329       0.573       0.000   18.76%       0.045      0.182      0.273
+            2766.000       0.087      -0.868       1.000    1.66%       0.364      0.636
+     L_SOUNDS              0.726      -0.817       0.000    0.87%       0.500      0.750      0.833
+            2766.000       0.069      -0.315       1.000   24.98%       0.833      1.000
+     L_TOYS                0.517       0.006       0.000    5.13%       0.167      0.389      0.500
+            2766.000       0.101      -1.312       1.000    8.93%       0.611      0.889
+     L_VEHICL              0.514      -0.149       0.000   10.52%       0.143      0.429      0.571
+            2766.000       0.111      -1.383       1.000    6.58%       0.714      0.857
+     D_AGE_C              -0.267       0.087      -7.000    6.69%      -5.000     -2.000      1.000
+            2766.000      18.040      -1.118       7.000    8.17%       1.000      4.000
+     D_AGE_C2             18.112       0.675       0.000    4.92%       1.000      9.000     16.000
+            2766.000     285.153      -0.881      49.000   14.86%      16.000     36.000
+     D_MALE                0.013      -0.026      -1.000   49.35%      -1.000     -1.000      1.000
+            2766.000       1.000      -1.999       1.000   50.65%       1.000      1.000
+     D_FIRSTB              0.030      -0.059      -1.000   48.52%      -1.000     -1.000      1.000
+            2766.000       0.999      -1.996       1.000   51.48%       1.000      1.000
+     D_MOMCOL              0.165      -0.334      -1.000   41.76%      -1.000     -1.000      1.000
+            2766.000       0.973      -1.888       1.000   58.24%       1.000      1.000
+     D_AGESEX              0.056      -0.017      -7.000    7.30%      -4.000     -1.000      0.000
+            2766.000      18.109      -1.130       7.000    7.56%       1.000      4.000
+     D_AG2SEX              0.267      -0.018     -49.000    7.41%     -16.000     -1.000      0.000
+            2766.000     613.116      -0.136      49.000    7.45%       1.000     25.000
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                      100
+
+Loglikelihood
+
+          H0 Value                       30805.880
+
+Information Criteria
+
+          Akaike (AIC)                  -61411.761
+          Bayesian (BIC)                -60819.245
+          Sample-Size Adjusted BIC      -61136.978
+            (n* = (n + 2) / 24)
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ ETA      BY
+    L_ACTION         999.000      0.000    999.000    999.000
+    L_ANIMAL           0.261      0.006     44.499      0.000
+    L_BODYP          999.000      0.000    999.000    999.000
+    L_CLOTH          999.000      0.000    999.000    999.000
+    L_DESCRB         999.000      0.000    999.000    999.000
+    L_FOOD             0.268      0.006     47.197      0.000
+    L_ROOMS          999.000      0.000    999.000    999.000
+    L_GAMES            0.236      0.005     43.504      0.000
+    L_HOUSEH           0.291      0.006     47.804      0.000
+    L_LOCATE         999.000      0.000    999.000    999.000
+    L_OUTSDE         999.000      0.000    999.000    999.000
+    L_PEOPLE         999.000      0.000    999.000    999.000
+    L_PLACES         999.000      0.000    999.000    999.000
+    L_SOUNDS         999.000      0.000    999.000    999.000
+    L_TOYS           999.000      0.000    999.000    999.000
+    L_VEHICL         999.000      0.000    999.000    999.000
+
+ ETA        ON
+    D_AGE_C            0.120      0.005     21.742      0.000
+    D_AGE_C2          -0.004      0.001     -5.021      0.000
+    D_MALE            -0.177      0.026     -6.769      0.000
+    D_FIRSTB           0.111      0.016      7.036      0.000
+    D_MOMCOL           0.078      0.016      4.848      0.000
+    D_AG2SEX           0.002      0.001      2.368      0.018
+
+ L_ACTION   ON
+    D_AGE_C            0.026      0.001     20.971      0.000
+
+ L_ANIMAL   ON
+    D_AGE_C            0.016      0.001     13.597      0.000
+    D_FIRSTB           0.015      0.002      6.134      0.000
+    D_MOMCOL           0.016      0.002      6.692      0.000
+
+ L_BODYP    ON
+    D_AGE_C            0.018      0.001     14.590      0.000
+    D_MALE            -0.006      0.002     -2.444      0.015
+    D_MOMCOL          -0.014      0.003     -5.677      0.000
+
+ L_CLOTH    ON
+    D_AGE_C            0.016      0.001     14.925      0.000
+    D_MALE            -0.017      0.002     -9.517      0.000
+
+ L_DESCRB   ON
+    D_AGE_C            0.024      0.001     20.629      0.000
+
+ L_FOOD     ON
+    D_AGE_C            0.021      0.001     18.458      0.000
+    D_FIRSTB          -0.007      0.002     -4.043      0.000
+
+ L_ROOMS    ON
+    D_AGE_C            0.019      0.001     15.944      0.000
+    D_MOMCOL          -0.015      0.002     -7.599      0.000
+
+ L_GAMES    ON
+    D_AGE_C            0.018      0.001     16.080      0.000
+
+ L_HOUSEH   ON
+    D_AGE_C            0.018      0.001     15.206      0.000
+    D_MOMCOL          -0.010      0.002     -5.932      0.000
+
+ L_LOCATE   ON
+    D_AGE_C            0.021      0.001     18.651      0.000
+
+ L_OUTSDE   ON
+    D_AGE_C            0.019      0.001     15.792      0.000
+    D_MALE             0.013      0.002      7.067      0.000
+
+ L_PEOPLE   ON
+    D_AGE_C            0.018      0.001     18.755      0.000
+
+ L_PLACES   ON
+    D_AGE_C            0.022      0.001     21.021      0.000
+    D_FIRSTB          -0.011      0.002     -5.797      0.000
+
+ L_SOUNDS   ON
+    D_AGE_C2          -0.001      0.000     -4.753      0.000
+    D_FIRSTB           0.014      0.004      4.062      0.000
+    D_MOMCOL           0.029      0.004      7.929      0.000
+
+ L_TOYS     ON
+    D_AGE_C            0.018      0.001     16.164      0.000
+    D_FIRSTB          -0.007      0.002     -3.463      0.001
+
+ L_VEHICL   ON
+    D_AGE_C            0.018      0.001     15.397      0.000
+    D_MALE             0.045      0.003     15.792      0.000
+    D_MOMCOL           0.012      0.002      4.902      0.000
+    D_AGESEX           0.001      0.001      1.884      0.060
+
+ Intercepts
+    L_ACTION           0.380      0.007     51.804      0.000
+    L_ANIMAL           0.527      0.007     73.786      0.000
+    L_BODYP            0.593      0.008     79.035      0.000
+    L_CLOTH            0.448      0.007     64.368      0.000
+    L_DESCRB           0.356      0.007     51.777      0.000
+    L_FOOD             0.501      0.007     70.335      0.000
+    L_ROOMS            0.404      0.008     53.022      0.000
+    L_GAMES            0.607      0.007     92.965      0.000
+    L_HOUSEH           0.490      0.008     63.695      0.000
+    L_LOCATE           0.295      0.006     48.973      0.000
+    L_OUTSDE           0.430      0.008     56.640      0.000
+    L_PEOPLE           0.417      0.006     73.946      0.000
+    L_PLACES           0.329      0.006     53.552      0.000
+    L_SOUNDS           0.759      0.006    122.814      0.000
+    L_TOYS             0.547      0.007     79.635      0.000
+    L_VEHICL           0.541      0.007     75.613      0.000
+    ETA                0.000      0.000    999.000    999.000
+
+ Residual Variances
+    L_ACTION           0.012      0.000     34.400      0.000
+    L_ANIMAL           0.014      0.000     35.367      0.000
+    L_BODYP            0.015      0.000     35.210      0.000
+    L_CLOTH            0.007      0.000     33.750      0.000
+    L_DESCRB           0.010      0.000     34.336      0.000
+    L_FOOD             0.007      0.000     33.106      0.000
+    L_ROOMS            0.008      0.000     33.428      0.000
+    L_GAMES            0.015      0.000     35.691      0.000
+    L_HOUSEH           0.006      0.000     31.614      0.000
+    L_LOCATE           0.017      0.000     35.949      0.000
+    L_OUTSDE           0.008      0.000     33.313      0.000
+    L_PEOPLE           0.009      0.000     35.298      0.000
+    L_PLACES           0.009      0.000     34.865      0.000
+    L_SOUNDS           0.033      0.001     36.764      0.000
+    L_TOYS             0.010      0.000     34.685      0.000
+    L_VEHICL           0.015      0.000     35.392      0.000
+    ETA              999.000      0.000    999.000    999.000
+
+New/Additional Parameters
+    V2                -0.021      0.002    -12.580      0.000
+    L1_0               0.269      0.006     45.663      0.000
+    L1_1               0.015      0.001     21.941      0.000
+    L3_0               0.274      0.006     44.570      0.000
+    L3_3               0.009      0.002      3.852      0.000
+    L4_0               0.259      0.006     46.840      0.000
+    L4_1               0.004      0.000      8.430      0.000
+    L4_3              -0.006      0.002     -3.414      0.001
+    L5_0               0.251      0.006     45.623      0.000
+    L5_1               0.016      0.001     23.963      0.000
+    L7_0               0.284      0.006     46.998      0.000
+    L7_1               0.010      0.001     17.764      0.000
+    L10_0              0.204      0.005     40.997      0.000
+    L10_1              0.017      0.001     21.308      0.000
+    L11_0              0.284      0.006     47.198      0.000
+    L11_1              0.009      0.001     16.752      0.000
+    L12_0              0.203      0.005     44.385      0.000
+    L12_1              0.011      0.001     19.778      0.000
+    L13_0              0.223      0.005     45.060      0.000
+    L13_1              0.013      0.001     21.232      0.000
+    L14_0              0.135      0.006     23.376      0.000
+    L14_2              0.002      0.000      9.278      0.000
+    L15_0              0.254      0.006     45.704      0.000
+    L15_4             -0.006      0.002     -2.908      0.004
+    L16_0              0.260      0.006     44.189      0.000
+    L16_6             -0.003      0.001     -5.213      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.122E-07
+       (ratio of smallest to largest eigenvalue)
+
+
+     Beginning Time:  22:07:50
+        Ending Time:  22:25:28
+       Elapsed Time:  00:17:38
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2019 Muthen & Muthen

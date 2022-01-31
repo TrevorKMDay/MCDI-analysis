@@ -1,0 +1,67 @@
+------Begin Mplus Model Run: 14Nov2021 16:49:41------
+Run options:
+	Recursive (run models in subdirectories): FALSE
+	Show output on console: FALSE
+	Replace existing outfile: never
+------
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\meanimpactscript.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_l_action.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_L_ACTION.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_l_animal.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_L_ANIMAL.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_l_bodyp.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_L_BODYP.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_l_cloth.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_L_CLOTH.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_l_descrb.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_L_DESCRB.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_l_food.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_L_FOOD.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_l_games.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_L_GAMES.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_l_househ.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_L_HOUSEH.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_l_locate.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_L_LOCATE.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_l_outsde.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_L_OUTSDE.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_l_people.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_L_PEOPLE.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_l_places.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_L_PLACES.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_l_rooms.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_L_ROOMS.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_l_sounds.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_L_SOUNDS.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_l_toys.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_L_TOYS.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_l_vehicl.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_L_VEHICL.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_s_complx.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_S_COMPLX.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_s_conj.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_S_CONJ.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_s_helpv.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_S_HELPV.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_s_pron.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_S_PRON.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_s_quant.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_S_QUANT.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_s_qwords.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_S_QWORDS.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_s_time.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_S_TIME.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_s_we_n.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_S_WE_N.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_s_we_v.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_S_WE_V.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_s_wf_n.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_S_WF_N.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_s_wf_v.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\measinvarscript_S_WF_V.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\round2calibration.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\round3calibration.inp
+Currently running model: scoring.inp
+Skipping model because output file already exists for: I:\Research\MCDI\MCDI-analysis\code\MNLFA\models\onefac\varimpactscript.inp
+
+------End Mplus Model Run: 14Nov2021 16:53:43------

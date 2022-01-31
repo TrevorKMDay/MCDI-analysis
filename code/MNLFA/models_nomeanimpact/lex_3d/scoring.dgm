@@ -1,0 +1,201 @@
+VERSION 1.1.0
+INPUT
+TITLE:
+ Scoring Model
+DATA:
+ FILE = "models_nomeanimpact/lex_3d/full.dat";
+VARIABLE:
+NAMES = ID L_ACTION L_ANIMAL L_BODYP L_CLOTH L_DESCRB L_FOOD L_ROOMS L_GAMES
+     L_HOUSEH L_LOCATE L_OUTSDE L_PEOPLE L_PLACES L_SOUNDS L_TOYS L_VEHICL D_AGE_C
+     D_AGE_C2 D_MALE D_FIRSTB D_MOMCOL D_AGESEX D_AG2SEX;
+MISSING=.;
+USEVARIABLES= L_ACTION L_ANIMAL L_BODYP L_CLOTH L_DESCRB L_FOOD L_ROOMS L_GAMES L_HOUSEH
+ L_LOCATE L_OUTSDE L_PEOPLE L_PLACES L_SOUNDS L_TOYS L_VEHICL D_AGE_C D_AGE_C2 D_MALE
+ D_FIRSTB D_MOMCOL D_AG2SEX D_AGESEX;
+AUXILIARY=ID;
+CONSTRAINT= D_AGE_C2 D_AGE_C D_MALE D_FIRSTB D_AGESEX ;
+ANALYSIS:
+ ESTIMATOR=ML; ALGORITHM=INTEGRATION; INTEGRATION=MONTECARLO; PROCESSORS=4;
+OUTPUT:
+ tech1;
+SAVEDATA:
+ SAVE=FSCORES; FILE=scores.dat;
+MODEL:
+ [ETA@0];ETA*(veta);
+ETA BY L_ACTION*(l_1);
+ETA BY L_ANIMAL @0.261;
+ETA BY L_BODYP*(l_3);
+ETA BY L_CLOTH*(l_4);
+ETA BY L_DESCRB*(l_5);
+ETA BY L_FOOD @0.268;
+ETA BY L_ROOMS*(l_7);
+ETA BY L_GAMES @0.236;
+ETA BY L_HOUSEH @0.291;
+ETA BY L_LOCATE*(l_10);
+ETA BY L_OUTSDE*(l_11);
+ETA BY L_PEOPLE*(l_12);
+ETA BY L_PLACES*(l_13);
+ETA BY L_SOUNDS*(l_14);
+ETA BY L_TOYS*(l_15);
+ETA BY L_VEHICL*(l_16);
+L_ACTION ON D_AGE_C@0.026;
+L_ANIMAL ON D_AGE_C@0.016;
+L_ANIMAL ON D_FIRSTB@0.015;
+L_ANIMAL ON D_MOMCOL@0.016;
+L_BODYP ON D_AGE_C@0.018;
+L_BODYP ON D_MALE@-0.006;
+L_BODYP ON D_MOMCOL@-0.014;
+L_CLOTH ON D_AGE_C@0.016;
+L_CLOTH ON D_MALE@-0.017;
+L_DESCRB ON D_AGE_C@0.024;
+L_FOOD ON D_AGE_C@0.021;
+L_FOOD ON D_FIRSTB@-0.007;
+L_ROOMS ON D_AGE_C@0.019;
+L_ROOMS ON D_MOMCOL@-0.015;
+L_GAMES ON D_AGE_C@0.018;
+L_HOUSEH ON D_AGE_C@0.018;
+L_HOUSEH ON D_MOMCOL@-0.01;
+L_LOCATE ON D_AGE_C@0.021;
+L_OUTSDE ON D_AGE_C@0.019;
+L_OUTSDE ON D_MALE@0.013;
+L_PEOPLE ON D_AGE_C@0.018;
+L_PLACES ON D_AGE_C@0.022;
+L_PLACES ON D_FIRSTB@-0.011;
+L_SOUNDS ON D_AGE_C2@-0.001;
+L_SOUNDS ON D_FIRSTB@0.014;
+L_SOUNDS ON D_MOMCOL@0.029;
+L_TOYS ON D_AGE_C@0.018;
+L_TOYS ON D_FIRSTB@-0.007;
+L_VEHICL ON D_AGE_C@0.018;
+L_VEHICL ON D_MALE@0.045;
+L_VEHICL ON D_MOMCOL@0.012;
+L_VEHICL ON D_AGESEX@0.001;
+[L_ACTION@0.38];
+[L_ANIMAL@0.527];
+[L_BODYP@0.593];
+[L_CLOTH@0.448];
+[L_DESCRB@0.356];
+[L_FOOD@0.501];
+[L_ROOMS@0.404];
+[L_GAMES@0.607];
+[L_HOUSEH@0.49];
+[L_LOCATE@0.295];
+[L_OUTSDE@0.43];
+[L_PEOPLE@0.417];
+[L_PLACES@0.329];
+[L_SOUNDS@0.759];
+[L_TOYS@0.547];
+[L_VEHICL@0.541];
+INPUT_END
+2
+0
+0
+0
+ML
+1
+GENERAL
+0
+17
+1
+6
+l_action l_animal l_bodyp l_cloth l_descrb l_food l_rooms l_games l_househ l_locate l_outsde l_people l_places l_sounds l_toys l_vehicl d_ag2sex eta d_age_c d_age_c2 d_male d_firstb d_momcol d_agesex
+1
+-1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0
+0
+1
+eta
+l_action l_animal l_bodyp l_cloth l_descrb l_food l_rooms l_games l_househ l_locate l_outsde l_people l_places l_sounds l_toys l_vehicl
+1 1 eta l_action  999.000    0.000
+91 1 eta l_action l_1
+1 1 eta l_animal    0.261    0.000
+1 1 eta l_bodyp  999.000    0.000
+91 1 eta l_bodyp l_3
+1 1 eta l_cloth  999.000    0.000
+91 1 eta l_cloth l_4
+1 1 eta l_descrb  999.000    0.000
+91 1 eta l_descrb l_5
+1 1 eta l_food    0.268    0.000
+1 1 eta l_rooms  999.000    0.000
+91 1 eta l_rooms l_7
+1 1 eta l_games    0.236    0.000
+1 1 eta l_househ    0.291    0.000
+1 1 eta l_locate  999.000    0.000
+91 1 eta l_locate l_10
+1 1 eta l_outsde  999.000    0.000
+91 1 eta l_outsde l_11
+1 1 eta l_people  999.000    0.000
+91 1 eta l_people l_12
+1 1 eta l_places  999.000    0.000
+91 1 eta l_places l_13
+1 1 eta l_sounds  999.000    0.000
+91 1 eta l_sounds l_14
+1 1 eta l_toys  999.000    0.000
+91 1 eta l_toys l_15
+1 1 eta l_vehicl  999.000    0.000
+91 1 eta l_vehicl l_16
+1 1 d_age_c l_action    0.026    0.000
+1 1 d_age_c l_animal    0.016    0.000
+1 1 d_firstb l_animal    0.015    0.000
+1 1 d_momcol l_animal    0.016    0.000
+1 1 d_age_c l_bodyp    0.018    0.000
+1 1 d_male l_bodyp   -0.006    0.000
+1 1 d_momcol l_bodyp   -0.014    0.000
+1 1 d_age_c l_cloth    0.016    0.000
+1 1 d_male l_cloth   -0.017    0.000
+1 1 d_age_c l_descrb    0.024    0.000
+1 1 d_age_c l_food    0.021    0.000
+1 1 d_firstb l_food   -0.007    0.000
+1 1 d_age_c l_rooms    0.019    0.000
+1 1 d_momcol l_rooms   -0.015    0.000
+1 1 d_age_c l_games    0.018    0.000
+1 1 d_age_c l_househ    0.018    0.000
+1 1 d_momcol l_househ   -0.010    0.000
+1 1 d_age_c l_locate    0.021    0.000
+1 1 d_age_c l_outsde    0.019    0.000
+1 1 d_male l_outsde    0.013    0.000
+1 1 d_age_c l_people    0.018    0.000
+1 1 d_age_c l_places    0.022    0.000
+1 1 d_firstb l_places   -0.011    0.000
+1 1 d_age_c2 l_sounds   -0.001    0.000
+1 1 d_firstb l_sounds    0.014    0.000
+1 1 d_momcol l_sounds    0.029    0.000
+1 1 d_age_c l_toys    0.018    0.000
+1 1 d_firstb l_toys   -0.007    0.000
+1 1 d_age_c l_vehicl    0.018    0.000
+1 1 d_male l_vehicl    0.045    0.000
+1 1 d_momcol l_vehicl    0.012    0.000
+1 1 d_agesex l_vehicl    0.001    0.000
+4 1 l_action    0.012    0.000
+4 1 l_animal    0.014    0.000
+4 1 l_bodyp    0.016    0.000
+4 1 l_cloth    0.007    0.000
+4 1 l_descrb    0.010    0.000
+4 1 l_food    0.007    0.000
+4 1 l_rooms    0.008    0.000
+4 1 l_games    0.015    0.000
+4 1 l_househ    0.006    0.000
+4 1 l_locate    0.017    0.000
+4 1 l_outsde    0.008    0.000
+4 1 l_people    0.009    0.000
+4 1 l_places    0.009    0.000
+4 1 l_sounds    0.033    0.001
+4 1 l_toys    0.010    0.000
+4 1 l_vehicl    0.015    0.000
+5 1 d_ag2sex  613.116   16.487
+5 1 eta  999.000    0.000
+95 1 eta veta
+2 1 d_age_c d_age_c2  999.000  999.000
+2 1 d_age_c d_male  999.000  999.000
+2 1 d_age_c d_firstb  999.000  999.000
+2 1 d_age_c d_momcol  999.000  999.000
+2 1 d_age_c d_agesex  999.000  999.000
+2 1 d_age_c2 d_male  999.000  999.000
+2 1 d_age_c2 d_firstb  999.000  999.000
+2 1 d_age_c2 d_momcol  999.000  999.000
+2 1 d_age_c2 d_agesex  999.000  999.000
+2 1 d_male d_firstb  999.000  999.000
+2 1 d_male d_momcol  999.000  999.000
+2 1 d_male d_agesex  999.000  999.000
+2 1 d_firstb d_momcol  999.000  999.000
+2 1 d_firstb d_agesex  999.000  999.000
+2 1 d_momcol d_agesex  999.000  999.000

@@ -1,0 +1,1652 @@
+Mplus VERSION 8.4
+MUTHEN & MUTHEN
+11/04/2021  11:19 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE: Scoring Model
+  DATA: FILE = "models_nomeanimpact/lex_3d/full.dat";
+  VARIABLE:
+  NAMES = ID L_ACTION L_ANIMAL L_BODYP L_CLOTH L_DESCRB L_FOOD L_ROOMS L_GAMES
+       L_HOUSEH L_LOCATE L_OUTSDE L_PEOPLE L_PLACES L_SOUNDS L_TOYS L_VEHICL D_AGE_C
+       D_AGE_C2 D_MALE D_FIRSTB D_MOMCOL D_AGESEX D_AG2SEX;
+  MISSING=.;
+  !
+  !
+  USEVARIABLES= L_ACTION L_ANIMAL L_BODYP L_CLOTH L_DESCRB L_FOOD L_ROOMS L_GAMES L_HOUSEH
+   L_LOCATE L_OUTSDE L_PEOPLE L_PLACES L_SOUNDS L_TOYS L_VEHICL D_AGE_C D_AGE_C2 D_MALE
+   D_FIRSTB D_MOMCOL D_AG2SEX D_AGESEX;
+  AUXILIARY=ID;
+  !
+  !
+  !
+  CONSTRAINT= D_AGE_C2 D_AGE_C D_MALE D_FIRSTB D_AGESEX ;
+  ANALYSIS: ESTIMATOR=ML; ALGORITHM=INTEGRATION; INTEGRATION=MONTECARLO; PROCESSORS=4;
+  MODEL: [ETA@0];ETA*(veta);
+  ETA BY L_ACTION*(l_1);
+  ETA BY L_ANIMAL @0.261;
+  ETA BY L_BODYP*(l_3);
+  ETA BY L_CLOTH*(l_4);
+  ETA BY L_DESCRB*(l_5);
+  ETA BY L_FOOD @0.268;
+  ETA BY L_ROOMS*(l_7);
+  ETA BY L_GAMES @0.236;
+  ETA BY L_HOUSEH @0.291;
+  ETA BY L_LOCATE*(l_10);
+  ETA BY L_OUTSDE*(l_11);
+  ETA BY L_PEOPLE*(l_12);
+  ETA BY L_PLACES*(l_13);
+  ETA BY L_SOUNDS*(l_14);
+  ETA BY L_TOYS*(l_15);
+  ETA BY L_VEHICL*(l_16);
+  L_ACTION ON D_AGE_C@0.026;
+  L_ANIMAL ON D_AGE_C@0.016;
+  L_ANIMAL ON D_FIRSTB@0.015;
+  L_ANIMAL ON D_MOMCOL@0.016;
+  L_BODYP ON D_AGE_C@0.018;
+  L_BODYP ON D_MALE@-0.006;
+  L_BODYP ON D_MOMCOL@-0.014;
+  L_CLOTH ON D_AGE_C@0.016;
+  L_CLOTH ON D_MALE@-0.017;
+  L_DESCRB ON D_AGE_C@0.024;
+  L_FOOD ON D_AGE_C@0.021;
+  L_FOOD ON D_FIRSTB@-0.007;
+  L_ROOMS ON D_AGE_C@0.019;
+  L_ROOMS ON D_MOMCOL@-0.015;
+  L_GAMES ON D_AGE_C@0.018;
+  L_HOUSEH ON D_AGE_C@0.018;
+  L_HOUSEH ON D_MOMCOL@-0.01;
+  L_LOCATE ON D_AGE_C@0.021;
+  L_OUTSDE ON D_AGE_C@0.019;
+  L_OUTSDE ON D_MALE@0.013;
+  L_PEOPLE ON D_AGE_C@0.018;
+  L_PLACES ON D_AGE_C@0.022;
+  L_PLACES ON D_FIRSTB@-0.011;
+  L_SOUNDS ON D_AGE_C2@-0.001;
+  L_SOUNDS ON D_FIRSTB@0.014;
+  L_SOUNDS ON D_MOMCOL@0.029;
+  L_TOYS ON D_AGE_C@0.018;
+  L_TOYS ON D_FIRSTB@-0.007;
+  L_VEHICL ON D_AGE_C@0.018;
+  L_VEHICL ON D_MALE@0.045;
+  L_VEHICL ON D_MOMCOL@0.012;
+  L_VEHICL ON D_AGESEX@0.001;
+  [L_ACTION@0.38];
+  [L_ANIMAL@0.527];
+  [L_BODYP@0.593];
+  [L_CLOTH@0.448];
+  [L_DESCRB@0.356];
+  [L_FOOD@0.501];
+  [L_ROOMS@0.404];
+  [L_GAMES@0.607];
+  [L_HOUSEH@0.49];
+  [L_LOCATE@0.295];
+  [L_OUTSDE@0.43];
+  [L_PEOPLE@0.417];
+  [L_PLACES@0.329];
+  [L_SOUNDS@0.759];
+  [L_TOYS@0.547];
+  [L_VEHICL@0.541];
+  MODEL CONSTRAINT:
+    veta=1*exp(
+    -0.021*D_AGE_C2+
+    0);
+    l_1=0.269 +0.015*D_AGE_C;
+    ! !;
+    l_3=0.274 +0.009*D_MALE;
+    l_4=0.259 +0.004*D_AGE_C -0.006*D_MALE;
+    l_5=0.251 +0.016*D_AGE_C;
+    ! !;
+    l_7=0.284 +0.01*D_AGE_C;
+    ! !;
+    ! !;
+    l_10=0.204 +0.017*D_AGE_C;
+    l_11=0.284 +0.009*D_AGE_C;
+    l_12=0.203 +0.011*D_AGE_C;
+    l_13=0.223 +0.013*D_AGE_C;
+    l_14=0.135 +0.002*D_AGE_C2;
+    l_15=0.254 -0.006*D_FIRSTB;
+    l_16=0.26 -0.003*D_AGESEX;
+
+
+
+  OUTPUT: tech1;
+  SAVEDATA: SAVE=FSCORES; FILE=scores.dat;
+
+
+
+*** WARNING in MODEL command
+  Variable is uncorrelated with all other variables:  D_AG2SEX
+*** WARNING in MODEL command
+  At least one variable is uncorrelated with all other variables in the model.
+  Check that this is what is intended.
+   2 WARNING(S) FOUND IN THE INPUT INSTRUCTIONS
+
+
+
+Scoring Model
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                        2766
+
+Number of dependent variables                                   17
+Number of independent variables                                  6
+Number of continuous latent variables                            1
+
+Observed dependent variables
+
+  Continuous
+   L_ACTION    L_ANIMAL    L_BODYP     L_CLOTH     L_DESCRB    L_FOOD
+   L_ROOMS     L_GAMES     L_HOUSEH    L_LOCATE    L_OUTSDE    L_PEOPLE
+   L_PLACES    L_SOUNDS    L_TOYS      L_VEHICL    D_AG2SEX
+
+Observed independent variables
+   D_AGE_C     D_AGE_C2    D_MALE      D_FIRSTB    D_MOMCOL    D_AGESEX
+
+Observed auxiliary variables
+   ID
+
+Continuous latent variables
+   ETA
+
+
+Estimator                                                       ML
+Information matrix                                        OBSERVED
+Optimization Specifications for the Quasi-Newton Algorithm for
+Continuous Outcomes
+  Maximum number of iterations                                 100
+  Convergence criterion                                  0.100D-05
+Optimization Specifications for the EM Algorithm
+  Maximum number of iterations                                 500
+  Convergence criteria
+    Loglikelihood change                                 0.100D-02
+    Relative loglikelihood change                        0.100D-05
+    Derivative                                           0.100D-02
+Optimization Specifications for the M step of the EM Algorithm for
+Categorical Latent variables
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-02
+  Basis for M step termination                           ITERATION
+Optimization Specifications for the M step of the EM Algorithm for
+Censored, Binary or Ordered Categorical (Ordinal), Unordered
+Categorical (Nominal) and Count Outcomes
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-02
+  Basis for M step termination                           ITERATION
+  Maximum value for logit thresholds                            15
+  Minimum value for logit thresholds                           -15
+  Minimum expected cell size for chi-square              0.100D-01
+Maximum number of iterations for H1                           2000
+Convergence criterion for H1                             0.100D-03
+Optimization algorithm                                         EMA
+Integration Specifications
+  Type                                                  MONTECARLO
+  Number of integration points                                   1
+  Dimensions of numerical integration                            0
+  Adaptive quadrature                                           ON
+  Monte Carlo integration seed                                   0
+Cholesky                                                       OFF
+
+Input data file(s)
+  models_nomeanimpact/lex_3d/full.dat
+Input data format  FREE
+
+
+SUMMARY OF DATA
+
+     Number of missing data patterns             1
+
+
+COVARIANCE COVERAGE OF DATA
+
+Minimum covariance coverage value   0.100
+
+
+     PROPORTION OF DATA PRESENT FOR Y
+
+
+           Covariance Coverage
+              L_ACTION      L_ANIMAL      L_BODYP       L_CLOTH       L_DESCRB
+              ________      ________      ________      ________      ________
+ L_ACTION       1.000
+ L_ANIMAL       1.000         1.000
+ L_BODYP        1.000         1.000         1.000
+ L_CLOTH        1.000         1.000         1.000         1.000
+ L_DESCRB       1.000         1.000         1.000         1.000         1.000
+ L_FOOD         1.000         1.000         1.000         1.000         1.000
+ L_ROOMS        1.000         1.000         1.000         1.000         1.000
+ L_GAMES        1.000         1.000         1.000         1.000         1.000
+ L_HOUSEH       1.000         1.000         1.000         1.000         1.000
+ L_LOCATE       1.000         1.000         1.000         1.000         1.000
+ L_OUTSDE       1.000         1.000         1.000         1.000         1.000
+ L_PEOPLE       1.000         1.000         1.000         1.000         1.000
+ L_PLACES       1.000         1.000         1.000         1.000         1.000
+ L_SOUNDS       1.000         1.000         1.000         1.000         1.000
+ L_TOYS         1.000         1.000         1.000         1.000         1.000
+ L_VEHICL       1.000         1.000         1.000         1.000         1.000
+ D_AG2SEX       1.000         1.000         1.000         1.000         1.000
+ D_AGE_C        1.000         1.000         1.000         1.000         1.000
+ D_AGE_C2       1.000         1.000         1.000         1.000         1.000
+ D_MALE         1.000         1.000         1.000         1.000         1.000
+ D_FIRSTB       1.000         1.000         1.000         1.000         1.000
+ D_MOMCOL       1.000         1.000         1.000         1.000         1.000
+ D_AGESEX       1.000         1.000         1.000         1.000         1.000
+
+
+           Covariance Coverage
+              L_FOOD        L_ROOMS       L_GAMES       L_HOUSEH      L_LOCATE
+              ________      ________      ________      ________      ________
+ L_FOOD         1.000
+ L_ROOMS        1.000         1.000
+ L_GAMES        1.000         1.000         1.000
+ L_HOUSEH       1.000         1.000         1.000         1.000
+ L_LOCATE       1.000         1.000         1.000         1.000         1.000
+ L_OUTSDE       1.000         1.000         1.000         1.000         1.000
+ L_PEOPLE       1.000         1.000         1.000         1.000         1.000
+ L_PLACES       1.000         1.000         1.000         1.000         1.000
+ L_SOUNDS       1.000         1.000         1.000         1.000         1.000
+ L_TOYS         1.000         1.000         1.000         1.000         1.000
+ L_VEHICL       1.000         1.000         1.000         1.000         1.000
+ D_AG2SEX       1.000         1.000         1.000         1.000         1.000
+ D_AGE_C        1.000         1.000         1.000         1.000         1.000
+ D_AGE_C2       1.000         1.000         1.000         1.000         1.000
+ D_MALE         1.000         1.000         1.000         1.000         1.000
+ D_FIRSTB       1.000         1.000         1.000         1.000         1.000
+ D_MOMCOL       1.000         1.000         1.000         1.000         1.000
+ D_AGESEX       1.000         1.000         1.000         1.000         1.000
+
+
+           Covariance Coverage
+              L_OUTSDE      L_PEOPLE      L_PLACES      L_SOUNDS      L_TOYS
+              ________      ________      ________      ________      ________
+ L_OUTSDE       1.000
+ L_PEOPLE       1.000         1.000
+ L_PLACES       1.000         1.000         1.000
+ L_SOUNDS       1.000         1.000         1.000         1.000
+ L_TOYS         1.000         1.000         1.000         1.000         1.000
+ L_VEHICL       1.000         1.000         1.000         1.000         1.000
+ D_AG2SEX       1.000         1.000         1.000         1.000         1.000
+ D_AGE_C        1.000         1.000         1.000         1.000         1.000
+ D_AGE_C2       1.000         1.000         1.000         1.000         1.000
+ D_MALE         1.000         1.000         1.000         1.000         1.000
+ D_FIRSTB       1.000         1.000         1.000         1.000         1.000
+ D_MOMCOL       1.000         1.000         1.000         1.000         1.000
+ D_AGESEX       1.000         1.000         1.000         1.000         1.000
+
+
+           Covariance Coverage
+              L_VEHICL      D_AG2SEX      D_AGE_C       D_AGE_C2      D_MALE
+              ________      ________      ________      ________      ________
+ L_VEHICL       1.000
+ D_AG2SEX       1.000         1.000
+ D_AGE_C        1.000         1.000         1.000
+ D_AGE_C2       1.000         1.000         1.000         1.000
+ D_MALE         1.000         1.000         1.000         1.000         1.000
+ D_FIRSTB       1.000         1.000         1.000         1.000         1.000
+ D_MOMCOL       1.000         1.000         1.000         1.000         1.000
+ D_AGESEX       1.000         1.000         1.000         1.000         1.000
+
+
+           Covariance Coverage
+              D_FIRSTB      D_MOMCOL      D_AGESEX
+              ________      ________      ________
+ D_FIRSTB       1.000
+ D_MOMCOL       1.000         1.000
+ D_AGESEX       1.000         1.000         1.000
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     L_ACTION              0.381       0.465       0.000   10.09%       0.029      0.146      0.272
+            2766.000       0.124      -1.319       1.000    2.02%       0.437      0.796
+     L_ANIMAL              0.502       0.006       0.000    3.25%       0.140      0.372      0.512
+            2766.000       0.109      -1.413       1.000    6.69%       0.651      0.860
+     L_BODYP               0.559      -0.333       0.000    8.13%       0.148      0.481      0.667
+            2766.000       0.120      -1.406       1.000    4.66%       0.778      0.926
+     L_CLOTH               0.429       0.197       0.000    9.54%       0.071      0.286      0.429
+            2766.000       0.100      -1.290       1.000    2.71%       0.536      0.750
+     L_DESCRB              0.361       0.570       0.000    9.65%       0.048      0.143      0.254
+            2766.000       0.109      -1.095       1.000    2.28%       0.397      0.730
+     L_FOOD                0.470       0.063       0.000    5.89%       0.103      0.309      0.485
+            2766.000       0.112      -1.432       1.000    3.29%       0.603      0.838
+     L_ROOMS               0.392       0.352       0.000   17.75%       0.030      0.182      0.333
+            2766.000       0.119      -1.378       1.000    2.13%       0.485      0.788
+     L_GAMES               0.580      -0.160       0.000    1.99%       0.240      0.480      0.600
+            2766.000       0.096      -1.277       1.000   11.35%       0.720      0.920
+     L_HOUSEH              0.456       0.111       0.000    8.79%       0.060      0.280      0.440
+            2766.000       0.122      -1.486       1.000    3.69%       0.600      0.840
+     L_LOCATE              0.306       0.862       0.000   17.03%       0.038      0.154      0.231
+            2766.000       0.084      -0.356       1.000    2.17%       0.308      0.577
+     L_OUTSDE              0.418       0.301       0.000   14.24%       0.032      0.226      0.355
+            2766.000       0.117      -1.327       1.000    4.92%       0.516      0.806
+     L_PEOPLE              0.418       0.559       0.000    1.19%       0.172      0.276      0.345
+            2766.000       0.071      -0.751       1.000    2.71%       0.448      0.690
+     L_PLACES              0.329       0.573       0.000   18.76%       0.045      0.182      0.273
+            2766.000       0.087      -0.868       1.000    1.66%       0.364      0.636
+     L_SOUNDS              0.726      -0.817       0.000    0.87%       0.500      0.750      0.833
+            2766.000       0.069      -0.315       1.000   24.98%       0.833      1.000
+     L_TOYS                0.517       0.006       0.000    5.13%       0.167      0.389      0.500
+            2766.000       0.101      -1.312       1.000    8.93%       0.611      0.889
+     L_VEHICL              0.514      -0.149       0.000   10.52%       0.143      0.429      0.571
+            2766.000       0.111      -1.383       1.000    6.58%       0.714      0.857
+     D_AG2SEX              0.267      -0.018     -49.000    7.41%     -16.000     -1.000      0.000
+            2766.000     613.116      -0.136      49.000    7.45%       1.000     25.000
+     D_AGE_C              -0.267       0.087      -7.000    6.69%      -5.000     -2.000      1.000
+            2766.000      18.040      -1.118       7.000    8.17%       1.000      4.000
+     D_AGE_C2             18.112       0.675       0.000    4.92%       1.000      9.000     16.000
+            2766.000     285.153      -0.881      49.000   14.86%      16.000     36.000
+     D_MALE                0.013      -0.026      -1.000   49.35%      -1.000     -1.000      1.000
+            2766.000       1.000      -1.999       1.000   50.65%       1.000      1.000
+     D_FIRSTB              0.030      -0.059      -1.000   48.52%      -1.000     -1.000      1.000
+            2766.000       0.999      -1.996       1.000   51.48%       1.000      1.000
+     D_MOMCOL              0.165      -0.334      -1.000   41.76%      -1.000     -1.000      1.000
+            2766.000       0.973      -1.888       1.000   58.24%       1.000      1.000
+     D_AGESEX              0.056      -0.017      -7.000    7.30%      -4.000     -1.000      0.000
+            2766.000      18.109      -1.130       7.000    7.56%       1.000      4.000
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       18
+
+Loglikelihood
+
+          H0 Value                       17143.928
+
+Information Criteria
+
+          Akaike (AIC)                  -34251.856
+          Bayesian (BIC)                -34145.203
+          Sample-Size Adjusted BIC      -34202.395
+            (n* = (n + 2) / 24)
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ ETA      BY
+    L_ACTION         999.000      0.000    999.000    999.000
+    L_ANIMAL           0.261      0.000    999.000    999.000
+    L_BODYP          999.000      0.000    999.000    999.000
+    L_CLOTH          999.000      0.000    999.000    999.000
+    L_DESCRB         999.000      0.000    999.000    999.000
+    L_FOOD             0.268      0.000    999.000    999.000
+    L_ROOMS          999.000      0.000    999.000    999.000
+    L_GAMES            0.236      0.000    999.000    999.000
+    L_HOUSEH           0.291      0.000    999.000    999.000
+    L_LOCATE         999.000      0.000    999.000    999.000
+    L_OUTSDE         999.000      0.000    999.000    999.000
+    L_PEOPLE         999.000      0.000    999.000    999.000
+    L_PLACES         999.000      0.000    999.000    999.000
+    L_SOUNDS         999.000      0.000    999.000    999.000
+    L_TOYS           999.000      0.000    999.000    999.000
+    L_VEHICL         999.000      0.000    999.000    999.000
+
+ L_ACTION   ON
+    D_AGE_C            0.026      0.000    999.000    999.000
+
+ L_ANIMAL   ON
+    D_AGE_C            0.016      0.000    999.000    999.000
+    D_FIRSTB           0.015      0.000    999.000    999.000
+    D_MOMCOL           0.016      0.000    999.000    999.000
+
+ L_BODYP    ON
+    D_AGE_C            0.018      0.000    999.000    999.000
+    D_MALE            -0.006      0.000    999.000    999.000
+    D_MOMCOL          -0.014      0.000    999.000    999.000
+
+ L_CLOTH    ON
+    D_AGE_C            0.016      0.000    999.000    999.000
+    D_MALE            -0.017      0.000    999.000    999.000
+
+ L_DESCRB   ON
+    D_AGE_C            0.024      0.000    999.000    999.000
+
+ L_FOOD     ON
+    D_AGE_C            0.021      0.000    999.000    999.000
+    D_FIRSTB          -0.007      0.000    999.000    999.000
+
+ L_ROOMS    ON
+    D_AGE_C            0.019      0.000    999.000    999.000
+    D_MOMCOL          -0.015      0.000    999.000    999.000
+
+ L_GAMES    ON
+    D_AGE_C            0.018      0.000    999.000    999.000
+
+ L_HOUSEH   ON
+    D_AGE_C            0.018      0.000    999.000    999.000
+    D_MOMCOL          -0.010      0.000    999.000    999.000
+
+ L_LOCATE   ON
+    D_AGE_C            0.021      0.000    999.000    999.000
+
+ L_OUTSDE   ON
+    D_AGE_C            0.019      0.000    999.000    999.000
+    D_MALE             0.013      0.000    999.000    999.000
+
+ L_PEOPLE   ON
+    D_AGE_C            0.018      0.000    999.000    999.000
+
+ L_PLACES   ON
+    D_AGE_C            0.022      0.000    999.000    999.000
+    D_FIRSTB          -0.011      0.000    999.000    999.000
+
+ L_SOUNDS   ON
+    D_AGE_C2          -0.001      0.000    999.000    999.000
+    D_FIRSTB           0.014      0.000    999.000    999.000
+    D_MOMCOL           0.029      0.000    999.000    999.000
+
+ L_TOYS     ON
+    D_AGE_C            0.018      0.000    999.000    999.000
+    D_FIRSTB          -0.007      0.000    999.000    999.000
+
+ L_VEHICL   ON
+    D_AGE_C            0.018      0.000    999.000    999.000
+    D_MALE             0.045      0.000    999.000    999.000
+    D_MOMCOL           0.012      0.000    999.000    999.000
+    D_AGESEX           0.001      0.000    999.000    999.000
+
+ Means
+    D_AG2SEX           0.267      0.471      0.567      0.570
+    ETA                0.000      0.000    999.000    999.000
+
+ Intercepts
+    L_ACTION           0.380      0.000    999.000    999.000
+    L_ANIMAL           0.527      0.000    999.000    999.000
+    L_BODYP            0.593      0.000    999.000    999.000
+    L_CLOTH            0.448      0.000    999.000    999.000
+    L_DESCRB           0.356      0.000    999.000    999.000
+    L_FOOD             0.501      0.000    999.000    999.000
+    L_ROOMS            0.404      0.000    999.000    999.000
+    L_GAMES            0.607      0.000    999.000    999.000
+    L_HOUSEH           0.490      0.000    999.000    999.000
+    L_LOCATE           0.295      0.000    999.000    999.000
+    L_OUTSDE           0.430      0.000    999.000    999.000
+    L_PEOPLE           0.417      0.000    999.000    999.000
+    L_PLACES           0.329      0.000    999.000    999.000
+    L_SOUNDS           0.759      0.000    999.000    999.000
+    L_TOYS             0.547      0.000    999.000    999.000
+    L_VEHICL           0.541      0.000    999.000    999.000
+
+ Variances
+    D_AG2SEX         613.116     16.487     37.189      0.000
+    ETA              999.000      0.000    999.000    999.000
+
+ Residual Variances
+    L_ACTION           0.012      0.000     34.519      0.000
+    L_ANIMAL           0.014      0.000     35.416      0.000
+    L_BODYP            0.016      0.000     35.330      0.000
+    L_CLOTH            0.007      0.000     33.842      0.000
+    L_DESCRB           0.010      0.000     34.470      0.000
+    L_FOOD             0.007      0.000     33.297      0.000
+    L_ROOMS            0.008      0.000     33.533      0.000
+    L_GAMES            0.015      0.000     35.739      0.000
+    L_HOUSEH           0.006      0.000     32.035      0.000
+    L_LOCATE           0.017      0.000     35.983      0.000
+    L_OUTSDE           0.008      0.000     33.414      0.000
+    L_PEOPLE           0.009      0.000     35.350      0.000
+    L_PLACES           0.009      0.000     34.923      0.000
+    L_SOUNDS           0.033      0.001     36.816      0.000
+    L_TOYS             0.010      0.000     34.780      0.000
+    L_VEHICL           0.015      0.000     35.454      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.124E-07
+       (ratio of smallest to largest eigenvalue)
+
+
+TECHNICAL 1 OUTPUT
+
+
+     PARAMETER SPECIFICATION
+
+
+           NU
+              L_ACTION      L_ANIMAL      L_BODYP       L_CLOTH       L_DESCRB
+              ________      ________      ________      ________      ________
+                    0             0             0             0             0
+
+
+           NU
+              L_FOOD        L_ROOMS       L_GAMES       L_HOUSEH      L_LOCATE
+              ________      ________      ________      ________      ________
+                    0             0             0             0             0
+
+
+           NU
+              L_OUTSDE      L_PEOPLE      L_PLACES      L_SOUNDS      L_TOYS
+              ________      ________      ________      ________      ________
+                    0             0             0             0             0
+
+
+           NU
+              L_VEHICL      D_AG2SEX      D_AGE_C       D_AGE_C2      D_MALE
+              ________      ________      ________      ________      ________
+                    0             1             0             0             0
+
+
+           NU
+              D_FIRSTB      D_MOMCOL      D_AGESEX
+              ________      ________      ________
+                    0             0             0
+
+
+           LAMBDA
+              ETA           L_ACTION      L_ANIMAL      L_BODYP       L_CLOTH
+              ________      ________      ________      ________      ________
+ L_ACTION           0             0             0             0             0
+ L_ANIMAL           0             0             0             0             0
+ L_BODYP            0             0             0             0             0
+ L_CLOTH            0             0             0             0             0
+ L_DESCRB           0             0             0             0             0
+ L_FOOD             0             0             0             0             0
+ L_ROOMS            0             0             0             0             0
+ L_GAMES            0             0             0             0             0
+ L_HOUSEH           0             0             0             0             0
+ L_LOCATE           0             0             0             0             0
+ L_OUTSDE           0             0             0             0             0
+ L_PEOPLE           0             0             0             0             0
+ L_PLACES           0             0             0             0             0
+ L_SOUNDS           0             0             0             0             0
+ L_TOYS             0             0             0             0             0
+ L_VEHICL           0             0             0             0             0
+ D_AG2SEX           0             0             0             0             0
+ D_AGE_C            0             0             0             0             0
+ D_AGE_C2           0             0             0             0             0
+ D_MALE             0             0             0             0             0
+ D_FIRSTB           0             0             0             0             0
+ D_MOMCOL           0             0             0             0             0
+ D_AGESEX           0             0             0             0             0
+
+
+           LAMBDA
+              L_DESCRB      L_FOOD        L_ROOMS       L_GAMES       L_HOUSEH
+              ________      ________      ________      ________      ________
+ L_ACTION           0             0             0             0             0
+ L_ANIMAL           0             0             0             0             0
+ L_BODYP            0             0             0             0             0
+ L_CLOTH            0             0             0             0             0
+ L_DESCRB           0             0             0             0             0
+ L_FOOD             0             0             0             0             0
+ L_ROOMS            0             0             0             0             0
+ L_GAMES            0             0             0             0             0
+ L_HOUSEH           0             0             0             0             0
+ L_LOCATE           0             0             0             0             0
+ L_OUTSDE           0             0             0             0             0
+ L_PEOPLE           0             0             0             0             0
+ L_PLACES           0             0             0             0             0
+ L_SOUNDS           0             0             0             0             0
+ L_TOYS             0             0             0             0             0
+ L_VEHICL           0             0             0             0             0
+ D_AG2SEX           0             0             0             0             0
+ D_AGE_C            0             0             0             0             0
+ D_AGE_C2           0             0             0             0             0
+ D_MALE             0             0             0             0             0
+ D_FIRSTB           0             0             0             0             0
+ D_MOMCOL           0             0             0             0             0
+ D_AGESEX           0             0             0             0             0
+
+
+           LAMBDA
+              L_LOCATE      L_OUTSDE      L_PEOPLE      L_PLACES      L_SOUNDS
+              ________      ________      ________      ________      ________
+ L_ACTION           0             0             0             0             0
+ L_ANIMAL           0             0             0             0             0
+ L_BODYP            0             0             0             0             0
+ L_CLOTH            0             0             0             0             0
+ L_DESCRB           0             0             0             0             0
+ L_FOOD             0             0             0             0             0
+ L_ROOMS            0             0             0             0             0
+ L_GAMES            0             0             0             0             0
+ L_HOUSEH           0             0             0             0             0
+ L_LOCATE           0             0             0             0             0
+ L_OUTSDE           0             0             0             0             0
+ L_PEOPLE           0             0             0             0             0
+ L_PLACES           0             0             0             0             0
+ L_SOUNDS           0             0             0             0             0
+ L_TOYS             0             0             0             0             0
+ L_VEHICL           0             0             0             0             0
+ D_AG2SEX           0             0             0             0             0
+ D_AGE_C            0             0             0             0             0
+ D_AGE_C2           0             0             0             0             0
+ D_MALE             0             0             0             0             0
+ D_FIRSTB           0             0             0             0             0
+ D_MOMCOL           0             0             0             0             0
+ D_AGESEX           0             0             0             0             0
+
+
+           LAMBDA
+              L_TOYS        L_VEHICL      D_AGE_C       D_AGE_C2      D_MALE
+              ________      ________      ________      ________      ________
+ L_ACTION           0             0             0             0             0
+ L_ANIMAL           0             0             0             0             0
+ L_BODYP            0             0             0             0             0
+ L_CLOTH            0             0             0             0             0
+ L_DESCRB           0             0             0             0             0
+ L_FOOD             0             0             0             0             0
+ L_ROOMS            0             0             0             0             0
+ L_GAMES            0             0             0             0             0
+ L_HOUSEH           0             0             0             0             0
+ L_LOCATE           0             0             0             0             0
+ L_OUTSDE           0             0             0             0             0
+ L_PEOPLE           0             0             0             0             0
+ L_PLACES           0             0             0             0             0
+ L_SOUNDS           0             0             0             0             0
+ L_TOYS             0             0             0             0             0
+ L_VEHICL           0             0             0             0             0
+ D_AG2SEX           0             0             0             0             0
+ D_AGE_C            0             0             0             0             0
+ D_AGE_C2           0             0             0             0             0
+ D_MALE             0             0             0             0             0
+ D_FIRSTB           0             0             0             0             0
+ D_MOMCOL           0             0             0             0             0
+ D_AGESEX           0             0             0             0             0
+
+
+           LAMBDA
+              D_FIRSTB      D_MOMCOL      D_AGESEX
+              ________      ________      ________
+ L_ACTION           0             0             0
+ L_ANIMAL           0             0             0
+ L_BODYP            0             0             0
+ L_CLOTH            0             0             0
+ L_DESCRB           0             0             0
+ L_FOOD             0             0             0
+ L_ROOMS            0             0             0
+ L_GAMES            0             0             0
+ L_HOUSEH           0             0             0
+ L_LOCATE           0             0             0
+ L_OUTSDE           0             0             0
+ L_PEOPLE           0             0             0
+ L_PLACES           0             0             0
+ L_SOUNDS           0             0             0
+ L_TOYS             0             0             0
+ L_VEHICL           0             0             0
+ D_AG2SEX           0             0             0
+ D_AGE_C            0             0             0
+ D_AGE_C2           0             0             0
+ D_MALE             0             0             0
+ D_FIRSTB           0             0             0
+ D_MOMCOL           0             0             0
+ D_AGESEX           0             0             0
+
+
+           THETA
+              L_ACTION      L_ANIMAL      L_BODYP       L_CLOTH       L_DESCRB
+              ________      ________      ________      ________      ________
+ L_ACTION           0
+ L_ANIMAL           0             0
+ L_BODYP            0             0             0
+ L_CLOTH            0             0             0             0
+ L_DESCRB           0             0             0             0             0
+ L_FOOD             0             0             0             0             0
+ L_ROOMS            0             0             0             0             0
+ L_GAMES            0             0             0             0             0
+ L_HOUSEH           0             0             0             0             0
+ L_LOCATE           0             0             0             0             0
+ L_OUTSDE           0             0             0             0             0
+ L_PEOPLE           0             0             0             0             0
+ L_PLACES           0             0             0             0             0
+ L_SOUNDS           0             0             0             0             0
+ L_TOYS             0             0             0             0             0
+ L_VEHICL           0             0             0             0             0
+ D_AG2SEX           0             0             0             0             0
+ D_AGE_C            0             0             0             0             0
+ D_AGE_C2           0             0             0             0             0
+ D_MALE             0             0             0             0             0
+ D_FIRSTB           0             0             0             0             0
+ D_MOMCOL           0             0             0             0             0
+ D_AGESEX           0             0             0             0             0
+
+
+           THETA
+              L_FOOD        L_ROOMS       L_GAMES       L_HOUSEH      L_LOCATE
+              ________      ________      ________      ________      ________
+ L_FOOD             0
+ L_ROOMS            0             0
+ L_GAMES            0             0             0
+ L_HOUSEH           0             0             0             0
+ L_LOCATE           0             0             0             0             0
+ L_OUTSDE           0             0             0             0             0
+ L_PEOPLE           0             0             0             0             0
+ L_PLACES           0             0             0             0             0
+ L_SOUNDS           0             0             0             0             0
+ L_TOYS             0             0             0             0             0
+ L_VEHICL           0             0             0             0             0
+ D_AG2SEX           0             0             0             0             0
+ D_AGE_C            0             0             0             0             0
+ D_AGE_C2           0             0             0             0             0
+ D_MALE             0             0             0             0             0
+ D_FIRSTB           0             0             0             0             0
+ D_MOMCOL           0             0             0             0             0
+ D_AGESEX           0             0             0             0             0
+
+
+           THETA
+              L_OUTSDE      L_PEOPLE      L_PLACES      L_SOUNDS      L_TOYS
+              ________      ________      ________      ________      ________
+ L_OUTSDE           0
+ L_PEOPLE           0             0
+ L_PLACES           0             0             0
+ L_SOUNDS           0             0             0             0
+ L_TOYS             0             0             0             0             0
+ L_VEHICL           0             0             0             0             0
+ D_AG2SEX           0             0             0             0             0
+ D_AGE_C            0             0             0             0             0
+ D_AGE_C2           0             0             0             0             0
+ D_MALE             0             0             0             0             0
+ D_FIRSTB           0             0             0             0             0
+ D_MOMCOL           0             0             0             0             0
+ D_AGESEX           0             0             0             0             0
+
+
+           THETA
+              L_VEHICL      D_AG2SEX      D_AGE_C       D_AGE_C2      D_MALE
+              ________      ________      ________      ________      ________
+ L_VEHICL           0
+ D_AG2SEX           0             2
+ D_AGE_C            0             0             0
+ D_AGE_C2           0             0             0             0
+ D_MALE             0             0             0             0             0
+ D_FIRSTB           0             0             0             0             0
+ D_MOMCOL           0             0             0             0             0
+ D_AGESEX           0             0             0             0             0
+
+
+           THETA
+              D_FIRSTB      D_MOMCOL      D_AGESEX
+              ________      ________      ________
+ D_FIRSTB           0
+ D_MOMCOL           0             0
+ D_AGESEX           0             0             0
+
+
+           ALPHA
+              ETA           L_ACTION      L_ANIMAL      L_BODYP       L_CLOTH
+              ________      ________      ________      ________      ________
+                    0             0             0             0             0
+
+
+           ALPHA
+              L_DESCRB      L_FOOD        L_ROOMS       L_GAMES       L_HOUSEH
+              ________      ________      ________      ________      ________
+                    0             0             0             0             0
+
+
+           ALPHA
+              L_LOCATE      L_OUTSDE      L_PEOPLE      L_PLACES      L_SOUNDS
+              ________      ________      ________      ________      ________
+                    0             0             0             0             0
+
+
+           ALPHA
+              L_TOYS        L_VEHICL      D_AGE_C       D_AGE_C2      D_MALE
+              ________      ________      ________      ________      ________
+                    0             0             0             0             0
+
+
+           ALPHA
+              D_FIRSTB      D_MOMCOL      D_AGESEX
+              ________      ________      ________
+                    0             0             0
+
+
+           BETA
+              ETA           L_ACTION      L_ANIMAL      L_BODYP       L_CLOTH
+              ________      ________      ________      ________      ________
+ ETA                0             0             0             0             0
+ L_ACTION           3             0             0             0             0
+ L_ANIMAL           0             0             0             0             0
+ L_BODYP            4             0             0             0             0
+ L_CLOTH            5             0             0             0             0
+ L_DESCRB           6             0             0             0             0
+ L_FOOD             0             0             0             0             0
+ L_ROOMS            7             0             0             0             0
+ L_GAMES            0             0             0             0             0
+ L_HOUSEH           0             0             0             0             0
+ L_LOCATE           8             0             0             0             0
+ L_OUTSDE           9             0             0             0             0
+ L_PEOPLE          10             0             0             0             0
+ L_PLACES          11             0             0             0             0
+ L_SOUNDS          12             0             0             0             0
+ L_TOYS            13             0             0             0             0
+ L_VEHICL          14             0             0             0             0
+ D_AGE_C            0             0             0             0             0
+ D_AGE_C2           0             0             0             0             0
+ D_MALE             0             0             0             0             0
+ D_FIRSTB           0             0             0             0             0
+ D_MOMCOL           0             0             0             0             0
+ D_AGESEX           0             0             0             0             0
+
+
+           BETA
+              L_DESCRB      L_FOOD        L_ROOMS       L_GAMES       L_HOUSEH
+              ________      ________      ________      ________      ________
+ ETA                0             0             0             0             0
+ L_ACTION           0             0             0             0             0
+ L_ANIMAL           0             0             0             0             0
+ L_BODYP            0             0             0             0             0
+ L_CLOTH            0             0             0             0             0
+ L_DESCRB           0             0             0             0             0
+ L_FOOD             0             0             0             0             0
+ L_ROOMS            0             0             0             0             0
+ L_GAMES            0             0             0             0             0
+ L_HOUSEH           0             0             0             0             0
+ L_LOCATE           0             0             0             0             0
+ L_OUTSDE           0             0             0             0             0
+ L_PEOPLE           0             0             0             0             0
+ L_PLACES           0             0             0             0             0
+ L_SOUNDS           0             0             0             0             0
+ L_TOYS             0             0             0             0             0
+ L_VEHICL           0             0             0             0             0
+ D_AGE_C            0             0             0             0             0
+ D_AGE_C2           0             0             0             0             0
+ D_MALE             0             0             0             0             0
+ D_FIRSTB           0             0             0             0             0
+ D_MOMCOL           0             0             0             0             0
+ D_AGESEX           0             0             0             0             0
+
+
+           BETA
+              L_LOCATE      L_OUTSDE      L_PEOPLE      L_PLACES      L_SOUNDS
+              ________      ________      ________      ________      ________
+ ETA                0             0             0             0             0
+ L_ACTION           0             0             0             0             0
+ L_ANIMAL           0             0             0             0             0
+ L_BODYP            0             0             0             0             0
+ L_CLOTH            0             0             0             0             0
+ L_DESCRB           0             0             0             0             0
+ L_FOOD             0             0             0             0             0
+ L_ROOMS            0             0             0             0             0
+ L_GAMES            0             0             0             0             0
+ L_HOUSEH           0             0             0             0             0
+ L_LOCATE           0             0             0             0             0
+ L_OUTSDE           0             0             0             0             0
+ L_PEOPLE           0             0             0             0             0
+ L_PLACES           0             0             0             0             0
+ L_SOUNDS           0             0             0             0             0
+ L_TOYS             0             0             0             0             0
+ L_VEHICL           0             0             0             0             0
+ D_AGE_C            0             0             0             0             0
+ D_AGE_C2           0             0             0             0             0
+ D_MALE             0             0             0             0             0
+ D_FIRSTB           0             0             0             0             0
+ D_MOMCOL           0             0             0             0             0
+ D_AGESEX           0             0             0             0             0
+
+
+           BETA
+              L_TOYS        L_VEHICL      D_AGE_C       D_AGE_C2      D_MALE
+              ________      ________      ________      ________      ________
+ ETA                0             0             0             0             0
+ L_ACTION           0             0             0             0             0
+ L_ANIMAL           0             0             0             0             0
+ L_BODYP            0             0             0             0             0
+ L_CLOTH            0             0             0             0             0
+ L_DESCRB           0             0             0             0             0
+ L_FOOD             0             0             0             0             0
+ L_ROOMS            0             0             0             0             0
+ L_GAMES            0             0             0             0             0
+ L_HOUSEH           0             0             0             0             0
+ L_LOCATE           0             0             0             0             0
+ L_OUTSDE           0             0             0             0             0
+ L_PEOPLE           0             0             0             0             0
+ L_PLACES           0             0             0             0             0
+ L_SOUNDS           0             0             0             0             0
+ L_TOYS             0             0             0             0             0
+ L_VEHICL           0             0             0             0             0
+ D_AGE_C            0             0             0             0             0
+ D_AGE_C2           0             0             0             0             0
+ D_MALE             0             0             0             0             0
+ D_FIRSTB           0             0             0             0             0
+ D_MOMCOL           0             0             0             0             0
+ D_AGESEX           0             0             0             0             0
+
+
+           BETA
+              D_FIRSTB      D_MOMCOL      D_AGESEX
+              ________      ________      ________
+ ETA                0             0             0
+ L_ACTION           0             0             0
+ L_ANIMAL           0             0             0
+ L_BODYP            0             0             0
+ L_CLOTH            0             0             0
+ L_DESCRB           0             0             0
+ L_FOOD             0             0             0
+ L_ROOMS            0             0             0
+ L_GAMES            0             0             0
+ L_HOUSEH           0             0             0
+ L_LOCATE           0             0             0
+ L_OUTSDE           0             0             0
+ L_PEOPLE           0             0             0
+ L_PLACES           0             0             0
+ L_SOUNDS           0             0             0
+ L_TOYS             0             0             0
+ L_VEHICL           0             0             0
+ D_AGE_C            0             0             0
+ D_AGE_C2           0             0             0
+ D_MALE             0             0             0
+ D_FIRSTB           0             0             0
+ D_MOMCOL           0             0             0
+ D_AGESEX           0             0             0
+
+
+           PSI
+              ETA           L_ACTION      L_ANIMAL      L_BODYP       L_CLOTH
+              ________      ________      ________      ________      ________
+ ETA               15
+ L_ACTION           0            16
+ L_ANIMAL           0             0            17
+ L_BODYP            0             0             0            18
+ L_CLOTH            0             0             0             0            19
+ L_DESCRB           0             0             0             0             0
+ L_FOOD             0             0             0             0             0
+ L_ROOMS            0             0             0             0             0
+ L_GAMES            0             0             0             0             0
+ L_HOUSEH           0             0             0             0             0
+ L_LOCATE           0             0             0             0             0
+ L_OUTSDE           0             0             0             0             0
+ L_PEOPLE           0             0             0             0             0
+ L_PLACES           0             0             0             0             0
+ L_SOUNDS           0             0             0             0             0
+ L_TOYS             0             0             0             0             0
+ L_VEHICL           0             0             0             0             0
+ D_AGE_C            0             0             0             0             0
+ D_AGE_C2           0             0             0             0             0
+ D_MALE             0             0             0             0             0
+ D_FIRSTB           0             0             0             0             0
+ D_MOMCOL           0             0             0             0             0
+ D_AGESEX           0             0             0             0             0
+
+
+           PSI
+              L_DESCRB      L_FOOD        L_ROOMS       L_GAMES       L_HOUSEH
+              ________      ________      ________      ________      ________
+ L_DESCRB          20
+ L_FOOD             0            21
+ L_ROOMS            0             0            22
+ L_GAMES            0             0             0            23
+ L_HOUSEH           0             0             0             0            24
+ L_LOCATE           0             0             0             0             0
+ L_OUTSDE           0             0             0             0             0
+ L_PEOPLE           0             0             0             0             0
+ L_PLACES           0             0             0             0             0
+ L_SOUNDS           0             0             0             0             0
+ L_TOYS             0             0             0             0             0
+ L_VEHICL           0             0             0             0             0
+ D_AGE_C            0             0             0             0             0
+ D_AGE_C2           0             0             0             0             0
+ D_MALE             0             0             0             0             0
+ D_FIRSTB           0             0             0             0             0
+ D_MOMCOL           0             0             0             0             0
+ D_AGESEX           0             0             0             0             0
+
+
+           PSI
+              L_LOCATE      L_OUTSDE      L_PEOPLE      L_PLACES      L_SOUNDS
+              ________      ________      ________      ________      ________
+ L_LOCATE          25
+ L_OUTSDE           0            26
+ L_PEOPLE           0             0            27
+ L_PLACES           0             0             0            28
+ L_SOUNDS           0             0             0             0            29
+ L_TOYS             0             0             0             0             0
+ L_VEHICL           0             0             0             0             0
+ D_AGE_C            0             0             0             0             0
+ D_AGE_C2           0             0             0             0             0
+ D_MALE             0             0             0             0             0
+ D_FIRSTB           0             0             0             0             0
+ D_MOMCOL           0             0             0             0             0
+ D_AGESEX           0             0             0             0             0
+
+
+           PSI
+              L_TOYS        L_VEHICL      D_AGE_C       D_AGE_C2      D_MALE
+              ________      ________      ________      ________      ________
+ L_TOYS            30
+ L_VEHICL           0            31
+ D_AGE_C            0             0             0
+ D_AGE_C2           0             0             0             0
+ D_MALE             0             0             0             0             0
+ D_FIRSTB           0             0             0             0             0
+ D_MOMCOL           0             0             0             0             0
+ D_AGESEX           0             0             0             0             0
+
+
+           PSI
+              D_FIRSTB      D_MOMCOL      D_AGESEX
+              ________      ________      ________
+ D_FIRSTB           0
+ D_MOMCOL           0             0
+ D_AGESEX           0             0             0
+
+
+     STARTING VALUES
+
+
+           NU
+              L_ACTION      L_ANIMAL      L_BODYP       L_CLOTH       L_DESCRB
+              ________      ________      ________      ________      ________
+                0.000         0.000         0.000         0.000         0.000
+
+
+           NU
+              L_FOOD        L_ROOMS       L_GAMES       L_HOUSEH      L_LOCATE
+              ________      ________      ________      ________      ________
+                0.000         0.000         0.000         0.000         0.000
+
+
+           NU
+              L_OUTSDE      L_PEOPLE      L_PLACES      L_SOUNDS      L_TOYS
+              ________      ________      ________      ________      ________
+                0.000         0.000         0.000         0.000         0.000
+
+
+           NU
+              L_VEHICL      D_AG2SEX      D_AGE_C       D_AGE_C2      D_MALE
+              ________      ________      ________      ________      ________
+                0.000         0.267         0.000         0.000         0.000
+
+
+           NU
+              D_FIRSTB      D_MOMCOL      D_AGESEX
+              ________      ________      ________
+                0.000         0.000         0.000
+
+
+           LAMBDA
+              ETA           L_ACTION      L_ANIMAL      L_BODYP       L_CLOTH
+              ________      ________      ________      ________      ________
+ L_ACTION       0.000         1.000         0.000         0.000         0.000
+ L_ANIMAL       0.000         0.000         1.000         0.000         0.000
+ L_BODYP        0.000         0.000         0.000         1.000         0.000
+ L_CLOTH        0.000         0.000         0.000         0.000         1.000
+ L_DESCRB       0.000         0.000         0.000         0.000         0.000
+ L_FOOD         0.000         0.000         0.000         0.000         0.000
+ L_ROOMS        0.000         0.000         0.000         0.000         0.000
+ L_GAMES        0.000         0.000         0.000         0.000         0.000
+ L_HOUSEH       0.000         0.000         0.000         0.000         0.000
+ L_LOCATE       0.000         0.000         0.000         0.000         0.000
+ L_OUTSDE       0.000         0.000         0.000         0.000         0.000
+ L_PEOPLE       0.000         0.000         0.000         0.000         0.000
+ L_PLACES       0.000         0.000         0.000         0.000         0.000
+ L_SOUNDS       0.000         0.000         0.000         0.000         0.000
+ L_TOYS         0.000         0.000         0.000         0.000         0.000
+ L_VEHICL       0.000         0.000         0.000         0.000         0.000
+ D_AG2SEX       0.000         0.000         0.000         0.000         0.000
+ D_AGE_C        0.000         0.000         0.000         0.000         0.000
+ D_AGE_C2       0.000         0.000         0.000         0.000         0.000
+ D_MALE         0.000         0.000         0.000         0.000         0.000
+ D_FIRSTB       0.000         0.000         0.000         0.000         0.000
+ D_MOMCOL       0.000         0.000         0.000         0.000         0.000
+ D_AGESEX       0.000         0.000         0.000         0.000         0.000
+
+
+           LAMBDA
+              L_DESCRB      L_FOOD        L_ROOMS       L_GAMES       L_HOUSEH
+              ________      ________      ________      ________      ________
+ L_ACTION       0.000         0.000         0.000         0.000         0.000
+ L_ANIMAL       0.000         0.000         0.000         0.000         0.000
+ L_BODYP        0.000         0.000         0.000         0.000         0.000
+ L_CLOTH        0.000         0.000         0.000         0.000         0.000
+ L_DESCRB       1.000         0.000         0.000         0.000         0.000
+ L_FOOD         0.000         1.000         0.000         0.000         0.000
+ L_ROOMS        0.000         0.000         1.000         0.000         0.000
+ L_GAMES        0.000         0.000         0.000         1.000         0.000
+ L_HOUSEH       0.000         0.000         0.000         0.000         1.000
+ L_LOCATE       0.000         0.000         0.000         0.000         0.000
+ L_OUTSDE       0.000         0.000         0.000         0.000         0.000
+ L_PEOPLE       0.000         0.000         0.000         0.000         0.000
+ L_PLACES       0.000         0.000         0.000         0.000         0.000
+ L_SOUNDS       0.000         0.000         0.000         0.000         0.000
+ L_TOYS         0.000         0.000         0.000         0.000         0.000
+ L_VEHICL       0.000         0.000         0.000         0.000         0.000
+ D_AG2SEX       0.000         0.000         0.000         0.000         0.000
+ D_AGE_C        0.000         0.000         0.000         0.000         0.000
+ D_AGE_C2       0.000         0.000         0.000         0.000         0.000
+ D_MALE         0.000         0.000         0.000         0.000         0.000
+ D_FIRSTB       0.000         0.000         0.000         0.000         0.000
+ D_MOMCOL       0.000         0.000         0.000         0.000         0.000
+ D_AGESEX       0.000         0.000         0.000         0.000         0.000
+
+
+           LAMBDA
+              L_LOCATE      L_OUTSDE      L_PEOPLE      L_PLACES      L_SOUNDS
+              ________      ________      ________      ________      ________
+ L_ACTION       0.000         0.000         0.000         0.000         0.000
+ L_ANIMAL       0.000         0.000         0.000         0.000         0.000
+ L_BODYP        0.000         0.000         0.000         0.000         0.000
+ L_CLOTH        0.000         0.000         0.000         0.000         0.000
+ L_DESCRB       0.000         0.000         0.000         0.000         0.000
+ L_FOOD         0.000         0.000         0.000         0.000         0.000
+ L_ROOMS        0.000         0.000         0.000         0.000         0.000
+ L_GAMES        0.000         0.000         0.000         0.000         0.000
+ L_HOUSEH       0.000         0.000         0.000         0.000         0.000
+ L_LOCATE       1.000         0.000         0.000         0.000         0.000
+ L_OUTSDE       0.000         1.000         0.000         0.000         0.000
+ L_PEOPLE       0.000         0.000         1.000         0.000         0.000
+ L_PLACES       0.000         0.000         0.000         1.000         0.000
+ L_SOUNDS       0.000         0.000         0.000         0.000         1.000
+ L_TOYS         0.000         0.000         0.000         0.000         0.000
+ L_VEHICL       0.000         0.000         0.000         0.000         0.000
+ D_AG2SEX       0.000         0.000         0.000         0.000         0.000
+ D_AGE_C        0.000         0.000         0.000         0.000         0.000
+ D_AGE_C2       0.000         0.000         0.000         0.000         0.000
+ D_MALE         0.000         0.000         0.000         0.000         0.000
+ D_FIRSTB       0.000         0.000         0.000         0.000         0.000
+ D_MOMCOL       0.000         0.000         0.000         0.000         0.000
+ D_AGESEX       0.000         0.000         0.000         0.000         0.000
+
+
+           LAMBDA
+              L_TOYS        L_VEHICL      D_AGE_C       D_AGE_C2      D_MALE
+              ________      ________      ________      ________      ________
+ L_ACTION       0.000         0.000         0.000         0.000         0.000
+ L_ANIMAL       0.000         0.000         0.000         0.000         0.000
+ L_BODYP        0.000         0.000         0.000         0.000         0.000
+ L_CLOTH        0.000         0.000         0.000         0.000         0.000
+ L_DESCRB       0.000         0.000         0.000         0.000         0.000
+ L_FOOD         0.000         0.000         0.000         0.000         0.000
+ L_ROOMS        0.000         0.000         0.000         0.000         0.000
+ L_GAMES        0.000         0.000         0.000         0.000         0.000
+ L_HOUSEH       0.000         0.000         0.000         0.000         0.000
+ L_LOCATE       0.000         0.000         0.000         0.000         0.000
+ L_OUTSDE       0.000         0.000         0.000         0.000         0.000
+ L_PEOPLE       0.000         0.000         0.000         0.000         0.000
+ L_PLACES       0.000         0.000         0.000         0.000         0.000
+ L_SOUNDS       0.000         0.000         0.000         0.000         0.000
+ L_TOYS         1.000         0.000         0.000         0.000         0.000
+ L_VEHICL       0.000         1.000         0.000         0.000         0.000
+ D_AG2SEX       0.000         0.000         0.000         0.000         0.000
+ D_AGE_C        0.000         0.000         1.000         0.000         0.000
+ D_AGE_C2       0.000         0.000         0.000         1.000         0.000
+ D_MALE         0.000         0.000         0.000         0.000         1.000
+ D_FIRSTB       0.000         0.000         0.000         0.000         0.000
+ D_MOMCOL       0.000         0.000         0.000         0.000         0.000
+ D_AGESEX       0.000         0.000         0.000         0.000         0.000
+
+
+           LAMBDA
+              D_FIRSTB      D_MOMCOL      D_AGESEX
+              ________      ________      ________
+ L_ACTION       0.000         0.000         0.000
+ L_ANIMAL       0.000         0.000         0.000
+ L_BODYP        0.000         0.000         0.000
+ L_CLOTH        0.000         0.000         0.000
+ L_DESCRB       0.000         0.000         0.000
+ L_FOOD         0.000         0.000         0.000
+ L_ROOMS        0.000         0.000         0.000
+ L_GAMES        0.000         0.000         0.000
+ L_HOUSEH       0.000         0.000         0.000
+ L_LOCATE       0.000         0.000         0.000
+ L_OUTSDE       0.000         0.000         0.000
+ L_PEOPLE       0.000         0.000         0.000
+ L_PLACES       0.000         0.000         0.000
+ L_SOUNDS       0.000         0.000         0.000
+ L_TOYS         0.000         0.000         0.000
+ L_VEHICL       0.000         0.000         0.000
+ D_AG2SEX       0.000         0.000         0.000
+ D_AGE_C        0.000         0.000         0.000
+ D_AGE_C2       0.000         0.000         0.000
+ D_MALE         0.000         0.000         0.000
+ D_FIRSTB       1.000         0.000         0.000
+ D_MOMCOL       0.000         1.000         0.000
+ D_AGESEX       0.000         0.000         1.000
+
+
+           THETA
+              L_ACTION      L_ANIMAL      L_BODYP       L_CLOTH       L_DESCRB
+              ________      ________      ________      ________      ________
+ L_ACTION       0.000
+ L_ANIMAL       0.000         0.000
+ L_BODYP        0.000         0.000         0.000
+ L_CLOTH        0.000         0.000         0.000         0.000
+ L_DESCRB       0.000         0.000         0.000         0.000         0.000
+ L_FOOD         0.000         0.000         0.000         0.000         0.000
+ L_ROOMS        0.000         0.000         0.000         0.000         0.000
+ L_GAMES        0.000         0.000         0.000         0.000         0.000
+ L_HOUSEH       0.000         0.000         0.000         0.000         0.000
+ L_LOCATE       0.000         0.000         0.000         0.000         0.000
+ L_OUTSDE       0.000         0.000         0.000         0.000         0.000
+ L_PEOPLE       0.000         0.000         0.000         0.000         0.000
+ L_PLACES       0.000         0.000         0.000         0.000         0.000
+ L_SOUNDS       0.000         0.000         0.000         0.000         0.000
+ L_TOYS         0.000         0.000         0.000         0.000         0.000
+ L_VEHICL       0.000         0.000         0.000         0.000         0.000
+ D_AG2SEX       0.000         0.000         0.000         0.000         0.000
+ D_AGE_C        0.000         0.000         0.000         0.000         0.000
+ D_AGE_C2       0.000         0.000         0.000         0.000         0.000
+ D_MALE         0.000         0.000         0.000         0.000         0.000
+ D_FIRSTB       0.000         0.000         0.000         0.000         0.000
+ D_MOMCOL       0.000         0.000         0.000         0.000         0.000
+ D_AGESEX       0.000         0.000         0.000         0.000         0.000
+
+
+           THETA
+              L_FOOD        L_ROOMS       L_GAMES       L_HOUSEH      L_LOCATE
+              ________      ________      ________      ________      ________
+ L_FOOD         0.000
+ L_ROOMS        0.000         0.000
+ L_GAMES        0.000         0.000         0.000
+ L_HOUSEH       0.000         0.000         0.000         0.000
+ L_LOCATE       0.000         0.000         0.000         0.000         0.000
+ L_OUTSDE       0.000         0.000         0.000         0.000         0.000
+ L_PEOPLE       0.000         0.000         0.000         0.000         0.000
+ L_PLACES       0.000         0.000         0.000         0.000         0.000
+ L_SOUNDS       0.000         0.000         0.000         0.000         0.000
+ L_TOYS         0.000         0.000         0.000         0.000         0.000
+ L_VEHICL       0.000         0.000         0.000         0.000         0.000
+ D_AG2SEX       0.000         0.000         0.000         0.000         0.000
+ D_AGE_C        0.000         0.000         0.000         0.000         0.000
+ D_AGE_C2       0.000         0.000         0.000         0.000         0.000
+ D_MALE         0.000         0.000         0.000         0.000         0.000
+ D_FIRSTB       0.000         0.000         0.000         0.000         0.000
+ D_MOMCOL       0.000         0.000         0.000         0.000         0.000
+ D_AGESEX       0.000         0.000         0.000         0.000         0.000
+
+
+           THETA
+              L_OUTSDE      L_PEOPLE      L_PLACES      L_SOUNDS      L_TOYS
+              ________      ________      ________      ________      ________
+ L_OUTSDE       0.000
+ L_PEOPLE       0.000         0.000
+ L_PLACES       0.000         0.000         0.000
+ L_SOUNDS       0.000         0.000         0.000         0.000
+ L_TOYS         0.000         0.000         0.000         0.000         0.000
+ L_VEHICL       0.000         0.000         0.000         0.000         0.000
+ D_AG2SEX       0.000         0.000         0.000         0.000         0.000
+ D_AGE_C        0.000         0.000         0.000         0.000         0.000
+ D_AGE_C2       0.000         0.000         0.000         0.000         0.000
+ D_MALE         0.000         0.000         0.000         0.000         0.000
+ D_FIRSTB       0.000         0.000         0.000         0.000         0.000
+ D_MOMCOL       0.000         0.000         0.000         0.000         0.000
+ D_AGESEX       0.000         0.000         0.000         0.000         0.000
+
+
+           THETA
+              L_VEHICL      D_AG2SEX      D_AGE_C       D_AGE_C2      D_MALE
+              ________      ________      ________      ________      ________
+ L_VEHICL       0.000
+ D_AG2SEX       0.000       306.558
+ D_AGE_C        0.000         0.000         0.000
+ D_AGE_C2       0.000         0.000         0.000         0.000
+ D_MALE         0.000         0.000         0.000         0.000         0.000
+ D_FIRSTB       0.000         0.000         0.000         0.000         0.000
+ D_MOMCOL       0.000         0.000         0.000         0.000         0.000
+ D_AGESEX       0.000         0.000         0.000         0.000         0.000
+
+
+           THETA
+              D_FIRSTB      D_MOMCOL      D_AGESEX
+              ________      ________      ________
+ D_FIRSTB       0.000
+ D_MOMCOL       0.000         0.000
+ D_AGESEX       0.000         0.000         0.000
+
+
+           ALPHA
+              ETA           L_ACTION      L_ANIMAL      L_BODYP       L_CLOTH
+              ________      ________      ________      ________      ________
+                0.000         0.380         0.527         0.593         0.448
+
+
+           ALPHA
+              L_DESCRB      L_FOOD        L_ROOMS       L_GAMES       L_HOUSEH
+              ________      ________      ________      ________      ________
+                0.356         0.501         0.404         0.607         0.490
+
+
+           ALPHA
+              L_LOCATE      L_OUTSDE      L_PEOPLE      L_PLACES      L_SOUNDS
+              ________      ________      ________      ________      ________
+                0.295         0.430         0.417         0.329         0.759
+
+
+           ALPHA
+              L_TOYS        L_VEHICL      D_AGE_C       D_AGE_C2      D_MALE
+              ________      ________      ________      ________      ________
+                0.547         0.541         0.000         0.000         0.000
+
+
+           ALPHA
+              D_FIRSTB      D_MOMCOL      D_AGESEX
+              ________      ________      ________
+                0.000         0.000         0.000
+
+
+           BETA
+              ETA           L_ACTION      L_ANIMAL      L_BODYP       L_CLOTH
+              ________      ________      ________      ________      ________
+ ETA            0.000         0.000         0.000         0.000         0.000
+ L_ACTION       1.000         0.000         0.000         0.000         0.000
+ L_ANIMAL       0.261         0.000         0.000         0.000         0.000
+ L_BODYP        1.000         0.000         0.000         0.000         0.000
+ L_CLOTH        1.000         0.000         0.000         0.000         0.000
+ L_DESCRB       1.000         0.000         0.000         0.000         0.000
+ L_FOOD         0.268         0.000         0.000         0.000         0.000
+ L_ROOMS        1.000         0.000         0.000         0.000         0.000
+ L_GAMES        0.236         0.000         0.000         0.000         0.000
+ L_HOUSEH       0.291         0.000         0.000         0.000         0.000
+ L_LOCATE       1.000         0.000         0.000         0.000         0.000
+ L_OUTSDE       1.000         0.000         0.000         0.000         0.000
+ L_PEOPLE       1.000         0.000         0.000         0.000         0.000
+ L_PLACES       1.000         0.000         0.000         0.000         0.000
+ L_SOUNDS       1.000         0.000         0.000         0.000         0.000
+ L_TOYS         1.000         0.000         0.000         0.000         0.000
+ L_VEHICL       1.000         0.000         0.000         0.000         0.000
+ D_AGE_C        0.000         0.000         0.000         0.000         0.000
+ D_AGE_C2       0.000         0.000         0.000         0.000         0.000
+ D_MALE         0.000         0.000         0.000         0.000         0.000
+ D_FIRSTB       0.000         0.000         0.000         0.000         0.000
+ D_MOMCOL       0.000         0.000         0.000         0.000         0.000
+ D_AGESEX       0.000         0.000         0.000         0.000         0.000
+
+
+           BETA
+              L_DESCRB      L_FOOD        L_ROOMS       L_GAMES       L_HOUSEH
+              ________      ________      ________      ________      ________
+ ETA            0.000         0.000         0.000         0.000         0.000
+ L_ACTION       0.000         0.000         0.000         0.000         0.000
+ L_ANIMAL       0.000         0.000         0.000         0.000         0.000
+ L_BODYP        0.000         0.000         0.000         0.000         0.000
+ L_CLOTH        0.000         0.000         0.000         0.000         0.000
+ L_DESCRB       0.000         0.000         0.000         0.000         0.000
+ L_FOOD         0.000         0.000         0.000         0.000         0.000
+ L_ROOMS        0.000         0.000         0.000         0.000         0.000
+ L_GAMES        0.000         0.000         0.000         0.000         0.000
+ L_HOUSEH       0.000         0.000         0.000         0.000         0.000
+ L_LOCATE       0.000         0.000         0.000         0.000         0.000
+ L_OUTSDE       0.000         0.000         0.000         0.000         0.000
+ L_PEOPLE       0.000         0.000         0.000         0.000         0.000
+ L_PLACES       0.000         0.000         0.000         0.000         0.000
+ L_SOUNDS       0.000         0.000         0.000         0.000         0.000
+ L_TOYS         0.000         0.000         0.000         0.000         0.000
+ L_VEHICL       0.000         0.000         0.000         0.000         0.000
+ D_AGE_C        0.000         0.000         0.000         0.000         0.000
+ D_AGE_C2       0.000         0.000         0.000         0.000         0.000
+ D_MALE         0.000         0.000         0.000         0.000         0.000
+ D_FIRSTB       0.000         0.000         0.000         0.000         0.000
+ D_MOMCOL       0.000         0.000         0.000         0.000         0.000
+ D_AGESEX       0.000         0.000         0.000         0.000         0.000
+
+
+           BETA
+              L_LOCATE      L_OUTSDE      L_PEOPLE      L_PLACES      L_SOUNDS
+              ________      ________      ________      ________      ________
+ ETA            0.000         0.000         0.000         0.000         0.000
+ L_ACTION       0.000         0.000         0.000         0.000         0.000
+ L_ANIMAL       0.000         0.000         0.000         0.000         0.000
+ L_BODYP        0.000         0.000         0.000         0.000         0.000
+ L_CLOTH        0.000         0.000         0.000         0.000         0.000
+ L_DESCRB       0.000         0.000         0.000         0.000         0.000
+ L_FOOD         0.000         0.000         0.000         0.000         0.000
+ L_ROOMS        0.000         0.000         0.000         0.000         0.000
+ L_GAMES        0.000         0.000         0.000         0.000         0.000
+ L_HOUSEH       0.000         0.000         0.000         0.000         0.000
+ L_LOCATE       0.000         0.000         0.000         0.000         0.000
+ L_OUTSDE       0.000         0.000         0.000         0.000         0.000
+ L_PEOPLE       0.000         0.000         0.000         0.000         0.000
+ L_PLACES       0.000         0.000         0.000         0.000         0.000
+ L_SOUNDS       0.000         0.000         0.000         0.000         0.000
+ L_TOYS         0.000         0.000         0.000         0.000         0.000
+ L_VEHICL       0.000         0.000         0.000         0.000         0.000
+ D_AGE_C        0.000         0.000         0.000         0.000         0.000
+ D_AGE_C2       0.000         0.000         0.000         0.000         0.000
+ D_MALE         0.000         0.000         0.000         0.000         0.000
+ D_FIRSTB       0.000         0.000         0.000         0.000         0.000
+ D_MOMCOL       0.000         0.000         0.000         0.000         0.000
+ D_AGESEX       0.000         0.000         0.000         0.000         0.000
+
+
+           BETA
+              L_TOYS        L_VEHICL      D_AGE_C       D_AGE_C2      D_MALE
+              ________      ________      ________      ________      ________
+ ETA            0.000         0.000         0.000         0.000         0.000
+ L_ACTION       0.000         0.000         0.026         0.000         0.000
+ L_ANIMAL       0.000         0.000         0.016         0.000         0.000
+ L_BODYP        0.000         0.000         0.018         0.000        -0.006
+ L_CLOTH        0.000         0.000         0.016         0.000        -0.017
+ L_DESCRB       0.000         0.000         0.024         0.000         0.000
+ L_FOOD         0.000         0.000         0.021         0.000         0.000
+ L_ROOMS        0.000         0.000         0.019         0.000         0.000
+ L_GAMES        0.000         0.000         0.018         0.000         0.000
+ L_HOUSEH       0.000         0.000         0.018         0.000         0.000
+ L_LOCATE       0.000         0.000         0.021         0.000         0.000
+ L_OUTSDE       0.000         0.000         0.019         0.000         0.013
+ L_PEOPLE       0.000         0.000         0.018         0.000         0.000
+ L_PLACES       0.000         0.000         0.022         0.000         0.000
+ L_SOUNDS       0.000         0.000         0.000        -0.001         0.000
+ L_TOYS         0.000         0.000         0.018         0.000         0.000
+ L_VEHICL       0.000         0.000         0.018         0.000         0.045
+ D_AGE_C        0.000         0.000         0.000         0.000         0.000
+ D_AGE_C2       0.000         0.000         0.000         0.000         0.000
+ D_MALE         0.000         0.000         0.000         0.000         0.000
+ D_FIRSTB       0.000         0.000         0.000         0.000         0.000
+ D_MOMCOL       0.000         0.000         0.000         0.000         0.000
+ D_AGESEX       0.000         0.000         0.000         0.000         0.000
+
+
+           BETA
+              D_FIRSTB      D_MOMCOL      D_AGESEX
+              ________      ________      ________
+ ETA            0.000         0.000         0.000
+ L_ACTION       0.000         0.000         0.000
+ L_ANIMAL       0.015         0.016         0.000
+ L_BODYP        0.000        -0.014         0.000
+ L_CLOTH        0.000         0.000         0.000
+ L_DESCRB       0.000         0.000         0.000
+ L_FOOD        -0.007         0.000         0.000
+ L_ROOMS        0.000        -0.015         0.000
+ L_GAMES        0.000         0.000         0.000
+ L_HOUSEH       0.000        -0.010         0.000
+ L_LOCATE       0.000         0.000         0.000
+ L_OUTSDE       0.000         0.000         0.000
+ L_PEOPLE       0.000         0.000         0.000
+ L_PLACES      -0.011         0.000         0.000
+ L_SOUNDS       0.014         0.029         0.000
+ L_TOYS        -0.007         0.000         0.000
+ L_VEHICL       0.000         0.012         0.001
+ D_AGE_C        0.000         0.000         0.000
+ D_AGE_C2       0.000         0.000         0.000
+ D_MALE         0.000         0.000         0.000
+ D_FIRSTB       0.000         0.000         0.000
+ D_MOMCOL       0.000         0.000         0.000
+ D_AGESEX       0.000         0.000         0.000
+
+
+           PSI
+              ETA           L_ACTION      L_ANIMAL      L_BODYP       L_CLOTH
+              ________      ________      ________      ________      ________
+ ETA            0.050
+ L_ACTION       0.000         0.062
+ L_ANIMAL       0.000         0.000         0.054
+ L_BODYP        0.000         0.000         0.000         0.060
+ L_CLOTH        0.000         0.000         0.000         0.000         0.050
+ L_DESCRB       0.000         0.000         0.000         0.000         0.000
+ L_FOOD         0.000         0.000         0.000         0.000         0.000
+ L_ROOMS        0.000         0.000         0.000         0.000         0.000
+ L_GAMES        0.000         0.000         0.000         0.000         0.000
+ L_HOUSEH       0.000         0.000         0.000         0.000         0.000
+ L_LOCATE       0.000         0.000         0.000         0.000         0.000
+ L_OUTSDE       0.000         0.000         0.000         0.000         0.000
+ L_PEOPLE       0.000         0.000         0.000         0.000         0.000
+ L_PLACES       0.000         0.000         0.000         0.000         0.000
+ L_SOUNDS       0.000         0.000         0.000         0.000         0.000
+ L_TOYS         0.000         0.000         0.000         0.000         0.000
+ L_VEHICL       0.000         0.000         0.000         0.000         0.000
+ D_AGE_C        0.000         0.000         0.000         0.000         0.000
+ D_AGE_C2       0.000         0.000         0.000         0.000         0.000
+ D_MALE         0.000         0.000         0.000         0.000         0.000
+ D_FIRSTB       0.000         0.000         0.000         0.000         0.000
+ D_MOMCOL       0.000         0.000         0.000         0.000         0.000
+ D_AGESEX       0.000         0.000         0.000         0.000         0.000
+
+
+           PSI
+              L_DESCRB      L_FOOD        L_ROOMS       L_GAMES       L_HOUSEH
+              ________      ________      ________      ________      ________
+ L_DESCRB       0.054
+ L_FOOD         0.000         0.056
+ L_ROOMS        0.000         0.000         0.060
+ L_GAMES        0.000         0.000         0.000         0.048
+ L_HOUSEH       0.000         0.000         0.000         0.000         0.061
+ L_LOCATE       0.000         0.000         0.000         0.000         0.000
+ L_OUTSDE       0.000         0.000         0.000         0.000         0.000
+ L_PEOPLE       0.000         0.000         0.000         0.000         0.000
+ L_PLACES       0.000         0.000         0.000         0.000         0.000
+ L_SOUNDS       0.000         0.000         0.000         0.000         0.000
+ L_TOYS         0.000         0.000         0.000         0.000         0.000
+ L_VEHICL       0.000         0.000         0.000         0.000         0.000
+ D_AGE_C        0.000         0.000         0.000         0.000         0.000
+ D_AGE_C2       0.000         0.000         0.000         0.000         0.000
+ D_MALE         0.000         0.000         0.000         0.000         0.000
+ D_FIRSTB       0.000         0.000         0.000         0.000         0.000
+ D_MOMCOL       0.000         0.000         0.000         0.000         0.000
+ D_AGESEX       0.000         0.000         0.000         0.000         0.000
+
+
+           PSI
+              L_LOCATE      L_OUTSDE      L_PEOPLE      L_PLACES      L_SOUNDS
+              ________      ________      ________      ________      ________
+ L_LOCATE       0.042
+ L_OUTSDE       0.000         0.059
+ L_PEOPLE       0.000         0.000         0.035
+ L_PLACES       0.000         0.000         0.000         0.043
+ L_SOUNDS       0.000         0.000         0.000         0.000         0.035
+ L_TOYS         0.000         0.000         0.000         0.000         0.000
+ L_VEHICL       0.000         0.000         0.000         0.000         0.000
+ D_AGE_C        0.000         0.000         0.000         0.000         0.000
+ D_AGE_C2       0.000         0.000         0.000         0.000         0.000
+ D_MALE         0.000         0.000         0.000         0.000         0.000
+ D_FIRSTB       0.000         0.000         0.000         0.000         0.000
+ D_MOMCOL       0.000         0.000         0.000         0.000         0.000
+ D_AGESEX       0.000         0.000         0.000         0.000         0.000
+
+
+           PSI
+              L_TOYS        L_VEHICL      D_AGE_C       D_AGE_C2      D_MALE
+              ________      ________      ________      ________      ________
+ L_TOYS         0.051
+ L_VEHICL       0.000         0.055
+ D_AGE_C        0.000         0.000         9.020
+ D_AGE_C2       0.000         0.000         0.000       142.577
+ D_MALE         0.000         0.000         0.000         0.000         0.500
+ D_FIRSTB       0.000         0.000         0.000         0.000         0.000
+ D_MOMCOL       0.000         0.000         0.000         0.000         0.000
+ D_AGESEX       0.000         0.000         0.000         0.000         0.000
+
+
+           PSI
+              D_FIRSTB      D_MOMCOL      D_AGESEX
+              ________      ________      ________
+ D_FIRSTB       0.500
+ D_MOMCOL       0.000         0.486
+ D_AGESEX       0.000         0.000         9.054
+
+
+SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES
+
+
+     SAMPLE STATISTICS
+
+
+           Means
+              ETA
+              ________
+               -0.036
+
+
+           Covariances
+              ETA
+              ________
+ ETA            0.822
+
+
+           Correlations
+              ETA
+              ________
+ ETA            1.000
+
+
+SAVEDATA INFORMATION
+
+
+  Save file
+    scores.dat
+
+  Order and format of variables
+
+    L_ACTION       F10.3
+    L_ANIMAL       F10.3
+    L_BODYP        F10.3
+    L_CLOTH        F10.3
+    L_DESCRB       F10.3
+    L_FOOD         F10.3
+    L_ROOMS        F10.3
+    L_GAMES        F10.3
+    L_HOUSEH       F10.3
+    L_LOCATE       F10.3
+    L_OUTSDE       F10.3
+    L_PEOPLE       F10.3
+    L_PLACES       F10.3
+    L_SOUNDS       F10.3
+    L_TOYS         F10.3
+    L_VEHICL       F10.3
+    D_AG2SEX       F10.3
+    D_AGE_C        F10.3
+    D_AGE_C2       F10.3
+    D_MALE         F10.3
+    D_FIRSTB       F10.3
+    D_MOMCOL       F10.3
+    D_AGESEX       F10.3
+    ID             F10.3
+    ETA            F10.3
+
+  Save file format
+    25F10.3
+
+  Save file record length    10000
+
+
+DIAGRAM INFORMATION
+
+  Use View Diagram under the Diagram menu in the Mplus Editor to view the diagram.
+  If running Mplus from the Mplus Diagrammer, the diagram opens automatically.
+
+  Diagram output
+    i:\research\mcdi\mcdi-analysis\code\mnlfa\models_nomeanimpact\lex_3d\scoring.dgm
+
+     Beginning Time:  11:19:00
+        Ending Time:  11:25:56
+       Elapsed Time:  00:06:56
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2019 Muthen & Muthen
