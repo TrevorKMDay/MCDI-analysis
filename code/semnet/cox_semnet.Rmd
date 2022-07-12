@@ -1,0 +1,273 @@
+---
+title: "GCC Cox & Haebig Networks"
+author: "Trevor Day"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+# Setup
+
+## Setup R
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+
+setwd("G:/My Drive/Research/MCDI/MCDI-analysis/code/semnet")
+
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(igraph))
+suppressPackageStartupMessages(library(qgraph))
+suppressPackageStartupMessages(library(patchwork))
+
+source("../mcdi-setup.R")
+
+```
+
+## Setup data
+
+Cox & Haebig (2022) removed some items from the CDI, either because of 
+homophony, missing age of acquisition, or being multiple words. 
+
+Also apply func/content labels
+
+```{r cdi-setup}
+
+##### CDI
+
+sdict <- read_csv(.data("other/s_dict.csv"), show_col_types = FALSE) %>%
+  filter(
+
+    # # Words duplicated in two places
+    !str_detect(definition,
+                "^(can|chicken|clean|drink|dry|fish|orange|slide|swing|watch|water|work)"),
+
+    # No AoA in Cox & Haebig
+    !(definition %in% c("about", "above", "an", "babysitter", "basement",
+                        "before", "beside", "but", "camping", "child", "could",
+                        "country", "does", "downtown", "each", "every", "hate",
+                        "hers", "if", "into", "last", "much", "naughty",
+                        "none", "nurse", "out", "person", "play", "pen",
+                        "poor", "scarf", "snowsuit", "so", "their", "them",
+                        "then", "tights", "tray", "us", "vagina", "vanilla",
+                        "walker", "was", "where", "when", "which", "wish",
+                        "woods", "would", "yesterday", "yourself")),
+
+    !(definition %in% c("babysitter's name", "child's own name",
+                        "give me five!", "gonna get you!", "pet's name",
+                        "so big!", "this little piggy"))
+  ) %>%
+  mutate(
+    # Seven categories are functional, the rest are content
+    group = if_else(category %in% c("connecting_words", "helping_verbs",
+                                    "locations", "pronouns", "quantifiers",
+                                    "question_words", "time_words"),
+                    "func", "content")
+  )
+
+sdict
+
+# Load data
+load(.data("semnet/associations-child.Rdata"))
+head(associations_child)
+
+```
+
+# Create edgelist
+
+Filter the associations down to items found in the reduced list of MB-CDI items
+(`sdict$definition`), then summarize.
+
+```{r edgelist}
+
+assocs <- associations_child %>%
+  select(-SOURCE, -COND, -ORDER, -LIST_ID, -RESP_ID) %>%
+  mutate(
+    across(c(CUE, RESPONSE), as.character)
+  ) %>%
+  filter(
+    CUE %in% sdict$definition,
+    RESPONSE %in% sdict$definition,
+  ) %>%
+  as_tibble()
+
+assocs_tbl <- assocs %>%
+  group_by(CUE, RESPONSE) %>%
+  summarize(
+    n = n()
+  ) %>%
+  group_by(CUE) %>%
+  mutate(
+    cue_total = sum(n),
+    pct_resp_in_cue = n / cue_total * 100,
+    pct_resp_in_cue_ceiling = if_else(pct_resp_in_cue > 33, 33, pct_resp_in_cue)
+  )
+
+range(assocs_tbl$n)
+
+```
+
+Each cue has many responses, but variable. Below is a plot of the distribution
+of response frequency, i.e. what percent of all responses to a cue were a given
+cue. The most responses appear only once. This is probably too low of a 
+threshold to be included as an "edge." 
+
+I also plot the mean response rate (solid) and the median (dashed). Responses
+appearing in more than 33% of the sample are truncated to 33% for plotting only.
+
+```{r edgelist-plot}
+
+ggplot(assocs_tbl, aes(x = pct_resp_in_cue_ceiling)) +
+  geom_histogram(binwidth = 1, boundary = 0) +
+  geom_vline(xintercept = c(mean(assocs_tbl$pct_resp_in_cue), 
+                            median(assocs_tbl$pct_resp_in_cue)),
+             color = "red", size = 1,
+             linetype = c("solid", "dashed")) +
+  scale_x_continuous(breaks = seq(0, 100, by = 10),
+                     minor_breaks = 0:100) +
+  theme_bw() +
+  labs(x = "% responses", y = "Count") 
+
+```
+
+I decided to use the more conservative threshold (mean over median), and removed
+those low-rate edges from the table.
+
+```{r edgelist2}
+
+assocs_tbl_high <- assocs_tbl %>%
+  filter(
+    pct_resp_in_cue > mean(pct_resp_in_cue)
+  ) %>%
+  select(CUE, RESPONSE, pct_resp_in_cue)
+
+assocs_tbl_high
+
+```
+
+# Network graphs
+
+The function `edgelist_to_adjacency` takes our associations table and returns
+an adjacency matrix as well as an ordered list of nodes for doing other things 
+with.
+
+The graph shows the top 50% of edges, but all edges are included in determining
+the spacing. 
+
+```{r all-items-graph}
+
+edgelist_to_adjacency <- function(edge) {
+
+  nodes <- c(edge$CUE, edge$RESPONSE) %>%
+    unique() %>%
+    sort()
+
+  eg <- expand.grid(CUE = nodes, RESPONSE = nodes)
+
+  values <- left_join(eg, edge, by = c("CUE", "RESPONSE"))
+
+  mat <- values %>%
+    mutate(
+      pct_resp_in_cue = replace_na(pct_resp_in_cue, 0)
+    ) %>%
+    pivot_wider(names_from = RESPONSE, values_from = pct_resp_in_cue) %>%
+    column_to_rownames("CUE")
+
+  return(list(matrix = mat, nodes = nodes))
+
+}
+
+assocs_adj <- edgelist_to_adjacency(assocs_tbl_high)
+
+qgraph(assocs_adj$mat, 
+       groups = sdict$group[match(assocs_adj$nodes, sdict$definition)],
+       minimum = 11, cut = 60, details = TRUE, layout = "spring",
+       repulsion = -1, directed = TRUE)
+
+```
+
+However, this graph shows the association between *all* words. 
+
+## Grand GCC
+
+The GCC of this graph is below: 
+
+```{r grand-gcc}
+
+g1 <- assocs_tbl_high %>%
+  select(CUE, RESPONSE) %>%
+  as.matrix() %>%
+  graph_from_edgelist()
+
+transitivity(g1, type = "global")
+
+```
+
+# Wordbank
+
+Here, we load in Wordbank data and calculate GCCs for each individual by 
+creating a function that takes a list of words an indivdual knows and returns
+a reduced assocations list. 
+
+```{r wordbank-1}
+
+wb0 <- read_data("Wordbank/Wordbank-WS-191105.rds")
+
+
+get_assoc <- function(assocs_tbl, word_list) {
+
+  assocs_tbl %>%
+    filter(
+      CUE %in% word_list,
+      RESPONSE %in% word_list
+    ) %>%
+    select(CUE, RESPONSE) %>%
+    return()
+
+}
+
+# Load data and create words known list
+wb <- wb0 %>%
+  filter(
+    type == "word"
+  ) %>%
+  group_by(data_id, age) %>%
+  nest() %>%
+  mutate(
+    words_known = map(data, ~as.character(.x$definition[!is.na(.x$value)])),
+    n = map_int(words_known, length)
+  ) %>%
+  ungroup %>%
+  filter(
+    # Cut-offs suggested by Haebig
+    n >= 20,
+    n <= 600
+  )
+
+# can't get function to work in map()
+wb$assocs <- lapply(wb$words_known, function(x) get_assoc(assocs_tbl_high, x))
+
+# Create graphs and GCCs
+wb2 <- wb %>%
+  mutate(
+    graph = map(assocs, ~graph_from_edgelist(as.matrix(.x))),
+    gcc = map_dbl(graph, transitivity)
+  )
+
+plot_wb_ageXn <- ggplot(wb2, aes(x = age, y = n)) +
+  geom_jitter(alpha = 0.2, width = 0.25) +
+  geom_smooth() +
+  theme_minimal()
+
+plot_wb_ageXgcc <- ggplot(wb2, aes(x = age, y = gcc)) +
+  geom_jitter(alpha = 0.2, width = 0.25) +
+  geom_smooth() +
+  theme_minimal()
+
+plot_wb_nXgcc <- ggplot(wb2, aes(x = n, y = gcc)) +
+  geom_jitter(alpha = 0.2, width = 0.25) +
+  geom_smooth() +
+  theme_minimal()
+
+plot_wb_ageXn + plot_wb_ageXgcc + plot_wb_nXgcc
+
+```
