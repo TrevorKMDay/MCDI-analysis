@@ -7,10 +7,6 @@ for (i in locs)
     setwd(paste0(i, path))
 
 library(tidyverse)
-library(lcmm)
-library(patchwork)
-library(umx)
-library(viridis)
 
 source("../mcdi-setup.R")
 source("../growth_curving/growth-curve-functions.R")
@@ -133,10 +129,17 @@ cat_avg <- left_join(wb_cat_avg, eirli_cat_avg, by = c("age", "category"))  %>%
     bcp_n = if_else(group == "bcp_mean", bcp_n, NA_integer_)
   )
 
+dir.create("plots/bcp_adjust", showWarnings = FALSE, recursive = TRUE)
+png("plots/bcp_adjust/comparison-facet.png", width = 8, height = 6,
+    units = "in", res = 72)
+
 ggplot(cat_avg, aes(x = age, value, color = group)) +
   geom_point(aes(size = bcp_n)) +
   geom_line() +
   facet_wrap(vars(category), scales = "free_y") +
   scale_x_continuous(limits = c(11, 30), breaks = seq(10, 30, by = 2)) +
-  theme_bw()
+  theme_bw() +
+  labs(x = "Age (mo.)", y = "# words", color = "Group",
+       size = "BCP sample size")
 
+dev.off()

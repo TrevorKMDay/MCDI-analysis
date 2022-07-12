@@ -7,12 +7,10 @@ for (i in locs)
     setwd(paste0(i, path))
 
 library(tidyverse)
-library(lcmm)
-library(patchwork)
-library(umx)
-library(viridis)
 
 source("../mcdi-setup.R")
+
+dir.create("plots/setup", showWarnings = FALSE, recursive = TRUE)
 
 # Category labels ####
 
@@ -225,7 +223,7 @@ B_E_WB <- BplusE  %>%
                       "EIRLI", status)
   )
 
-png("plots/comparison-facet.png", width = 6, height = 4, units = "in",
+png("plots/setup/comparison-facet.png", width = 6, height = 4, units = "in",
     res = 72)
 
 ggplot(B_E_WB, aes(x = jitter(exact_age), y = inventory_total,
@@ -247,8 +245,8 @@ B_WB <- B_E_WB %>%
 
 range(B_WB$inventory_total)
 
-png("plots/comparison-BCP_v_Wordbank.png", width = 6, height = 4, units = "in",
-    res = 72)
+png("plots/setup/comparison-BCP_v_Wordbank.png", width = 6, height = 4,
+    units = "in", res = 72)
 
 ggplot(B_WB, aes(x = age, y = inventory_total, color = status)) +
   geom_point(aes(shape = status), alpha = 0.5) +
@@ -260,7 +258,7 @@ ggplot(B_WB, aes(x = age, y = inventory_total, color = status)) +
 
 dev.off()
 
-png("plots/comparison-trajectories_only.png", width = 6, height = 4,
+png("plots/setup/comparison-trajectories_only.png", width = 6, height = 4,
     units = "in", res = 72)
 
 ggplot(B_E_WB, aes(x = exact_age, y = inventory_total, color = status,
@@ -348,7 +346,7 @@ bcp_norm <- bcp %>%
     q_noS = map_dbl(noS_total, ~wb_noS_ecdf(.x)),
   )
 
-png("plots/BCP_quantile_trends.png", width = 8, height = 6, units = "in",
+png("plots/setup/BCP_quantile_trends.png", width = 8, height = 6, units = "in",
     res = 72)
 
 ggplot(bcp_norm, aes(x = age, y = q)) +
