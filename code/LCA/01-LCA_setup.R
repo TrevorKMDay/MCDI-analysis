@@ -1,0 +1,388 @@
+path <- "/Research/MCDI/MCDI-analysis/code/LCA"
+locs <- c("G:/My Drive", "I:", "/Volumes",
+          "/home/tkmd/Insync/day00096@umn.edu/Google Drive")
+
+for (i in locs)
+  if (dir.exists(paste0(i, path)))
+    setwd(paste0(i, path))
+
+library(tidyverse)
+library(lcmm)
+library(patchwork)
+library(umx)
+library(viridis)
+
+source("../mcdi-setup.R")
+
+# Category labels ####
+
+# EIRLI is missing some columns, here's the lex cols that DO exist
+eirli_cols <- c("action_words", "animals", "body_parts", # "COMPLEXITY",
+                "clothing", "connecting_words", "descriptive_words",
+                "food_drink", "furniture_rooms", "games_routines",
+                "helping_verbs", "people", "locations", "pronouns",
+                "quantifiers", "question_words", "household", "sounds",
+                "toys", "vehicles")
+
+# WS 1A inventory category labels
+WS_1A <- read_data("other/s_dict.csv") %>%
+  pull(category) %>%
+  unique()
+
+WS_II <- c("WORD_FORMS_NOUNS", "WORD_FORMS_VERBS", "WORD_ENDINGS_NOUNS",
+           "WORD_ENDINGS_VERBS", "COMPLEXITY")
+
+lex_cols <- WS_1A[1:15]
+syn_cols <- c(WS_1A[16:22], WS_II)
+
+# Read in data ####
+
+# In the following steps, use the vectors defined above to create accurate
+# counts based on missing data (any_of). In this case, the syntax total is only
+# COMPLEXITY due to missing data
+
+## EIRLI ####
+
+# Read in cleaned EIRLI data with imputations for missing categories
+eirli <- read_data("EIRLI/EIRLI_clean.rds") %>%
+  mutate(
+
+    inventory_total = select(., any_of(WS_1A)) %>%
+      rowSums(),
+    lex_total = select(., any_of(lex_cols)) %>%
+      rowSums(),
+    syn_total = select(., any_of(syn_cols)) %>%
+      rowSums(),
+
+    status = case_when(
+      !follow_up      ~ "no_follow_up",
+      follow_up &  dx ~ "lg_dx",
+      follow_up & !dx ~ "no_lg_dx"
+    ),
+
+    proj = "EIRLI"
+
+  ) %>%
+  rename(
+    sex = gender
+  ) %>%
+  select(proj, data_id, age, exact_age, sex, status, ends_with("_ed"),
+         any_of(WS_1A), COMPLEXITY, ends_with("_total"))
+
+# EIRLI demographics
+eirli_d <- read_data("EIRLI/eirli_clean_impute.rds")$n %>%
+  select(data_id, gender, father_ed, mother_ed) %>%
+  rename(
+    sex = gender
+  ) %>%
+  distinct() %>%
+  mutate(
+    proj = "EIRLI"
+  )
+
+## BCP ####
+
+bcp_ws <- read_data("BCP/BCP_WS_scored-200609.rds")$n
+bcp_wg <- read_data("BCP/BCP_WG_asWS-200609.rds")
+
+# BCP demographics
+bcp_d <- read_data("BCP/BCP-demographics-200609.csv") %>%
+  select(CandID, sex, educ_momed) %>%
+  rename(
+    mother_ed = educ_momed,
+    data_id = CandID
+  ) %>%
+  mutate(
+    data_id = as.character(data_id),
+    proj = "BCP"
+  ) %>%
+  filter(
+    # BCP demographics include all subjects, drop those extra ones
+    data_id %in% unique(c(bcp_ws$data_id, bcp_wg$data_id))
+  )
+
+# ALL BCP data
+bcp <- bind_rows(bcp_ws, bcp_wg) %>%
+  mutate(
+    data_id = as.character(data_id)
+  ) %>%
+  select(data_id, age, all_of(WS_1A)) %>%
+  mutate(
+    inventory_total = rowSums(select(., all_of(WS_1A))),
+    eirli_total     = rowSums(select(., all_of(eirli_cols))),
+    noS_total       = rowSums(select(., all_of(eirli_cols), -sounds)),
+  )
+
+## Identify BCP participants with drops ####
+
+bcp_bad <- bcp %>%
+  select(data_id, age, inventory_total) %>%
+  group_by(data_id) %>%
+  arrange(age) %>%
+  nest() %>%
+  mutate(
+    n = map_int(data, nrow),
+    max = map_dbl(data, ~max(.x$inventory_total)),
+    last = map_dbl(data, ~tail(.x$inventory_total, 1))
+  ) %>%
+  filter(
+    n >= 2,
+    last < max
+  )
+
+ggplot(filter(bcp, data_id %in% bcp_bad$data_id),
+       aes(x = age, y = inventory_total, color = data_id)) +
+  geom_point() +
+  geom_line(aes(group = data_id)) +
+  theme_bw()
+
+# And remove
+
+bcp <- bcp %>%
+  filter(
+    !(data_id %in% bcp_bad$data_id)
+  )
+
+# BCP and EIRLI demographics
+BplusE_d <- bind_rows(bcp_d, eirli_d) %>%
+  mutate(
+    across(ends_with("ed"), ~replace(.x, .x == "graduate", "grad") %>%
+             replace(. == "high", "secondary") %>%
+             replace(. == "not_answered", NA)),
+    mother_college = mother_ed %in% c("college", "grad", "some_grad"),
+    father_college = father_ed %in% c("college", "grad", "some_grad"),
+  )
+
+# Finalize B+E dataset
+BplusE <- bind_rows(bcp, eirli) %>%
+  select(proj, status, data_id, age, exact_age, sex, mother_ed, father_ed,
+         all_of(eirli_cols), COMPLEXITY, ends_with("total")) %>%
+  arrange(proj, status, data_id, exact_age) %>%
+  group_by(data_id) %>%
+  mutate(
+
+    # Numeric identifier for data_id, leave original as char
+    data_id_num = as.numeric(cur_group_id()),
+
+    # If exact age is missing (BCP), replace it with the age column (BCP has
+    # exact age, EIRLI has target age as "age" and exact age. No reason not
+    # to use exact_age going forward)
+    exact_age = if_else(is.na(exact_age), age, exact_age),
+
+    # Center age
+    ageC = exact_age - 11,
+
+    # Harmonize education across projects, and order by amount of education so
+    # it plots right
+    across(ends_with("_ed"),
+           ~case_when(
+             .x %in% c("grad", "graduate")  ~ "graduate",
+             .x %in% c("high", "secondary") ~ "secondary",
+             .x == "not_answered" ~ NA_character_,
+             # Don't change any of the others
+             TRUE ~ .x
+           ) %>%
+             ordered(levels = c("some_secondary", "secondary", "some_college",
+                                "college", "some_grad", "graduate", NA))
+    ),
+
+
+    dx_prior = case_when(
+      status == "no_lg_dx" ~ 1,
+      status == "lg_dx"    ~ 2,
+      # All others
+      TRUE ~ 0
+    )
+  ) %>%
+  select(proj, status, data_id, data_id_num, age, exact_age, ageC, sex,
+         ends_with("_ed"), ends_with("_total"), everything())
+
+save_data(BplusE_d, "LCA/BplusE_demographics.rds")
+save_data(BplusE, "LCA/BplusE.rds")
+
+# Load Wordbank as double check ####
+
+wb_wg <- read_data("Wordbank/WG-scored.rds")$n
+wb_ws <- read_data("Wordbank/WS-scored.rds")$n
+
+wb <- bind_rows(wb_wg, wb_ws) %>%
+  select(data_id, age, all_of(eirli_cols)) %>%
+  mutate(
+    inventory_total = select(., -data_id, -age) %>%
+                        rowSums(na.rm = TRUE),
+    status = "WB"
+  ) %>%
+  select(data_id, age, status, inventory_total)
+
+# Trajectory comparisons ####
+
+B_E_WB <- BplusE  %>%
+  select(data_id, exact_age, age, status, inventory_total) %>%
+  bind_rows(wb) %>%
+  mutate(
+    exact_age = if_else(!is.na(exact_age), exact_age, age),
+    project = if_else(status %in% c("lg_dx", "no_follow_up", "no_lg_dx"),
+                      "EIRLI", status)
+  )
+
+png("plots/comparison-facet.png", width = 6, height = 4, units = "in",
+    res = 72)
+
+ggplot(B_E_WB, aes(x = jitter(exact_age), y = inventory_total,
+                   color = status)) +
+  geom_point(alpha = 0.2, size = 1, shape = 20) +
+  geom_line(aes(group = data_id), alpha = 0.1) +
+  geom_smooth(color = "black") +
+  facet_wrap(vars(status)) +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  labs(x = "Age (mo.)", y = "IA total")
+
+dev.off()
+
+B_WB <- B_E_WB %>%
+  filter(
+    status %in% c("BCP", "WB")
+  )
+
+range(B_WB$inventory_total)
+
+png("plots/comparison-BCP_v_Wordbank.png", width = 6, height = 4, units = "in",
+    res = 72)
+
+ggplot(B_WB, aes(x = age, y = inventory_total, color = status)) +
+  geom_point(aes(shape = status), alpha = 0.5) +
+  scale_shape_manual(values = c(16, NA)) +
+  geom_line(aes(group = interaction(data_id, status)), alpha = 0.25,
+            color = "black") +
+  geom_smooth(aes(fill = status)) +
+  theme_bw()
+
+dev.off()
+
+png("plots/comparison-trajectories_only.png", width = 6, height = 4,
+    units = "in", res = 72)
+
+ggplot(B_E_WB, aes(x = exact_age, y = inventory_total, color = status,
+                   fill = status)) +
+  geom_smooth(aes(linetype = project)) +
+  scale_linetype_manual(values = c("solid", "dotted", "twodash")) +
+  theme_bw() +
+  theme(legend.position = "bottom")
+
+dev.off()
+
+# Norming ####
+
+norming_subs <- read_data("Wordbank/vocabulary_norms_data.csv")
+
+## Create norms based on full data #####
+
+wb_full_norm <- norming_subs %>%
+  group_by(age) %>%
+  nest() %>%
+  arrange(age) %>%
+  mutate(
+    wb_ecdf = map(data, ~ecdf(.x$vocab))
+  ) %>%
+  select(-data)
+
+## Create norms with only EIRLI columns #####
+
+wb_eirli_norm <- bind_rows(wb_wg, wb_ws) %>%
+  select(data_id, age, all_of(eirli_cols)) %>%
+  filter(
+    data_id %in% norming_subs$data_id
+  ) %>%
+  mutate(
+    inventory_total = select(., -data_id, -age) %>%
+                        rowSums()
+  ) %>%
+  select(data_id, age, inventory_total) %>%
+  group_by(age) %>%
+  nest() %>%
+  arrange(age) %>%
+  mutate(
+    wb_e_ecdf = map(data, ~ecdf(.x$inventory_total))
+  ) %>%
+  select(-data)
+
+## without sounds ####
+
+wb_noS_norm <- bind_rows(wb_wg, wb_ws) %>%
+  select(data_id, age, all_of(eirli_cols), -sounds) %>%
+  filter(
+    data_id %in% norming_subs$data_id
+  ) %>%
+  mutate(
+    inventory_total = select(., -data_id, -age) %>%
+      rowSums()
+  ) %>%
+  select(data_id, age, inventory_total) %>%
+  group_by(age) %>%
+  nest() %>%
+  arrange(age) %>%
+  mutate(
+    wb_noS_ecdf = map(data, ~ecdf(.x$inventory_total))
+  ) %>%
+  select(-data)
+
+# Compare BCP to various norms ####
+
+bcp_norm <- bcp %>%
+  select(data_id, age, ends_with("_total")) %>%
+  mutate(
+    age = round(age)
+  ) %>%
+  filter(
+    age >= 16,
+    age <= 30
+  ) %>%
+  left_join(wb_full_norm, by = "age") %>%
+  left_join(wb_eirli_norm, by = "age") %>%
+  left_join(wb_noS_norm, by = "age") %>%
+  rowwise() %>%
+  mutate(
+    q     = map_dbl(inventory_total, ~wb_ecdf(.x)),
+    q_E   = map_dbl(eirli_total, ~wb_e_ecdf(.x)),
+    q_noS = map_dbl(noS_total, ~wb_noS_ecdf(.x)),
+  )
+
+png("plots/BCP_quantile_trends.png", width = 8, height = 6, units = "in",
+    res = 72)
+
+ggplot(bcp_norm, aes(x = age, y = q)) +
+  geom_point(color = "lightblue") +
+  geom_line(color = "lightblue", aes(group = data_id)) +
+  geom_hline(yintercept = 0.5, color = "red", size = 1) +
+  geom_hline(yintercept = mean(bcp_norm$q), color = "blue", size = 1) +
+  scale_y_continuous(limits = c(0, 1)) +
+  theme_bw() +
+  labs(x = "Age (mo.)", y = "Quantile",
+       title = "Full BCP vs. Wordbank norm")
+
+dev.off()
+
+ggplot(bcp_norm, aes(x = age, y = q_E)) +
+  geom_point(color = "lightblue") +
+  geom_line(color = "lightblue", aes(group = data_id)) +
+  geom_hline(yintercept = 0.5, color = "red", size = 1) +
+  geom_hline(yintercept = mean(bcp_norm$q_E), color = "blue", size = 1) +
+  scale_y_continuous(limits = c(0, 1)) +
+  theme_bw() +
+  labs(x = "Age (mo.)", y = "Quantile",
+       title = "Full BCP vs. Wordbank norm using EIRLI columns")
+
+ggplot(bcp_norm, aes(x = age, y = q_noS)) +
+  geom_point(color = "lightblue") +
+  geom_line(color = "lightblue", aes(group = data_id)) +
+  geom_hline(yintercept = 0.5, color = "red", size = 1) +
+  geom_hline(yintercept = mean(bcp_norm$q_noS), color = "blue", size = 1) +
+  scale_y_continuous(limits = c(0, 1)) +
+  theme_bw() +
+  labs(x = "Age (mo.)", y = "Quantile",
+       title = "Full BCP vs. Wordbank norm using EIRLI columns (less sounds)")
+
+bcp_norm %>%
+  select(starts_with("q")) %>%
+  colMeans()
