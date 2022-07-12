@@ -226,7 +226,7 @@ if (file.exists(FA1000)) {
 }
 
 # Display plots
-for(i in 1:max.factors) {
+for (i in 1:max.factors) {
 
   png(paste0("plots/WS-factors-", i, ".png"), width = 5, height = 5,
       units = "in", res = 300)

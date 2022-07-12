@@ -1,4 +1,4 @@
-if(.Platform$OS.type == "unix") {
+if (.Platform$OS.type == "unix") {
   setwd("/Volumes/GoogleDrive/My Drive/Research/MCDI/MCDI-analysis/code/DSA")
 } else {
   setwd("G:/My Drive/Research/MCDI/MCDI-analysis/code/DSA")
@@ -20,11 +20,14 @@ DSA <- read_csv(.data("DSA/DevSocAtt-MCDI-vrRSB.csv")) %>%
   select_all(~str_replace(., ",", ".")) %>%
   select(Identifiers, demographics.CandID, demographics.Sex,
          starts_with("mcdi."), starts_with("vrRSB.")) %>%
+  mutate(
+    across(ends_with(".Candidate_Age"), as.numeric)
+  ) %>%
   filter(
     # Need both MCDI and vrRSB ...
     mcdi.Administration  == "All",
     vrRSB.Administration == "All",
-    # ... collected with in six weeks (1.5 months)
+    # ... collected within six weeks (1.5 months)
     abs(mcdi.Candidate_Age - vrRSB.Candidate_Age) < 1.5
   ) %>%
   rename(
@@ -86,6 +89,7 @@ dsa_vrrsb <- DSA %>%
     RRI = vrRSB.restricted_repetitive_items
   ) %>%
   mutate(
+    across(c(RSB, VRS, SCI, RRI), as.numeric),
     RSBz = scale(RSB),
     VRSz = scale(VRS)
   )
@@ -145,7 +149,7 @@ dsa_mcdi_WB <- dsa_mcdi %>%
   format.gestures(g_dict_file = .data("WG-example.csv"))
 
 # Now score once formatted as WB
-dsa_mcdi_scored <- score.WG(dsa_mcdi_WB)$n %>%
+dsa_mcdi_scored <- score.WG(dsa_mcdi_WB, produces_value = "produces")$n %>%
   mutate(
     TOTAL = LEXICAL + SYNTAX
   )
@@ -189,7 +193,7 @@ all_summary <- all %>%
   dplyr::summarize(
     n = n(),
     mcdi_sd = sd(TOTAL) / 396,
-    vrs_sd = sd(VRS)    / 32
+    vrs_sd  = sd(VRS)    / 32
   ) %>%
   pivot_longer(-c(age_y, n))
 
@@ -199,8 +203,11 @@ ggplot(all_summary, aes(x = age_y, y = value, color = name)) +
 
 ggplot(all, aes(x = age, y = VRS)) +
   geom_point() +
+  geom_smooth(method = "lm") +
   scale_x_continuous(limits = c(16, 30), breaks = 16:30) +
   theme_bw()
+
+cor(all$VRSz, scale(all$TOTAL))
 
 # Check for missing data
 # all %>%
@@ -214,9 +221,41 @@ dsa_demo %>%
   cor(use = "complete.obs") %>%
   round(2)
 
-# FIND BEST MODEL FOR VRRSB
+#############################################################
 
-best_predictor_VRS <- lm(TOTAL ~ 1 + avg_age + male + VRS, data = all)
+# Values for new project
+
+ipr <- all %>%
+  select(CandID, age, TOTAL, sex, VRS) %>%
+  filter(
+    age >= 23,
+    age <= 25
+  ) %>%
+  mutate(
+    VRS_rzd = umx::umx_residualize("VRS", covs = c("age"), data = .)$VRS,
+    TOTAL_rzd = umx::umx_residualize("TOTAL", covs = c("age"), data = .)$TOTAL
+  )
+
+VRS_sex <- ipr %>%
+  group_by(sex) %>%
+  summarize(
+    m = mean(VRS_rzd),
+    sd = sd(VRS_rzd)
+  )
+
+VRS_sex_d <- diff(VRS_sex$m) / sqrt(sum(VRS_sex$sd^2)) # .19
+
+mcdi_VRS_r <- cor(ipr$TOTAL_rzd, ipr$VRS_rzd)
+mcdi_VRS_d <- 2 * mcdi_VRS_r / sqrt(1 - mcdi_VRS_r^2) # .99
+
+ggplot(ipr, aes(x = VRS_rzd, y = TOTAL_rzd)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+
+#############################################################
+
+# FIND BEST MODEL FOR VRRSB
+est_predictor_VRS <- lm(TOTAL ~ 1 + avg_age + male + VRS, data = all)
 best_predictor_RSB <- lm(TOTAL ~ 1 + avg_age + male + RSB, data = all)
 
 AICc(best_predictor_RSB) # 19038.47

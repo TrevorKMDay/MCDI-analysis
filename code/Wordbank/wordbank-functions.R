@@ -323,7 +323,8 @@ score.WS <- function(sentences, include.totals = FALSE) {
 
 }
 
-score.WG <- function(gestures, inventory.only = TRUE, sc.understands = FALSE) {
+score.WG <- function(gestures, inventory.only = TRUE, sc.understands = FALSE,
+                     produces_value = "says_and_understands") {
 
   # inventory.only : only score words, not gestures
   # sc.understands : if FALSE, treat "understands only" as the same as "doesn't
@@ -331,8 +332,6 @@ score.WG <- function(gestures, inventory.only = TRUE, sc.understands = FALSE) {
 
   syntax.categories <- c("time_words", "descriptive_words", "pronouns",
                          "question_words", "locations", "quantifiers")
-
-  produces_value <- "says_and_understands"
 
   if (sum(gestures$value == produces_value, na.rm = TRUE) == 0) {
     stop("No says_and_understands values detected, check inputs or you'll get an all-0 matrix")

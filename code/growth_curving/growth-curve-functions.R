@@ -81,7 +81,7 @@ plot.curves <- function(list_of_curves, max_val,
     geom_hline(yintercept = c(max_val, max_val / exp(1)),
                size = 1,
                linetype = "dashed",
-               color = "darkred")+
+               color = "darkred") +
     theme_bw()
 
   for (i in list_of_curves) {
@@ -89,4 +89,20 @@ plot.curves <- function(list_of_curves, max_val,
   }
 
   return(p)
+}
+
+# Solve for a given X or Y, given kg
+solve.gomp2 <- function(x = NA, y = NA, k_g, A = 681) {
+
+  W_0 <- .Machine$double.eps
+
+  if (is.na(y) & !is.na(x))
+    result <-  W_0 * (A / W_0) ^ (1 - exp(-k_g * x))
+  else if (is.na(x) & !is.na(y))
+    result <- -log(1 - log(y / W_0) / log(A / W_0)) / k_g
+  else
+    message("Exactly one of x/y must be specified")
+
+  return(result)
+
 }

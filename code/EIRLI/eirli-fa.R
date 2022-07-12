@@ -1,4 +1,4 @@
-if(.Platform$OS.type == "unix") {
+if (.Platform$OS.type == "unix") {
   setwd("/Volumes/GoogleDrive/My Drive/Research/MCDI/MCDI-analysis/code/EIRLI")
 } else {
   setwd("G:/My Drive/Research/MCDI/MCDI-analysis/code/EIRLI")

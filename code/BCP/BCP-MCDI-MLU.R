@@ -1,4 +1,4 @@
-if(.Platform$OS.type == "unix") {
+if (.Platform$OS.type == "unix") {
   setwd("/Volumes/GoogleDrive/My Drive/Research/MCDI/MCDI-analysis")
 } else {
   setwd("G:/My Drive/Research/MCDI/MCDI-analysis/code/BCP")
@@ -53,12 +53,19 @@ BCP_MLU <- read_data(paste0("BCP/BCP_WS_MLU3-", date, ".rds"))
 wMLU <- right_join(BCP_WS_scored, BCP_MLU) %>%
   left_join(., BCP.demographics, by = c("data_id" = "CandID"))
 
+wMLU %>%
+  select(partI, partII, SYN, LEX, MLU3m, MLU3w) %>%
+  cor()
+
+
 ggplot(wMLU, aes(x = MLU3w, y = MLU3m, color = age)) +
   geom_point() +
   geom_smooth() +
   geom_line(aes(group = data_id)) +
   scale_color_viridis() +
   labs(x = "Words", y = "Morphemes")
+
+
 
 #
 #
