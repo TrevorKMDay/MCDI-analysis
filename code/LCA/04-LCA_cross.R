@@ -35,116 +35,127 @@ max_inv <- c("lex" = 513, syn = 139)
 
 ## Multi-lcmm ####
 
-lca_lexsyn_ng1 <- multlcmm(lex_total + syn_total ~ ageC,
-                           data     = as.data.frame(BE),
-                           subject  = "data_id_num",
-                           ng       = 1,
-                           random   = ~ageC,
-                           link     = "3-manual-splines",
-                           prior    = "empty_prior",
-                           intnodes = max_inv / exp(1))
+if (!file.exists("all_LCAs.Rdata")) {
 
-lca_lexsyn_ng2_6 <- lapply(2:6, function(ng)
-                                  multlcmm(lex_total + syn_total ~ ageC,
-                                           data     = as.data.frame(BE),
-                                           subject  = "data_id_num",
-                                           ng       = ng,
-                                           random   = ~ageC,
-                                           mixture  = ~ageC,
-                                           link     = "3-manual-splines",
-                                           B        = lca_lexsyn_ng1,
-                                           prior    = "empty_prior",
-                                           intnodes = max_inv / exp(1)))
+  lca_lexsyn_ng1 <- multlcmm(lex_total + syn_total ~ ageC,
+                             data     = as.data.frame(BE),
+                             subject  = "data_id_num",
+                             ng       = 1,
+                             random   = ~ageC,
+                             link     = "3-manual-splines",
+                             prior    = "empty_prior",
+                             intnodes = max_inv / exp(1))
+
+  lca_lexsyn_ng2_6 <- lapply(2:6, function(ng)
+                                    multlcmm(lex_total + syn_total ~ ageC,
+                                             data     = as.data.frame(BE),
+                                             subject  = "data_id_num",
+                                             ng       = ng,
+                                             random   = ~ageC,
+                                             mixture  = ~ageC,
+                                             link     = "3-manual-splines",
+                                             B        = lca_lexsyn_ng1,
+                                             prior    = "empty_prior",
+                                             intnodes = max_inv / exp(1)))
 
 
-fitstats_lexsyn <- get_fit_stats(lca_lexsyn_ng1, lca_lexsyn_ng2_6)
-plot_fit_stats(fitstats_lexsyn)
+  fitstats_lexsyn <- get_fit_stats(lca_lexsyn_ng1, lca_lexsyn_ng2_6)
+  plot_fit_stats(fitstats_lexsyn)
 
-lca_lexsyn_ng1s <- multlcmm(lex_total + syn_total ~ ageC,
-                           data     = as.data.frame(BE),
-                           subject  = "data_id_num",
-                           ng       = 1,
-                           random   = ~ageC,
-                           link     = "3-manual-splines",
-                           prior    = "dx_prior",
-                           intnodes = max_inv / exp(1))
+  lca_lexsyn_ng1s <- multlcmm(lex_total + syn_total ~ ageC,
+                             data     = as.data.frame(BE),
+                             subject  = "data_id_num",
+                             ng       = 1,
+                             random   = ~ageC,
+                             link     = "3-manual-splines",
+                             prior    = "dx_prior",
+                             intnodes = max_inv / exp(1))
 
-lca_lexsyn_ng2_6s <- lapply(2:6, function(ng)
-  multlcmm(lex_total + syn_total ~ ageC,
-           data     = as.data.frame(BE),
-           subject  = "data_id_num",
-           ng       = ng,
-           random   = ~ageC,
-           mixture  = ~ageC,
-           link     = "3-manual-splines",
-           B        = lca_lexsyn_ng1,
-           prior    = "dx_prior",
-           intnodes = max_inv / exp(1)))
+  lca_lexsyn_ng2_6s <- lapply(2:6, function(ng)
+    multlcmm(lex_total + syn_total ~ ageC,
+             data     = as.data.frame(BE),
+             subject  = "data_id_num",
+             ng       = ng,
+             random   = ~ageC,
+             mixture  = ~ageC,
+             link     = "3-manual-splines",
+             B        = lca_lexsyn_ng1,
+             prior    = "dx_prior",
+             intnodes = max_inv / exp(1)))
 
-fitstats_lexsyn_sup <- get_fit_stats(lca_lexsyn_ng1s, lca_lexsyn_ng2_6s)
-plot_fit_stats(fitstats_lexsyn_sup)
+  fitstats_lexsyn_sup <- get_fit_stats(lca_lexsyn_ng1s, lca_lexsyn_ng2_6s)
+  plot_fit_stats(fitstats_lexsyn_sup)
 
-## Cross ####
+  ## Cross ####
 
-cor(BE$lex_total, BE$syn_total)
+  cor(BE$lex_total, BE$syn_total)
 
-lca_lex_ng1 <- lcmm(lex_total ~ ageC,
-                    data     = BE,
-                    subject  = "data_id_num",
-                    ng       = 1,
-                    link     = "3-manual-splines",
-                    B        = rep(1, 6),
-                    prior    = "empty_prior",
-                    intnodes = max_inv["lex"] / exp(1))
+  lca_lex_ng1 <- lcmm(lex_total ~ ageC,
+                      data     = BE,
+                      subject  = "data_id_num",
+                      ng       = 1,
+                      link     = "3-manual-splines",
+                      B        = rep(1, 6),
+                      prior    = "empty_prior",
+                      intnodes = max_inv["lex"] / exp(1))
 
-lca_syn_ng1 <- lcmm(syn_total ~ ageC,
-                    data     = BE,
-                    subject  = "data_id_num",
-                    ng       = 1,
-                    link     = "3-manual-splines",
-                    B        = rep(1, 6),
-                    prior    = "empty_prior",
-                    intnodes = max_inv["syn"] / exp(1))
+  lca_syn_ng1 <- lcmm(syn_total ~ ageC,
+                      data     = BE,
+                      subject  = "data_id_num",
+                      ng       = 1,
+                      link     = "3-manual-splines",
+                      B        = rep(1, 6),
+                      prior    = "empty_prior",
+                      intnodes = max_inv["syn"] / exp(1))
 
-lca_lex_ng2_6 <- lapply(2:6, function(ng)
-                              lcmm(lex_total ~ ageC,
-                                   data     = BE,
-                                   subject  = "data_id_num",
-                                   ng       = ng,
-                                   mixture  = ~ ageC,
-                                   B        = lca_lex_ng1,
-                                   prior    = "empty_prior",
-                                   link     = "3-manual-splines",
-                                   intnodes = max_inv["lex"] / exp(1)))
+  lca_lex_ng2_6 <- lapply(2:6, function(ng)
+                                lcmm(lex_total ~ ageC,
+                                     data     = BE,
+                                     subject  = "data_id_num",
+                                     ng       = ng,
+                                     mixture  = ~ ageC,
+                                     B        = lca_lex_ng1,
+                                     prior    = "empty_prior",
+                                     link     = "3-manual-splines",
+                                     intnodes = max_inv["lex"] / exp(1)))
 
-lca_syn_ng2_6 <- lapply(2:6, function(ng)
-                              lcmm(syn_total ~ ageC,
-                                   data     = BE,
-                                   subject  = "data_id_num",
-                                   ng       = ng,
-                                   mixture  = ~ ageC,
-                                   B        = lca_syn_ng1,
-                                   prior    = "empty_prior",
-                                   link     = "3-manual-splines",
-                                   intnodes = max_inv["syn"] / exp(1)))
+  lca_syn_ng2_6 <- lapply(2:6, function(ng)
+                                lcmm(syn_total ~ ageC,
+                                     data     = BE,
+                                     subject  = "data_id_num",
+                                     ng       = ng,
+                                     mixture  = ~ ageC,
+                                     B        = lca_syn_ng1,
+                                     prior    = "empty_prior",
+                                     link     = "3-manual-splines",
+                                     intnodes = max_inv["syn"] / exp(1)))
 
-fitstats_lex <- get_fit_stats(lca_lex_ng1, lca_lex_ng2_6)
+  fitstats_lex <- get_fit_stats(lca_lex_ng1, lca_lex_ng2_6)
 
-png("plots/lca/3a_lex_fitstats.png", width = 8, height = 5, units = "in",
-    res = 300)
+  png("plots/lca/3a_lex_fitstats.png", width = 8, height = 5, units = "in",
+      res = 300)
 
-plot_fit_stats(fitstats_lex)
+  plot_fit_stats(fitstats_lex)
 
-dev.off()
+  dev.off()
 
-fitstats_syn <- get_fit_stats(lca_syn_ng1, lca_syn_ng2_6)
+  fitstats_syn <- get_fit_stats(lca_syn_ng1, lca_syn_ng2_6)
 
-png("plots/lca/3b_syn_fitstats.png", width = 8, height = 5, units = "in",
-    res = 300)
+  png("plots/lca/3b_syn_fitstats.png", width = 8, height = 5, units = "in",
+      res = 300)
 
-plot_fit_stats(fitstats_syn)
+  plot_fit_stats(fitstats_syn)
 
-dev.off()
+  dev.off()
+
+  save.image(file = "all_LCAs.Rdata")
+
+} else {
+
+  # Save processing time
+  load("all_LCAs.Rdata")
+
+}
 
 # Next analysis ####
 
@@ -196,4 +207,39 @@ BEx_count <- BEx %>%
     p = n / total
   )
 
-writeClipboard(as.matrix(BEx_count))
+# writeClipboard(as.matrix(BEx_count))
+
+## Check against Delay 3+ criteria ####
+
+delay3 <- read_csv("BCP_delay3.csv") %>%
+  ungroup() %>%
+  mutate(
+    data_id = as.character(data_id)
+  )
+
+lca_results <- read_data("LCA/raw_LCA_results.rds") %>%
+  select(proj, status, data_id, ends_with("class"), contains("prob")) %>%
+  distinct()
+
+top_16p_BCP <- quantile(BE3$s2g_prob2[BE3$status == "BCP"], probs = 1 - 0.16)
+
+BE_delay <- BEx %>%
+  select(proj, data_id, lex_syn) %>%
+  distinct() %>%
+  filter(
+    proj == "BCP"
+  ) %>%
+  left_join(
+    select(delay3, data_id, delay)
+  ) %>%
+  left_join(lca_results) %>%
+  mutate(
+    delay_status = if_else(delay == 0, "no delay",
+                           if_else(delay < 1, "probable no delay",
+                                   if_else(delay %in% 1:4, "delayed",
+                                           "probable delay"))),
+    high_prob = s2g_prob2 > top_16p_BCP
+  )
+
+table(BE_delay$lex_syn, BE_delay$delay_status)
+table(BE_delay$lex_syn, BE_delay$high_prob)

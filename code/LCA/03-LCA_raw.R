@@ -180,15 +180,24 @@ dev.off()
 
 # Supervised 2-group analysis ####
 
+lca_IA_ng1s <- lcmm(inventory_total ~ ageC,
+                    data     = BE,
+                    subject  = "data_id_num",
+                    ng       = 1,
+                    link     = "3-manual-splines",
+                    intnodes = max_inv / exp(1))
+
 lca_IA_ng2s <- lcmm(inventory_total ~ ageC,
                       data     = BE,
                       subject  = "data_id_num",
                       ng       = 2,
                       mixture  = ~ ageC,
                       link     = "3-manual-splines",
-                      B        = rep(1, 9),
+                      B        = lca_IA_ng1s,
                       prior    = "dx_prior",
                       intnodes = max_inv / exp(1))
+
+save_data(lca_IA_ng2s, "results/BplusE_dxsupervised_LCA-2.rds")
 
 BE3 <- BE2 %>%
   left_join(lca_IA_ng2s$pprob) %>%
@@ -197,6 +206,8 @@ BE3 <- BE2 %>%
     s2g_prob1 = prob1,
     s2g_prob2 = prob2
   )
+
+save_data(BE3, "LCA/raw_LCA_results.rds")
 
 status_by_s2g <- BE3 %>%
   select(data_id, status, s2g_class) %>%

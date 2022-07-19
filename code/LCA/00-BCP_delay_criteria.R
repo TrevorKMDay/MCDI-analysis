@@ -10,9 +10,15 @@ library(tidyverse)
 
 source("../mcdi-setup.R")
 
+# Load data ####
 
 bcp_ws <- read_data("BCP/BCP_WS_scored-200609.rds")$n
 bcp_wg <- read_data("BCP/BCP_WG_asWS-200609.rds")
+
+# Define functions ####
+
+# This function, given a table of ages, calculates the number of words at 24
+# months if possibly by interpolation
 
 words_at_24m <- function(df) {
 
@@ -40,6 +46,8 @@ words_at_24m <- function(df) {
   return(words)
 
 }
+
+# Analysis ####
 
 bcp_combine <- read_data("BCP/bcp-UMNUNC-mcdi-200609.csv") %>%
   select_all(~str_replace(., ",", ".")) %>%
@@ -176,7 +184,7 @@ delay3 <- left_join(cbcl, select(bcp, data_id, w50_by_24mo2)) %>%
 
 table(delay3$delay, useNA = "a")
 
-write_csv(delay3, "delay3.csv")
+write_csv(delay3, "BCP_delay3.csv")
 
 ##### Analyze those in category 3.3
 
