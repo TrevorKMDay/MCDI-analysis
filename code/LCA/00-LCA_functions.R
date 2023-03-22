@@ -1,4 +1,13 @@
-get_fit_stats <- function(g1_model, list_of_models) {
+WS_1A <- read_data("other/s_dict.csv") %>%
+  pull(category) %>%
+  unique()
+
+get_fit_stats <- function(g1_model = NA, list_of_models, extra = NULL) {
+
+  if (length(g1_model) > 0) {
+    g1_model <- list_of_models[[1]]
+    list_of_models <- list_of_models[-1]
+  }
 
   n_models <- 1 + length(list_of_models)
 
@@ -10,39 +19,66 @@ get_fit_stats <- function(g1_model, list_of_models) {
   list_param <- sapply(list_of_models, function(x) length(x$best))
 
   # Fit indices
-  #computing fit indices for class enumeration
-  fit <- tibble(
+  # computing fit indices for class enumeration
+  fit1 <- tibble(
 
-    K       = 1:n_models,
+      K       = 1:n_models,
 
-    # Number of participants should be constant
-    n       = rep(g1_model$ns, n_models),
+      # Get number of participants in each model
+      n       = c(g1_model$ns,
+                  sapply(list_of_models, function(x) x$ns)),
 
-    # Number of parameters in the model
-    p       = c(g1_param, list_param),
+      # Number of parameters in the model
+      p       = c(g1_param, list_param),
 
-    # Log-likelihood
-    LL      = c(g1_model$loglik,
-                sapply(list_of_models, function(x) x$loglik)),
+      # Log-likelihood
+      LL      = c(g1_model$loglik,
+                  sapply(list_of_models, function(x) x$loglik)),
 
-    # Measures classification uncertainty: 0 when all pprobs are 0/1, gets
-    # bigger as uncertainty increases
-    entropy = c(0, lcga_entropy)
-  ) %>%
+      # Measures classification uncertainty: 0 when all pprobs are 0/1, gets
+      # bigger as uncertainty increases
+      entropy = c(0, lcga_entropy),
+
+      # Flag main vs. extra
+      group   = "main",
+    )
+
+  if (length(extra) > 0) {
+
+    for (i in extra)
+
+      post <- i$pprob[, -c(1, 2)]
+      e <- sum(-1 * post * log(post))
+
+      fit1 <- fit1 %>%
+        add_row(
+          K = i$ng,
+          n = i$ns,
+          p = length(i$best),
+          LL = i$loglik,
+          entropy = e,
+          group = "extra"
+        )
+
+
+  }
+
+  fit2 <- fit1 %>%
     mutate(
 
       # AIC has no penalty and favors more classes
       AIC     = -2*LL + 2*p,
 
       # Penalizes for model complexity
-      # BIC favores fewer classes
+      #  - BIC favors fewer classes
       BIC     = -2*LL + p*log(n),
 
       # Corrected AIC for small sample sizes
-      # CAIC favores fewer classes as well
+      #  - CAIC favors fewer classes as well
       CAIC    = -2*LL + p*(log(n) + 1),
 
-      # Sample-size corrected BIC - for small sample sizes
+      # Sample-size corrected BIC
+      #  - for small sample sizes
       ssBIC   = -2*LL + p*log((n + 2) / 24),
 
       # Classification-likelihood criterion penalizes poor entropy
@@ -58,14 +94,27 @@ get_fit_stats <- function(g1_model, list_of_models) {
 
     )
 
-  return(fit)
+  return(fit2)
 
 }
 
 plot_fit_stats <- function(fit_stats, plot_NEC = TRUE, text_size = 11,
                            title = NULL, bg = "#ffffff") {
 
+  require(patchwork)
+
   maxK <- max(fit_stats$K)
+
+  extra <- fit_stats %>%
+    filter(
+      group == "extra"
+    ) %>%
+    pivot_longer(cols = c(AIC, BIC, CAIC, ssBIC, CLC, ICL.BIC, NEC))
+
+  fit_stats <- fit_stats %>%
+    filter(
+      group == "main"
+    )
 
   fit_long <- pivot_longer(fit_stats,
                            cols = c(AIC, BIC, CAIC, ssBIC, CLC, ICL.BIC, NEC))
@@ -73,10 +122,12 @@ plot_fit_stats <- function(fit_stats, plot_NEC = TRUE, text_size = 11,
   fit_plot1 <- ggplot(filter(fit_long, name != "NEC"),
                       aes(x = K, y = value, color = name)) +
     geom_line() +
+    geom_point(data = filter(extra, name != "NEC")) +
     scale_x_continuous(limits = c(1, maxK), breaks = 1:maxK) +
     theme_bw() +
     theme(text = element_text(size = text_size),
-          plot.background = element_rect(fill = bg, color = NA)) +
+          plot.background = element_rect(fill = bg, color = NA),
+          legend.position = "bottom") +
     labs(title = title)
 
   if (plot_NEC) {
@@ -84,9 +135,12 @@ plot_fit_stats <- function(fit_stats, plot_NEC = TRUE, text_size = 11,
     fit_plotNEC  <- ggplot(filter(fit_long, name == "NEC"),
                            aes(x = K, y = value, color = name)) +
       geom_line() +
+      geom_point(data = filter(extra, name == "NEC")) +
       scale_x_continuous(limits = c(1, maxK), breaks = 1:maxK) +
+      scale_y_continuous(limits = c(0, NA)) +
       theme_bw() +
-      theme(text = element_text(size = text_size)) +
+      theme(text = element_text(size = text_size),
+            legend.position = "none") +
       labs(title = title)
 
     final_plot <- fit_plot1 + fit_plotNEC

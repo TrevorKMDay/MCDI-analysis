@@ -8,6 +8,8 @@ for (i in locs)
 
 library(tidyverse)
 
+summarize <- dplyr::summarize
+
 source("../mcdi-setup.R")
 source("../growth_curving/growth-curve-functions.R")
 
@@ -65,8 +67,13 @@ max_inv_total = sum(max_value$n) + 1
 kgs <- extract.kg(list(bcp_curve, wb_curve))
 curves <- calculate.curves(kgs, max_inv_total)
 
+png("plots/bcp_adjust/mean-trajectory.png", width = 8, height = 6,
+    units = "in", res = 72)
+
 plot.curves(curves, max_inv_total, x_limits = c(10, 60),
             y_limits = c(0, max_inv_total))
+
+dev.off()
 
 bcp_to_wb <- tibble(
     age = 11:38
@@ -111,7 +118,7 @@ bcp_cat_avg <- BE %>%
 wb_cat_avg <- wb %>%
   pivot_longer(-c(data_id, age, status), names_to = "category") %>%
   group_by(age, category) %>%
-  summarize(
+  dplyr::summarize(
     wb_mean = mean(value)
   )
 
@@ -140,6 +147,7 @@ ggplot(cat_avg, aes(x = age, value, color = group)) +
   scale_x_continuous(limits = c(11, 30), breaks = seq(10, 30, by = 2)) +
   theme_bw() +
   labs(x = "Age (mo.)", y = "# words", color = "Group",
-       size = "BCP sample size")
+       size = "BCP sample size") +
+  theme(legend.position = "bottom")
 
 dev.off()

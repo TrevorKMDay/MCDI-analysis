@@ -56,7 +56,7 @@ ws_demo <- read_data("Wordbank/WS-demographics.rds") %>%
   )
 
 ws_amnlfa <- ws %>%
-  select(-LEXICAL, -SYNTAX) %>%
+  dplyr::select(-LEXICAL, -SYNTAX) %>%
   left_join(ws_demo) %>%
   rename(
     ID       = data_id,
@@ -103,7 +103,7 @@ ws_amnlfa <- ws %>%
     D_AGESEX = D_AGE_C * D_MALE,
     D_AG2SEX = D_AGE_C2 * D_MALE
   ) %>%
-  select(ID, starts_with("D_"), starts_with("L_"), starts_with("S_"), -D_AGE)
+  dplyr::select(ID, starts_with("D_"), starts_with("L_"), starts_with("S_"), -D_AGE)
 
 table(ws_demo$sex, useNA = "a")
 table(ws_amnlfa$D_FIRSTB, ws_amnlfa$D_MOMCOL, useNA = "a")
@@ -385,3 +385,4 @@ for (ob in all_models) {
 # vars = read.csv("/Users/sifre002/Desktop/Invariance/CalibSample2/REP_FIXED/vars.csv",
 #                 header=TRUE)
 # vars
+

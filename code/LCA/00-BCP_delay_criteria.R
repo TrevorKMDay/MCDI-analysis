@@ -138,6 +138,8 @@ delay3 <- left_join(cbcl, select(bcp, data_id, w50_by_24mo2)) %>%
   ) %>%
   mutate(
 
+    data_id = as.character(data_id),
+
 
     n_flags = select(., lt50w, not_combining_concern, lg_concerns,
                       ear_inf_ge6) %>%
@@ -550,3 +552,22 @@ BE3 %>%
   distinct() %>%
   pull(status) %>%
   table()
+
+# Compare with other estimate ====
+
+BplusE <- read_data("LCA/BplusE.rds") %>%
+  filter(status == "BCP") %>%
+  select(data_id, delay_status.x) %>%
+  distinct() %>%
+  ungroup() %>%
+  left_join(delay3, .) %>%
+  mutate(
+    delay3_status = case_when(
+      delay == 0 ~ "confirmed_no_delay",
+      delay < 1 ~ "probable_no_delay",
+      delay %in% 1:4 ~ "confirmed_delay",
+      delay > 1 ~ "probable_delay"
+    )
+  )
+
+table(BplusE$delay3_status, BplusE$delay_status.x, useNA = "a")

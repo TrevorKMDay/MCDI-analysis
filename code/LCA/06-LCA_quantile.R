@@ -15,81 +15,104 @@ source("00-LCA_functions.R")
 
 # Load data ####
 
-BplusE_d <- read_data("LCA/BplusE_demographics.rds")
+Badj <- read_data("LCA/BCP_to_EIRLI.rds") %>%
+  select(age, diff)
 
-Badj <- read_data("LCA/BCP_to_EIRLI.rds")
+BplusE_d <- read_data("LCA/BplusE_demographics.rds") %>%
+  select(proj, data_id, sex, mother_college) %>%
+  mutate(
+    male = sex == "Male"
+  ) %>%
+  select(-sex)
 
-BplusE <-read_data("LCA/BplusE.rds") %>%
+BplusE <- read_data("LCA/BplusE.rds") %>%
+  left_join(Badj) %>%
+  mutate(
+    # For BCP participants, adjust the EIRLI total upward, but for EIRLI,
+    # keep it. Also, truncate values at 615
+    inv_total_adj = if_else(proj == "BCP", round(eirli_total - diff),
+                            eirli_total) %>%
+      if_else(. > 615, 615, .),
+    empty_prior   = 0
+  ) %>%
   ungroup() %>%
-  select(proj, status, data_id, age, exact_age, inventory_total) %>%
-  mutate(
-    age = round(age)
-  ) %>%
-  left_join(select(Badj, age, diff), by = "age") %>%
-  mutate(
-    # Only adjust BCP
-    inv_total_adj = if_else(proj == "BCP", inventory_total - diff,
-                            inventory_total),
-    # Don't let BCP exceed ceiling
-    inv_total_adj = if_else(inv_total_adj > 616, 616, inv_total_adj)
-  ) %>%
-  group_by(data_id) %>%
-  mutate(
-    data_id_num = cur_group_id(),
-    empty_prior = 0
+  left_join(BplusE_d)
+
+delay <- BplusE %>%
+  select(proj, status, data_id, delay_status) %>%
+  distinct()
+
+# table(delay$status, delay$delay_status.x) %>%
+#   addmargins()
+
+BplusE %>%
+  group_by(status) %>%
+  summarize(
+    min = min(inv_total_adj),
+    max = max(inv_total_adj)
   )
+
+####
 
 BE_Bn <- BplusE %>%
   filter(
     status %in% c("BCP", "no_lg_dx"),
-    !(age == 24 & inventory_total <= 50)
+    # !(age == 24 & inventory_total <= 50)
   )
 
 BE_Bn0 <- BplusE %>%
   filter(
     status %in% c("BCP", "no_lg_dx", "no_follow_up"),
-    !(age == 24 & inventory_total <=50)
+
   )
 
-# LCA ####
+# Covariate selection ####
 
-k <- 2:5
-
-LCA_ng1_Bn <- lcmm(inv_total_adj ~ age,
-                    data     = BE_Bn,
-                    subject  = "data_id_num",
-                    ng       = 1,
-                    link     = "3-manual-splines",
-                    B        = rep(1, 6),
-                    prior    = "empty_prior",
-                    intnodes = 615 / exp(1))
-
-LCA_ng1_Bn0 <- lcmm(inv_total_adj ~ age,
-                     data     = BE_Bn0,
-                     subject  = "data_id_num",
-                     ng       = 1,
-                     link     = "3-manual-splines",
-                     B        = rep(1, 6),
-                     prior    = "empty_prior",
-                     intnodes = 615 / exp(1))
-
-save_data(LCA_ng1, "results/BplusE_nodx_LCA-1.rds")
-
-LCAs_Bn <- lapply(k,
-               function(k)
-                 lcmm(inv_total_adj ~ age,
-                       data     = BE_Bn,
+LCA_ng1_Bn0_0 <- lcmm(inv_total_adj ~ age,
+                       data     = BE_Bn0,
                        subject  = "data_id_num",
-                       ng       = k,
+                       ng       = 1,
                        link     = "3-manual-splines",
-                       mixture  = ~age,
-                       B        = LCA_ng1_Bn,
                        prior    = "empty_prior",
-                       intnodes = 615 / exp(1)))
+                       intnodes = 615 / exp(1))
 
-LCAs_Bn0 <- lapply(k,
-                  function(k)
-                    lcmm(inv_total_adj ~ age,
+LCA_ng1_Bn0_1 <- lcmm(inv_total_adj ~ age + male,
+                      data     = BE_Bn0,
+                      subject  = "data_id_num",
+                      ng       = 1,
+                      link     = "3-manual-splines",
+                      prior    = "empty_prior",
+                      intnodes = 615 / exp(1))
+
+LCA_ng1_Bn0_2 <- lcmm(inv_total_adj ~ age + male + mother_college,
+                      data     = BE_Bn0,
+                      subject  = "data_id_num",
+                      ng       = 1,
+                      link     = "3-manual-splines",
+                      prior    = "empty_prior",
+                      intnodes = 615 / exp(1))
+
+LCA_ng1_Bn0_demosel <- list(LCA_ng1_Bn0_0, LCA_ng1_Bn0_1, LCA_ng1_Bn0_2)
+fitstats_ng1_Bn0_demosel <- get_fit_stats(list_of_models = LCA_ng1_Bn0_demosel)
+
+png("plots/covariate_selection.png", width = 6, height = 3, units = "in",
+    res = 300)
+
+plot_fit_stats(fitstats_ng1_Bn0_demosel)
+
+dev.off()
+
+# Use this as the "master" ng1 model
+LCA_ng1_Bn0 <- LCA_ng1_Bn0_1
+
+# Latent classes =====
+#
+
+k <- 2:6
+
+LCAs_Bn0_2_6 <- lapply(k,
+                 function(k)
+                   lcmm(inv_total_adj ~ age + male,
                          data     = BE_Bn0,
                          subject  = "data_id_num",
                          ng       = k,
@@ -99,214 +122,202 @@ LCAs_Bn0 <- lapply(k,
                          prior    = "empty_prior",
                          intnodes = 615 / exp(1)))
 
+LCAs_Bn0_nosex_2_6 <- lapply(k,
+                       function(k)
+                         lcmm(inv_total_adj ~ age,
+                              data     = BE_Bn0,
+                              subject  = "data_id_num",
+                              ng       = k,
+                              link     = "3-manual-splines",
+                              mixture  = ~age,
+                              B        = LCA_ng1_Bn0_0,
+                              prior    = "empty_prior",
+                              intnodes = 615 / exp(1)))
+
 save_data(LCAs, "results/BplusE_nodx_LCA-2_6.rds")
 
-fit_stats <- get_fit_stats(LCA_ng1_Bn, LCAs_Bn)
-plot_fit_stats(fit_stats, bg = "#ffffff")
+LCAs_fitstats <- get_fit_stats(LCA_ng1_Bn0, LCAs_Bn0)
+LCAs_nosex_fitstats <- get_fit_stats(LCA_ng1_Bn0_0, LCAs_Bn0_nosex_2_6)
 
-fit_stats <- get_fit_stats(LCA_ng1_Bn0, LCAs_Bn0)
-plot_fit_stats(fit_stats, bg = "#ffffff")
+png("plots/lca/fitstats_ng1_Bn0_agesex.png", width = 5, height = 4,
+    units = "in", res = 300)
 
-## Compare Bn/Bn0 =====
-
-compare_Bn_Bn0 <- BE_Bn0 %>%
-  ungroup() %>%
-  left_join(LCAs_Bn[[2]]$pprob, by = "data_id_num") %>%
-  left_join(LCAs_Bn0[[2]]$pprob, by = "data_id_num", suffix = c(".Bn", ".Bn0"))
-
-compare_Bn_Bn0_long <- compare_Bn_Bn0 %>%
-  select(status, data_id, exact_age, inv_total_adj, starts_with("class")) %>%
-  pivot_longer(starts_with("class"), values_to = "class") %>%
-  separate(name, into = c(NA, "analysis"), sep = "[.]")
-
-compare_tbl <- compare_Bn_Bn0 %>%
-  group_by(status, class.Bn, class.Bn0) %>%
-  summarize(
-    n = n()
-  ) %>%
-  group_by(status, class.Bn) %>%
-  mutate(
-    class1.n = sum(n),
-    p = round(100 * n / class1.n)
-  )
-
-ggplot(compare_Bn_Bn0_long, 
-       aes(x = exact_age, y = inv_total_adj, color = as.factor(class))) +
-  geom_point() +
-  geom_line(aes(group = data_id), alpha = 0.5) +
-  geom_smooth(color = "black", aes(linetype = as.factor(class))) +
-  scale_x_continuous(breaks = c(16, 20, 24, 28, 33, 36), 
-                     minor_breaks = 11:38) +
-  facet_grid(cols = vars(analysis), rows = vars(status)) +
-  theme_bw()
-
-## Selected model ####
-
-sel_model_groups <- LCAs[[2]]$pprob
-BplusE_groups <- left_join(BplusE2, sel_model_groups)
-
-png("plots/lca/5-TD_trajectories.png", width = 8, height = 5, units = "in",
-    res = 300)
-
-ggplot(BplusE_groups, aes(x = exact_age, y = inv_total_adj, color = proj)) +
-  geom_line(aes(group = data_id), alpha = 0.1) +
-  geom_smooth(aes(linetype = as.factor(class))) +
-  theme_bw() +
-  labs(x = "Age (mo.)", y = "Total inventory size", color = "Project",
-       linetype = "Class")
+plot_fit_stats(LCAs_fitstats, title = "Age + sex")
 
 dev.off()
 
-### BCP groups ####
+png("plots/lca/fitstats_ng1_Bn0_age.png", width = 5, height = 4,
+    units = "in", res = 300)
 
-BCP_groups <- BplusE_groups %>%
-  filter(
-    proj == "BCP"
-  ) %>%
-  select(-proj, -status) %>%
-  ungroup() %>%
+plot_fit_stats(LCAs_nosex_fitstats, title = "Age only")
+
+dev.off()
+
+# Bn only =====
+
+LCA_ng1_Bn_0 <- lcmm(inv_total_adj ~ age,
+                      data     = BE_Bn,
+                      subject  = "data_id_num",
+                      ng       = 1,
+                      link     = "3-manual-splines",
+                      prior    = "empty_prior",
+                      intnodes = 615 / exp(1))
+
+LCAs_Bn_2_6 <- lapply(k,
+                       function(k)
+                         lcmm(inv_total_adj ~ age,
+                              data     = BE_Bn,
+                              subject  = "data_id_num",
+                              ng       = k,
+                              link     = "3-manual-splines",
+                              mixture  = ~age,
+                              B        = LCA_ng1_Bn_0,
+                              prior    = "empty_prior",
+                              intnodes = 615 / exp(1)))
+
+LCAs_Bn_fitstats <- get_fit_stats(LCA_ng1_Bn_0, LCAs_Bn_2_6)
+plot_fit_stats(LCAs_Bn_fitstats)
+
+## Four-group solutions ====
+
+groups_Bn <- LCAs_Bn_2_6[[2]]$pprob
+groups_Bn0 <- LCAs_Bn0_nosex_2_6[[3]]$pprob
+
+# Full join to include participants in either
+groups_both <- full_join(groups_Bn, groups_Bn0, by = "data_id_num",
+                         suffix = c(".Bn", ".Bn0"))
+
+groups_tbl <- table(groups_both$class.Bn, groups_both$class.Bn0, useNA = "a")
+
+stability <- apply(groups_tbl, 1, max) / rowSums(groups_tbl)
+weighted.mean(stability[1:3], w = rowSums(groups_tbl)[1:3], na.rm = TRUE)
+
+groups_Bn0 %>%
+  pivot_longer(-c(data_id_num, class), names_to = "prob") %>%
+  group_by(class, prob) %>%
   mutate(
-    prob = if_else(class == 1, prob1,
-                   if_else(class == 2, prob2, prob3))
-  )
-
-ggplot(BCP_groups, aes(x = exact_age, y = inventory_total, color = prob)) +
-  geom_point() +
-  geom_line(aes(group = data_id)) +
-  geom_smooth() +
-  geom_hline(yintercept = 50, color = "red") +
-  geom_vline(xintercept = 24, color = "red") +
-  scale_color_viridis() +
-  facet_wrap(vars(class)) +
-  theme_bw()
-
-BCP_groups_d <- BplusE_d %>%
-  filter(
-    data_id %in% BCP_groups$data_id
+    prob = as.numeric(str_remove(prob, "prob"))
   ) %>%
-  select(-proj) %>%
-  left_join(
-    select(BCP_groups, data_id, class)
-  ) %>%
-  distinct()
-
-BCP_g_dsummary <- BCP_groups_d %>%
-  group_by(class) %>%
-  dplyr::summarize(
-    n = n(),
-    male = sum(sex == "Male"),
-    female = sum(sex == "Female"),
-    # n_gmissing = sum(is.na(sex)),
-    momed_missing = sum(is.na(mother_college)),
-    mom_coll = sum(mother_college),
-    mom_no_coll = sum(!mother_college)
-  )
-
-BCP_g_dsummary %>%
-  select(male, female) %>%
-  chisq.test(simulate.p.value = TRUE)
-
-BCP_g_dsummary %>%
-  select(mom_coll, mom_no_coll) %>%
-  chisq.test(simulate.p.value = TRUE)
-
-# Analyze BCP classes =====
-
-mullen <- read_data("BCP/bcp-vl_mullen-220209.csv") %>%
-  select_all(~str_replace(., ",", ".")) %>%
-  select(demographics.CandID, mullen.Candidate_Age,
-         mullen.Administration, matches("mullen..*_t$")) %>%
-  rename(
-    data_id = demographics.CandID,
-    exact_age = mullen.Candidate_Age
+  summarize(
+    min = min(value),
+    max = max(value)
   ) %>%
   filter(
-    mullen.Administration == "All"
-  ) %>%
-  mutate(
-    data_id = as.character(data_id),
-    across(c(exact_age, ends_with("_t")), as.numeric)
-  ) %>%
-  select(-mullen.Administration) %>%
-  pivot_longer(ends_with("_t"), names_to = "behavior") %>%
-  mutate(
-    behavior = str_replace(behavior, "mullen.", "m.") %>%
-      str_remove("_t$") %>%
-      str_replace("language", "lg")
-  ) %>%
-  group_by(data_id, behavior) %>%
-  nest() %>%
-  ungroup() %>%
-  mutate(
-    mean = map_dbl(data, ~mean(.x$value, na.rm = TRUE)),
-    wmean = map_dbl(data, ~weighted.mean(.x$value, .x$exact_age,
-                                         na.rm = TRUE)),
-    zwmean = scale(wmean)[, 1]
+    class == prob
   )
 
-vl <- readxl::read_xlsx("../../data/BCP/20210210_Vineland_BCP.xlsx") %>%
-  select(CandID, Candidate_Age, ends_with("STD_SCORE")) %>%
-  rename(
-    data_id = CandID,
-    exact_age = Candidate_Age
-  ) %>%
-  pivot_longer(-c(data_id, exact_age), names_to = "behavior") %>%
+BE_results <- BE_Bn0 %>%
+  select(proj, status, data_id, data_id_num, male, ends_with("age"),
+         inventory_total, inv_total_adj) %>%
+  left_join(groups_Bn0) %>%
+  left_join(groups_Bn, by = "data_id_num", suffix = c(".Bn0", ".Bn")) %>%
   mutate(
-    value = as.numeric(value),
-    behavior = paste0("vl.", behavior) %>%
-      str_remove("_STD_SCORE")
+    across(starts_with("class"), as.factor),
+    status = case_when(
+              status == "BCP" ~ "BCP",
+              status == "no_follow_up" ~ "EIRLI Dx(unk.)",
+              status == "no_lg_dx" ~ "EIRLI Dx(-)"
+            ),
+    # prob = case_when(
+    #           class == 1 ~ prob1,
+    #           class == 2 ~ prob2,
+    #           class == 3 ~ prob3,
+    #           class == 4 ~ prob4,
+    #         )
   ) %>%
-  group_by(data_id, behavior) %>%
-  nest() %>%
-  ungroup() %>%
-  mutate(
-    mean = map_dbl(data, ~mean(.x$value, na.rm = TRUE)),
-    wmean = map_dbl(data, ~weighted.mean(.x$value, .x$exact_age,
-                                         na.rm = TRUE)) %>%
-      replace(., is.nan(.), NA),
-  ) %>%
-  na.omit() %>%
-  mutate(
-    data_id = as.character(data_id),
-    zwmean = scale(wmean)[, 1]
-  )
-
-behav <- bind_rows(mullen, vl)
-
-BCP <- BCP_groups_d %>%
-  left_join(select(behav, -data), by = "data_id") %>%
   filter(
-    !is.na(behavior)
-  ) %>%
-  mutate(
-    instrument = if_else(str_detect(behavior, "^m."), "Mullen", "Vineland")
+    !is.na(class.Bn0)
   )
 
-ggplot(BCP, aes(x = behavior, y = zwmean, fill = as.factor(class))) +
-  geom_boxplot(notch = TRUE, notchwidth = .6) +
+save_data(BE_Bn0_results, "LCA/BN0_NG4_results.rds")
+
+png("plots/lca/BN0_ng4_trajectories.png", width = 6.5, height = 4,
+    units = "in", res = 300)
+
+ggplot(BE_results, aes(x = exact_age, y = inventory_total, color = class.Bn0)) +
+  geom_point(alpha = 0.1, size = 1) +
+  geom_line(aes(group = data_id), alpha = 0.2) +
+  geom_smooth(aes(group = class.Bn0), color = "black") +
+  annotate("rect", xmin = 24, ymin = -Inf, xmax = Inf, ymax = 50,
+           color = "black", linetype = "dashed", fill = "red", alpha = 0.25) +
+  annotate("text", x = 32, y = 0, label = "Delay 3", size = 3.5,
+           color = "darkred") +
+  scale_x_continuous(limits = c(11, 40), breaks = seq(6, 40, by = 6),
+                     minor_breaks = 6:40) +
+  coord_cartesian(ylim = c(0, NA)) +
+  facet_wrap(vars(status), scales = "free_y") +
   theme_bw() +
-  labs(x = "Behavior", y = "Z score", fill = "Class") +
-  facet_grid(cols = vars(instrument), scales = "free_x") +
-  theme(axis.text.x = element_text(angle = 30, hjust = 1))
+  labs(x = "Age (mo.)", y = "Inventory", color = "Class") +
+  guides(color = guide_legend(override.aes = list(alpha = 1))) +
+  theme(legend.position = "bottom")
 
-## MLU ####
+dev.off()
 
-mlu <- read_data("BCP/BCP_WS_MLU3-200609.rds") %>%
-  select(data_id, age, MLU3m) %>%
-  mutate(
-    data_id = as.character(data_id)
-  ) %>%
-  left_join(
-    select(BCP, data_id, class)
+## Reanalyze without delay3 candidates ====
+
+BE_Bn0_nodelay <- BplusE %>%
+  filter(
+    status != "lg_dx"
   )
 
-ggplot(mlu, aes(x = age, y = MLU3m, color = as.factor(class))) +
-  geom_point(shape = 1) +
-  geom_line(aes(group = data_id), alpha = 0.5) +
-  geom_smooth(method = "lm")+
-  theme_bw() +
-  labs(x = "Age (mo.)", y = "MLU3-morphemes", color = "Class")
+BE_Bn0_nodelay %>%
+  select(status, data_id, delay_status) %>%
+  distinct() %>%
+  select(-data_id) %>%
+  table()
 
-# EIRLI DX0 ====
+BE_Bn0_nodelay <- BplusE %>%
+  filter(
+    status != "lg_dx",
+    delay_status != "delay"
+  )
 
+### Run models ----
 
+LCA_ng1_Bn0nd <- lcmm(inv_total_adj ~ age,
+                       data     = BE_Bn0_nodelay,
+                       subject  = "data_id_num",
+                       ng       = 1,
+                       link     = "3-manual-splines",
+                       prior    = "empty_prior",
+                       intnodes = 615 / exp(1))
+
+LCAs_ng2_6_Bn0nd <- lapply(k,
+                            function(k)
+                              lcmm(inv_total_adj ~ age,
+                                   data     = BE_Bn0_nodelay,
+                                   subject  = "data_id_num",
+                                   ng       = k,
+                                   link     = "3-manual-splines",
+                                   mixture  = ~age,
+                                   B        = LCA_ng1_Bn0nd,
+                                   prior    = "empty_prior",
+                                   intnodes = 615 / exp(1)))
+
+LCAs_nodelay_fitstats <- get_fit_stats(LCA_ng1_Bn0nd, LCAs_ng2_6_Bn0nd)
+plot_fit_stats(LCAs_nodelay_fitstats)
+
+BE_results2 <- BE_results %>%
+  full_join(LCAs_ng2_6_Bn0nd[[2]]$pprob, by = "data_id_num") %>%
+  select(-starts_with("prob")) %>%
+  rename(
+    # Rename class from third model
+    class.Bn0_nd = class
+  ) %>%
+  mutate(
+    class.Bn0_nd = as.factor(class.Bn0_nd)
+  ) %>%
+  filter(
+    # Remove those that weren't included in the model (BE_results has everyone)
+    data_id %in% BE_Bn0_nodelay$data_id
+  )
+
+BE_results2_indiv <- BE_results2 %>%
+  select(data_id, starts_with("class.")) %>%
+  distinct() %>%
+  select(class.Bn, class.Bn0_nd)
+
+groups_nd_tbl <- table(BE_results2_indiv, useNA = "a")
+
+stability2 <- apply(groups_nd_tbl, 1, max) / rowSums(groups_nd_tbl)
+weighted.mean(stability2[1:3], w = rowSums(groups_nd_tbl)[1:3], na.rm = TRUE)

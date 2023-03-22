@@ -14,6 +14,7 @@ source("../BCP/format-BCP-funcs.R")
 source("../growth_curving/growth-curve-functions.R")
 
 PHE_data <- "PHE/PHE-MCDI-201103.rds"
+
 if (file.exists(.data(PHE_data))) {
 
   PHE <- read_data(PHE_data)
@@ -25,7 +26,9 @@ if (file.exists(.data(PHE_data))) {
     select_all(~gsub("demographics.", "demo.", .)) %>%
     select_all(~gsub("mcdi[.]", "wg.", .)) %>%
     select_all(~gsub("mcdi_words_sentences.", "ws.", .)) %>%
-    filter(demo.Site == "PHE")
+    filter(
+      demo.Site == "PHE"
+    )
 
   save_data(PHE, "PHE/PHE-MCDI-201103.rds")
 
@@ -33,34 +36,40 @@ if (file.exists(.data(PHE_data))) {
 
 ages <- select(PHE, demo.CandID, wg.Candidate_Age) %>%
   arrange(demo.CandID) %>%
-  mutate(month = round(as.numeric(wg.Candidate_Age), 0))
+  mutate(
+    age = round(as.numeric(wg.Candidate_Age), 0)
+  ) %>%
+  select(-wg.Candidate_Age)
 
-################################################################################
-# How many MLU entries?
-################################################################################
+# How many MLU entries? =====
 
 MLU <- replace(PHE$ws.II_D_1, PHE$ws.II_D_1 == ".", NA)
 sum(!is.na(MLU))
 
 # 310 * 3 = 930 sentences
 
-################################################################################
+## WS ====
 
 # Extract LORIS data for words and sentences
 WS_orig <- PHE %>%
   select(starts_with("demo."), starts_with("ws.")) %>%
-  filter(ws.Administration == "All") %>%
+  filter(
+    ws.Administration == "All"
+  ) %>%
   mutate(
     ws.Candidate_Age = as.numeric(ws.Candidate_Age)
   )
 
-length(unique(WS_orig$demo.CandID))
+range(WS_orig$ws.Candidate_Age)
 
 # The Phenoscreening kids who got WS also got some WG supplemental section,
 # these are those kids.
 WS_WG_addtl <- PHE %>%
   select(starts_with("demo."), ws.Administration, starts_with("wg.")) %>%
-  filter(ws.Administration == "All", wg.Administration == "All") %>%
+  filter(
+    ws.Administration == "All",
+    wg.Administration == "All"
+  ) %>%
   mutate(
     wg.Candidate_Age = as.numeric(wg.Candidate_Age)
   )
@@ -75,13 +84,19 @@ WS_as_WB <- WS_orig %>%
   select_all(~gsub("ws.", "sent.", .)) %>%
   format.sentences(., .data("Wordbank/WS-example.csv"))
 
-WS <- score.WS(WS_as_WB)
+WS <- score.WS(WS_as_WB, include.totals = TRUE)$n %>%
+  mutate(
+    inst = "WS"
+  )
 
-# WG
+## WG ====
 
 WG_orig <- PHE %>%
   select(starts_with("demo."), starts_with("wg."), ws.Administration) %>%
-  filter(wg.Administration == "All" & ws.Administration != "All") %>%
+  filter(
+    wg.Administration == "All" &
+    ws.Administration != "All"
+  ) %>%
   mutate(
     wg.Candidate_Age = as.numeric(wg.Candidate_Age)
   ) %>%
@@ -89,19 +104,12 @@ WG_orig <- PHE %>%
   select(-ws.Administration) %>%
   arrange(desc(wg.Candidate_Age))
 
-length(unique(WG_orig$demo.CandID))
-
-foo <- PHE %>%
-  select(demo.CandID, ends_with("Administration"),
-         ends_with("Candidate_Age")) %>%
-  filter(wg.Administration == "All" & ws.Administration != "All")  %>%
-  arrange(desc(wg.Candidate_Age))
+WG_orig$demo.CandID %in% WS_orig$demo.CandID
 
 WG_as_WB <- WG_orig %>%
   rename(
     data_id = demo.CandID,
     sex = demo.Sex,
-    age = wg.Candidate_Age
   ) %>%
   select(-starts_with("demo")) %>%
   select_all(~gsub("wg.", "gest.", .)) %>%
@@ -109,12 +117,24 @@ WG_as_WB <- WG_orig %>%
 
 WG <- score.WG(WG_as_WB)
 
-WG_as_WS <- score.GasS(WG_as_WB)
-WG_as_WS.p <- WG_as_WS$p %>%
-  arrange(desc(SYNTAX))
+WG_as_WS <- score.GasS(WG_as_WB)$n %>%
+  mutate(
+    inst = "WGasWS"
+  )
 
-tpts <- table(c(WG$n$data_id, WS$n$data_id))
-tpts[tpts > 2]
+## Boxplot ===
+
+all_data <- bind_rows(WS, WG_as_WS) %>%
+  left_join(ages, by = c("data_id" = "demo.CandID")) %>%
+  arrange(data_id, age) %>%
+  select(data_id, age, inst, everything())
+
+ggplot(all_data, aes(x = age, y = TOTAL, color = inst)) +
+  geom_point(alpha = 0.1) +
+  geom_line(aes(group = data_id), alpha = 0.1, color = "black") +
+  geom_smooth() +
+  scale_x_continuous(limits = c(NA, 36)) +
+  theme_minimal()
 
 ################################################################################
 

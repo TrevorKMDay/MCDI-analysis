@@ -68,34 +68,40 @@ apply.FA <- function(data, factors, rotate = "oblimin", n.iter = 1000) {
 score.GasS <- function(gestures, sc.understands = FALSE,
                        mapping = .data("other/sharedwords.csv")) {
 
-  sent_n <- read_csv(.data("other/s_dict.csv")) %>%
-    filter(!is.na(category)) %>%
+  sent_n <- read_csv(.data("other/s_dict.csv"), show_col_types = FALSE) %>%
+    filter(
+      !is.na(category)
+    ) %>%
     group_by(category) %>%
     dplyr::summarize(
       n_WS = n()
     )
 
-  mapping <- read_csv(mapping)
+  mapping <- read_csv(mapping, show_col_types = FALSE)
 
   syntactic.categories <- c("connecting_words", "helping_verbs",
                             "locations", "pronouns", "quantifiers",
                             "question_words", "time_words")
 
+  # New Wordbank format uses different column label
+  if ("item_kind" %in% colnames(gestures))
+    gestures <- rename(gestures, type = item_kind, definition = item_definition)
+
   # Score and calculate n, sum, perc
   scored <- gestures %>%
-    select(data_id, age, type, definition, value) %>%
+    select(data_id, type, definition, value) %>%
     filter(
       type == "word",
       definition != "in"
     ) %>%
-    left_join(mapping)%>%
+    left_join(mapping) %>%
     mutate(
       value = as.character(value),
       says  = score.produces(value,
                               produces = "produces",
                               score.understands = sc.understands)
     ) %>%
-    group_by(data_id, age, s.cat) %>%
+    group_by(data_id, s.cat) %>%
     dplyr::summarize(
       n = n(),
       sum = sum(says)
@@ -112,7 +118,7 @@ score.GasS <- function(gestures, sc.understands = FALSE,
 
   # Get lexical/syntax scores by group
   lex.syn <- scored %>%
-    group_by(data_id, age, SYNTACTIC) %>%
+    group_by(data_id, SYNTACTIC) %>%
     dplyr::summarize(
       N = sum(n_WS),
       SUM = sum(sum)
@@ -122,14 +128,12 @@ score.GasS <- function(gestures, sc.understands = FALSE,
       SYNTACTIC = if_else(SYNTACTIC, "SYNTAX", "LEXICAL")
     ) %>%
     dplyr::select(-N) %>%
-    pivot_longer(-c("data_id", "age", "SYNTACTIC")) %>%
-    pivot_wider(id_cols = c("data_id", "age"),
-                names_from = c("name", "SYNTACTIC"))
+    pivot_longer(-c(data_id, SYNTACTIC)) %>%
+    pivot_wider(id_cols = data_id, names_from = c("name", "SYNTACTIC"))
 
   scored2.n <- scored %>%
     dplyr::select(-n, -SYNTACTIC) %>%
-    pivot_wider(c(data_id, age), names_from = "category",
-                values_from = "sum") %>%
+    pivot_wider(data_id, names_from = "category", values_from = "sum") %>%
     mutate(
       connecting_words = 0,
       WORD_ENDINGS_NOUNS = 0,
@@ -137,7 +141,7 @@ score.GasS <- function(gestures, sc.understands = FALSE,
       WORD_FORMS_NOUNS = 0,
       WORD_FORMS_VERBS = 0,
       COMPLEXITY = 0,
-      TOTAL = select(., -data_id, -age) %>%
+      TOTAL = select(., -data_id) %>%
         rowSums()
     ) %>%
     left_join(dplyr::select(lex.syn, -starts_with("PERC_"))) %>%
@@ -148,7 +152,7 @@ score.GasS <- function(gestures, sc.understands = FALSE,
 
   scored2.perc <- scored %>%
     dplyr::select(-sum, -n, -SYNTACTIC) %>%
-    pivot_wider(c(data_id, age), names_from = "category",
+    pivot_wider(c(data_id), names_from = "category",
                 values_from = "perc") %>%
       mutate(
         connecting_words = 0,
@@ -189,13 +193,17 @@ score.WS <- function(sentences, include.totals = FALSE) {
                             "word_endings_nouns", "word_endings_verbs",
                             "word_forms_nouns", "word_forms_verbs")
 
+  # New Wordbank format uses different column label
+  if ("item_kind" %in% colnames(sentences))
+    sentences <- rename(sentences, type = item_kind)
+
   n_per_cat <- sentences %>%
     filter(
       data_id == data_id[1],
       type == "word"
     ) %>%
     group_by(category) %>%
-    summarize(
+    dplyr::summarize(
       n = n()
     )
 
@@ -208,7 +216,7 @@ score.WS <- function(sentences, include.totals = FALSE) {
       says     = score.produces(value),
       category = as.character(category)
     ) %>%
-    group_by(data_id, age, type, category) %>%
+    group_by(data_id, type, category) %>%
     dplyr::summarize(
       n   = n(),
       sum = sum(says),
@@ -228,7 +236,7 @@ score.WS <- function(sentences, include.totals = FALSE) {
     mutate(
       says = score.complexity(value)
     ) %>%
-    group_by(data_id, age, type) %>%
+    group_by(data_id, type) %>%
     dplyr::summarize(
       n   = n(),
       sum = sum(says)
@@ -241,7 +249,7 @@ score.WS <- function(sentences, include.totals = FALSE) {
 
   # Combine words and complexity
   scored3 <- bind_rows(scored1, scored.cx) %>%
-    arrange(data_id, age, type, category) %>%
+    arrange(data_id, type, category) %>%
     mutate(
       type = as.character(type)
     )
@@ -257,8 +265,8 @@ score.WS <- function(sentences, include.totals = FALSE) {
     filter(
       type == "word"
     ) %>%
-    group_by(data_id, age) %>%
-    summarize(
+    group_by(data_id) %>%
+    dplyr::summarize(
       n_words = sum(sum)
     ) %>%
     mutate(
@@ -269,13 +277,13 @@ score.WS <- function(sentences, include.totals = FALSE) {
     mutate(
       syntactic = category %in% syntactic.categories
     ) %>%
-    group_by(data_id, age, syntactic) %>%
+    group_by(data_id, syntactic) %>%
     dplyr::summarize(
-      N = sum(n),
-      Sum = sum(sum),
+      N    = sum(n),
+      Sum  = sum(sum),
       perc = Sum / N
     ) %>%
-    pivot_wider(c(data_id, age), names_from = "syntactic",
+    pivot_wider(data_id, names_from = "syntactic",
                 values_from = c("Sum", "perc")) %>%
     rename(
       N_SYNTAX = Sum_TRUE,
@@ -286,11 +294,11 @@ score.WS <- function(sentences, include.totals = FALSE) {
 
   # Spread raw numbers
   scored5.raw <- scored4 %>%
-    pivot_wider(c(data_id, age), names_from = "category",
+    pivot_wider(data_id, names_from = "category",
                 values_from = sum) %>%
-    dplyr::select(all_of(c("data_id", "age", tolower(categories)))) %>%
-    left_join(select(scored4.lexsym, data_id, age, starts_with("N"))) %>%
-    left_join(select(scored4.totals, data_id, age, n_words)) %>%
+    dplyr::select(all_of(c("data_id", tolower(categories)))) %>%
+    left_join(select(scored4.lexsym, data_id, starts_with("N"))) %>%
+    left_join(select(scored4.totals, data_id, n_words)) %>%
     rename(
       SYNTAX  = N_SYNTAX,
       LEXICAL = N_LEXICAL,
@@ -299,16 +307,17 @@ score.WS <- function(sentences, include.totals = FALSE) {
 
   # Spread percent
   scored5.perc <- scored4 %>%
-    pivot_wider(c(data_id, age), names_from = "category",
+    pivot_wider(data_id, names_from = "category",
                 values_from = perc) %>%
-    dplyr::select(all_of(c("data_id", "age",
-                           tolower(categories)))) %>%
-    left_join(select(scored4.lexsym, data_id, age, starts_with("P"))) %>%
-    left_join(select(scored4.totals, data_id, age, pct_words)) %>%
+    dplyr::select(all_of(c("data_id", tolower(categories)))) %>%
+    left_join(select(scored4.lexsym, data_id, starts_with("P")),
+              by = "data_id") %>%
+    left_join(select(scored4.totals, data_id, pct_words), by = "data_id") %>%
     rename(
       SYNTAX = P_SYNTAX,
       LEXICAL = P_LEXICAL,
-      TOTAL = pct_words) %>%
+      TOTAL = pct_words
+    ) %>%
     rename_with(toupper, c(starts_with("word_"), complexity))
 
   if (!include.totals) {
@@ -330,6 +339,13 @@ score.WG <- function(gestures, inventory.only = TRUE, sc.understands = FALSE,
   # sc.understands : if FALSE, treat "understands only" as the same as "doesn't
   #                   understand"
 
+  categories <- c("sounds", "animals", "vehicles", "toys", "food_drink",
+                  "clothing", "body_parts", "household", "furniture_rooms",
+                  "outside", "places", "people", "games_routines",
+                  "action_words", "descriptive_words", "time_words",
+                  "pronouns", "question_words", "locations", "quantifiers",
+                  "helping_verbs", "connecting_words")
+
   syntax.categories <- c("time_words", "descriptive_words", "pronouns",
                          "question_words", "locations", "quantifiers")
 
@@ -337,17 +353,23 @@ score.WG <- function(gestures, inventory.only = TRUE, sc.understands = FALSE,
     stop("No says_and_understands values detected, check inputs or you'll get an all-0 matrix")
   }
 
+  # New Wordbank format uses different column label
+  if ("item_kind" %in% colnames(gestures))
+    gestures <- rename(gestures, type = item_kind)
+
   if (inventory.only) {
 
     scored1 <- gestures %>%
-      filter(type == "word") %>%
+      filter(
+        type == "word"
+      ) %>%
       mutate(
         says      = score.produces(value, score.understands = sc.understands,
                                    produces = produces_value),
         category  = as.character(category),
         syntactic = category %in% syntax.categories
       ) %>%
-      group_by(data_id, age, type, category, syntactic) %>%
+      group_by(data_id, type, category, syntactic) %>%
       dplyr::summarize(
         n = n(),
         sum = sum(says),
@@ -356,13 +378,13 @@ score.WG <- function(gestures, inventory.only = TRUE, sc.understands = FALSE,
       ungroup()
 
     scored2.lexsym <- scored1 %>%
-      group_by(data_id, age, syntactic) %>%
+      group_by(data_id, syntactic) %>%
       dplyr::summarize(
         N = sum(n),
         Sum = sum(sum),
         perc = Sum / N
       ) %>%
-      pivot_wider(c(data_id, age), names_from = "syntactic",
+      pivot_wider(c(data_id), names_from = "syntactic",
                   values_from = c("Sum", "perc")) %>%
       rename(N_SYNTAX = Sum_TRUE,
              N_LEXICAL = Sum_FALSE,
@@ -370,23 +392,31 @@ score.WG <- function(gestures, inventory.only = TRUE, sc.understands = FALSE,
              P_LEXICAL = perc_FALSE)
 
     scored2.raw <- scored1 %>%
-      pivot_wider(c(data_id, age),
-                  names_from = "category", values_from = sum) %>%
-      left_join(select(scored2.lexsym, data_id, age, starts_with("N"))) %>%
-      rename(SYNTAX = N_SYNTAX,
-             LEXICAL = N_LEXICAL)
+      pivot_wider(c(data_id), names_from = "category", values_from = sum) %>%
+      left_join(select(scored2.lexsym, data_id, starts_with("N")),
+                by = "data_id") %>%
+      rename(
+        SYNTAX = N_SYNTAX,
+        LEXICAL = N_LEXICAL
+      ) %>%
+      mutate(
+        TOTAL = select(., any_of(categories)) %>%
+          rowSums()
+      )
 
     # Spread percent
     scored2.perc <- scored1 %>%
-      pivot_wider(c(data_id, age),
-                  names_from = "category", values_from = perc) %>%
-      left_join(select(scored2.lexsym, data_id, age, starts_with("P"))) %>%
-      rename(SYNTAX = P_SYNTAX,
-             LEXICAL = P_LEXICAL)
+      pivot_wider(data_id, names_from = "category", values_from = perc) %>%
+      left_join(select(scored2.lexsym, data_id, starts_with("P"))) %>%
+      rename(
+        SYNTAX = P_SYNTAX,
+        LEXICAL = P_LEXICAL,
+      ) %>%
+      mutate(
+        TOTAL = scored2.raw$TOTAL / 396
+      )
 
-    scored2 <- list(scored2.raw, scored2.perc)
-    names(scored2) <- c("n", "p")
-
+    scored2 <- list(n = scored2.raw, p = scored2.perc)
     return(scored2)
 
   } else {

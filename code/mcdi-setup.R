@@ -66,7 +66,7 @@ read_data <- function(filename) {
   if (grepl(".rds$", ignore.case = TRUE, x = src)) {
     x <- readRDS(src)
   } else if (grepl(".csv$", x = src)) {
-    x <- read_csv(src)
+    x <- read_csv(src, show_col_types = FALSE)
   }
 
   return(x)

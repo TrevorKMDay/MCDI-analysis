@@ -16,29 +16,61 @@ source("00-LCA_functions.R")
 
 # Load data ####
 
+BEd <- read_data("LCA/BplusE_demographics.rds")
+
+BEd %>%
+  filter(
+    proj == "EIRLI"
+  ) %>%
+  select(ends_with("college")) %>%
+  group_by(mother_college, father_college) %>%
+  summarize(
+    n = n()
+  ) %>%
+  mutate(
+    total = sum(n),
+    p = round(100 * n / nrow(BEd))
+  )
+
 BE <- read_data("LCA/BplusE.rds") %>%
   mutate(
     empty_prior = 0
   ) %>%
-  ungroup()
+  ungroup() %>%
+  left_join(
+    select(BEd, proj, data_id, sex, mother_college)
+  ) %>%
+  mutate(
+    male = sex == "Male",
+    prior = case_when(
+      status == "lg_dx" ~ 1,
+      status == "no_lg_dx" ~ 2,
+      TRUE ~ 0
+    ),
+    BCP = proj == "BCP"
+  ) %>%
+  select(-sex)
 
-BEd <- read_data("LCA/BplusE_demographics.rds")
-
-group_size <- BE %>%
-  select(proj, status, data_id) %>%
+# TODO: Missing demographics for n=98 BCP participants
+BE_nodx <- BE %>%
   filter(
-    proj == "EIRLI"
+    status %in% c("BCP", "no_lg_dx", "no_follow_up"),
+    exact_age > 15,
+    exact_age < 38
   ) %>%
-  group_by(status) %>%
-  summarize(
-    n = n()
-  ) %>%
-  pull(n)
+  mutate(
+    BCP = proj == "BCP"
+  )
 
-dx_rate <- group_size[1] / (group_size[1] + group_size[3])
+BE_nodx %>%
+  group_by(proj) %>%
+  summarize(
+    age_min = min(exact_age),
+    age_max = max(exact_age)
+  )
 
 # Maximum is NOT 680 since EIRLI is included
-max_inv <- max(BE$inventory_total)
+max_inv <- max(BE$eirli_total)
 
 # WS 1A inventory category labels
 WS_1A <- read_data("other/s_dict.csv") %>%
@@ -48,6 +80,16 @@ WS_1A <- read_data("other/s_dict.csv") %>%
 WS_II <- c("WORD_FORMS_NOUNS", "WORD_FORMS_VERBS", "WORD_ENDINGS_NOUNS",
            "WORD_ENDINGS_VERBS", "COMPLEXITY")
 
+
+# lm
+
+lm(eirli_total ~ exact_age + I(exact_age^2) + I(exact_age^3) + proj,
+   data = BE_nodx) %>%
+  summary()
+
+ggplot(BE_nodx, aes(x = exact_age, y = eirli_total, color = proj)) +
+  geom_point() +
+  geom_smooth()
 
 # LCA: Part IA ####
 
@@ -60,208 +102,148 @@ set.seed(55455)
 
 # TO DO: Grid searches
 
-lca_IA_ng1 <- lcmm(inventory_total ~ ageC,
-                   data     = BE,
-                   subject  = "data_id_num",
-                   ng       = 1,
-                   link     = "3-manual-splines",
-                   intnodes = max_inv / exp(1),
-                   B        = rep(1, 6),
-                   prior    = "empty_prior")
+max_inv_over_e <- max_inv / exp(1)
 
-lca_1A_ng2_6 <- lapply(2:6, function(x)
-                        lcmm(inventory_total ~ ageC,
-                             data     = BE,
+lca_IA_ng1_ageonly <- lcmm(eirli_total ~ exact_age,
+                           data     = BE_nodx,
+                           subject  = "data_id_num",
+                           ng       = 1,
+                           link     = "3-manual-splines",
+                           intnodes = max_inv_over_e,
+                           prior    = "empty_prior")
+
+lca_IA_ng1_agemale <- lcmm(eirli_total ~ exact_age + male,
+                           data     = BE_nodx,
+                           subject  = "data_id_num",
+                           ng       = 1,
+                           link     = "3-manual-splines",
+                           intnodes = max_inv_over_e,
+                           prior    = "empty_prior")
+
+lca_IA_ng1_agemaleBCP <- lcmm(eirli_total ~ exact_age + male + BCP,
+                           data     = BE_nodx,
+                           subject  = "data_id_num",
+                           ng       = 1,
+                           link     = "3-manual-splines",
+                           intnodes = max_inv_over_e,
+                           prior    = "empty_prior")
+
+lca_IA_ng1_agemalemed <- lcmm(eirli_total ~ exact_age + male + mother_college,
+                               data     = BE_nodx,
+                               subject  = "data_id_num",
+                               ng       = 1,
+                               link     = "3-manual-splines",
+                               intnodes = max_inv_over_e,
+                               prior    = "empty_prior")
+
+ng1_models <- list(lca_IA_ng1_ageonly, lca_IA_ng1_agemale, lca_IA_ng1_agemaleBCP,
+                   lca_IA_ng1_agemalemed)
+
+ng1_fitstats <- get_fit_stats(list_of_models = ng1_models)
+plot_fit_stats(ng1_fitstats)
+
+lca_1A_ng2_6_age <- lapply(2:6, function(x)
+                              lcmm(eirli_total ~ exact_age,
+                                   data     = BE_nodx,
+                                   subject  = "data_id_num",
+                                   ng       = x,
+                                   mixture  = ~exact_age,
+                                   link     = "3-manual-splines",
+                                   intnodes = max_inv_over_e,
+                                   B        = lca_IA_ng1_ageonly,
+                                   prior    = "empty_prior",
+                                   nproc    = 6)
+                            )
+
+lca_1A_ng2_6_agemale <- lapply(2:6, function(x)
+                        lcmm(eirli_total ~ exact_age + male,
+                             data     = BE_nodx,
                              subject  = "data_id_num",
                              ng       = x,
-                             mixture  = ~ageC,
+                             mixture  = ~exact_age + male,
                              link     = "3-manual-splines",
-                             intnodes = max_inv / exp(1),
-                             B        = lca_IA_ng1,
-                             prior    = "empty_prior"))
+                             intnodes = max_inv_over_e,
+                             B        = lca_IA_ng1_agemale,
+                             prior    = "empty_prior",
+                             nproc    = 6)
+                       )
+
+lca_1A_ng2_6_agemaleBCP <- lapply(2:6, function(x)
+                                lcmm(eirli_total ~ exact_age + male + BCP,
+                                     data     = BE_nodx,
+                                     subject  = "data_id_num",
+                                     ng       = x,
+                                     mixture  = ~exact_age + male + BCP,
+                                     link     = "3-manual-splines",
+                                     intnodes = max_inv_over_e,
+                                     B        = lca_IA_ng1_agemaleBCP,
+                                     prior    = "empty_prior",
+                                     nproc    = 6)
+                              )
 
 # Extract the seven fit stats (AIC, BIC, CAIC, CLC, ICL.BIC, ss.BIC, NEC)
 # from the one-group model and the list of higher-order models for plotting
-fitstats_IA <- get_fit_stats(lca_IA_ng1, lca_1A_ng2_6)
+fitstats_IA_ageonly <- get_fit_stats(lca_IA_ng1_ageonly, lca_1A_ng2_6_age)
+fitstats_IA_agemale <- get_fit_stats(lca_IA_ng1_agemale, lca_1A_ng2_6_agemale)
+fitstats_IA_agemaleBCP <- get_fit_stats(lca_IA_ng1_agemaleBCP,
+                                        lca_1A_ng2_6_agemaleBCP)
 
-dir.create("plots/modeling/", showWarnings = FALSE, recursive = TRUE)
+plot_fit_stats(fitstats_IA_ageonly, title = "Age only")
+plot_fit_stats(fitstats_IA_agemale, title = "Age + male")
+plot_fit_stats(fitstats_IA_agemaleBCP, title = "Age + male + BCP")
 
-png("plots/modeling/fitstats_IA.png", width = 6.91, height = 3.28,
-    units = "in", res = 150)
+lca_ng_pprob <- lca_1A_ng2_6[[3]]$pprob
 
-plot_fit_stats(fitstats_IA)
+BE_ng3 <- left_join(BE_nodx, lca_ng_pprob, by = "data_id_num")
 
-dev.off()
+ggplot(BE_ng3, aes(x = exact_age, y = eirli_total, color = proj)) +
+  geom_line(aes(group = data_id), alpha = 0.1) +
+  geom_smooth() +
+  theme_minimal()
 
-## Unsupervised two-group LCA ####
+ggplot(BE_ng3, aes(x = exact_age, y = eirli_total, color = as.factor(class))) +
+  geom_line(aes(group = data_id), alpha = 0.1) +
+  geom_smooth(aes(linetype = proj)) +
+  theme_minimal()
 
-# Leave BE object alone, BE2 is going to start collecting LCA values
-BE2 <- BE %>%
-  select(-any_of(WS_1A), -COMPLEXITY) %>%
-  left_join(lca_1A_ng2_6[[1]]$pprob) %>%
-  rename(
-    u2g_class = class
-  ) %>%
-  mutate(
-    u2g_prob = if_else(u2g_class == 1, prob1, prob2)
-  ) %>%
-  select(-starts_with("prob")) %>%
-  left_join(lca_1A_ng2_6[[2]]$pprob) %>%
-  rename(
-    u3g_class = class
-  ) %>%
-  mutate(
-    u3g_prob = if_else(u3g_class == 1, prob1,
-                       if_else(u3g_class == 2, prob2, prob3))
-  ) %>%
-  select(-starts_with("prob"))
+table(BE_ng3$proj, BE_ng3$class) / rep(table(BE_ng3$proj), 4)
 
-status_by_u2g <- BE2 %>%
-  select(data_id, status, u2g_class) %>%
-  distinct() %>%
-  group_by(status) %>%
-  mutate(
-    total_status = n()
-  ) %>%
-  group_by(status, total_status, u2g_class) %>%
-  summarize(
-    n = n()
-  ) %>%
-  mutate(
-    u2g_class = as.factor(u2g_class),
-    p = n / total_status,
-    label = paste0(n, " (", round(p * 100), "%)")
-  )
+# DX groups ====
 
-status_by_u3g <- BE2 %>%
-  select(data_id, status, u3g_class) %>%
-  distinct() %>%
-  group_by(status) %>%
-  mutate(
-    total_status = n()
-  ) %>%
-  group_by(status, total_status, u3g_class) %>%
-  summarize(
-    n = n()
-  ) %>%
-  mutate(
-    u3g_class = as.factor(u3g_class),
-    p = n / total_status,
-    label = paste0(n, " (", round(p * 100), "%)")
-  )
+lca_dx <- lcmm(eirli_total ~ exact_age + male + BCP,
+               data     = BE,
+               subject  = "data_id_num",
+               ng       = 2,
+               mixture  = ~exact_age + male + BCP,
+               B        = rep(1, 13),
+               link     = "3-manual-splines",
+               intnodes = max_inv_over_e,
+               prior    = "prior")
 
-u2g_ass <- calc_ass(BE2, column = "u2g_class", dx_class = 2)
-u3g_ass <- calc_ass(BE2, column = "u3g_class", dx_class = 3)
+# Muli-LCMM
 
-u2g_tile <- ggplot(status_by_u2g, aes(x = u2g_class, y = status, fill = p)) +
-  geom_tile() +
-  geom_text(aes(label = label)) +
-  scale_fill_viridis(limits = 0:1) +
-  scale_y_discrete(labels = c("BCP", "E Dx+", "E Dx0", "E Dx-")) +
-  theme_bw() +
-  labs(x = "Class", y = "Status", caption = ass2str(u2g_ass))
+lex_syn_nodes <- c(max(BE_nodx$lex_total), max(BE_nodx$syn_total)) / exp(1)
 
-u3g_tile <- ggplot(status_by_u3g, aes(x = u3g_class, y = status, fill = p)) +
-  geom_tile() +
-  geom_text(aes(label = label)) +
-  scale_fill_viridis(limits = 0:1) +
-  scale_y_discrete(labels = c("BCP", "E Dx+", "E Dx0", "E Dx-")) +
-  theme_bw() +
-  labs(x = "Class", y = "Status", caption = ass2str(u3g_ass))
+lca_mult <- multlcmm(lex_total + syn_total ~ 1 + exact_age,
+                     data     = as.data.frame(BE_nodx),
+                     subject  = "data_id_num",
+                     random   = ~1 + exact_age,
+                     ng       = 1,
+                     link     = "3-manual-splines",
+                     intnodes = lex_syn_nodes,
+                     prior    = "empty_prior")
 
-dir.create("plots/lca", showWarnings = FALSE, recursive = TRUE)
+lca_mult_26 <- lapply(2:6, function(ng)
+  multlcmm(lex_total + syn_total ~ 1 + exact_age,
+           data     = as.data.frame(BE_nodx),
+           subject  = "data_id_num",
+           mixture  = ~1 + exact_age,
+           random   = ~1 + exact_age,
+           ng       = ng,
+           link     = "3-manual-splines",
+           intnodes = lex_syn_nodes,
+           B        = lca_mult,
+           prior    = "empty_prior"))
 
-png("plots/lca/1_unsupervised_tileplots.png", width = 9, height = 4,
-    units = "in", res = 300)
-
-u2g_tile + u3g_tile
-
-dev.off()
-
-# Supervised 2-group analysis ####
-
-lca_IA_ng1s <- lcmm(inventory_total ~ ageC,
-                    data     = BE,
-                    subject  = "data_id_num",
-                    ng       = 1,
-                    link     = "3-manual-splines",
-                    intnodes = max_inv / exp(1))
-
-lca_IA_ng2s <- lcmm(inventory_total ~ ageC,
-                      data     = BE,
-                      subject  = "data_id_num",
-                      ng       = 2,
-                      mixture  = ~ ageC,
-                      link     = "3-manual-splines",
-                      B        = lca_IA_ng1s,
-                      prior    = "dx_prior",
-                      intnodes = max_inv / exp(1))
-
-save_data(lca_IA_ng2s, "results/BplusE_dxsupervised_LCA-2.rds")
-
-BE3 <- BE2 %>%
-  left_join(lca_IA_ng2s$pprob) %>%
-  rename(
-    s2g_class = class,
-    s2g_prob1 = prob1,
-    s2g_prob2 = prob2
-  )
-
-save_data(BE3, "LCA/raw_LCA_results.rds")
-
-status_by_s2g <- BE3 %>%
-  select(data_id, status, s2g_class) %>%
-  distinct() %>%
-  group_by(status) %>%
-  mutate(
-    total_status = n()
-  ) %>%
-  group_by(status, total_status, s2g_class) %>%
-  summarize(
-    n = n()
-  ) %>%
-  mutate(
-    s2g_class = as.factor(s2g_class),
-    p = n / total_status,
-    label = paste0(n, " (", round(p * 100), "%)")
-  )
-
-png("plots/lca/2_supervised_tileplot.png", width = 5, height = 4,
-    units = "in", res = 300)
-
-ggplot(status_by_s2g, aes(x = s2g_class, y = status, fill = p)) +
-  geom_tile() +
-  geom_text(aes(label = label)) +
-  scale_fill_viridis(limits = 0:1) +
-  scale_y_discrete(labels = c("BCP", "E Dx+", "E Dx0", "E Dx-")) +
-  theme_bw() +
-  labs(x = "Class", y = "Status", caption = ass2str(u3g_ass))
-
-dev.off()
-
-top_16p_BCP <- quantile(BE3$s2g_prob2[BE3$status == "BCP"],
-                        probs = 1 - dx_rate)
-
-
-s2g_assn <- BE3 %>%
-  filter(
-    status %in% c("BCP", "no_follow_up")
-  ) %>%
-  select(status, data_id, s2g_prob2) %>%
-  distinct()
-
-sum(s2g_assn$s2g_prob2[s2g_assn$status == "BCP"] >= top_16p_BCP)
-
-png("plots/lca/2b_bcp_supervised_prob.png", width = 4, height = 2,
-    units = "in", res = 300)
-
-ggplot(s2g_assn, aes(x = s2g_prob2, fill = status)) +
-  geom_density(alpha = 0.5) +
-  geom_vline(xintercept = top_16p_BCP) +
-  theme_bw() +
-  theme(legend.position = "bottom") +
-  labs(x = "Dx group assn. prob.")
-
-dev.off()
-
-
+multlcmm_fs <- get_fit_stats(lca_mult, lca_mult_26)
+plot_fit_stats(multlcmm_fs)

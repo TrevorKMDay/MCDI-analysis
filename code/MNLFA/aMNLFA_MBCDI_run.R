@@ -1,4 +1,4 @@
-path <- "/Research/MCDI/MCDI-analysis/code/MNLFA"
+aMNpath <- "/Research/MCDI/MCDI-analysis/code/MNLFA"
 locs <- c("G:/My Drive", "I:", "/Volumes")
 for (i in locs)
   if (dir.exists(paste0(i, path)))

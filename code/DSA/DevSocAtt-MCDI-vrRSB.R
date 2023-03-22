@@ -69,9 +69,7 @@ dsa_demo <- read_csv(.data("DSA/DevSocAtt-demo.csv")) %>%
   left_join(select(DSA, Identifiers, CandID)) %>%
   select(CandID, starts_with("demo"))
 
-
-
-## vrRSB #######################################################################
+# vrRSB ====
 
 DSA %>%
   select(starts_with("vrRSB")) %>%
@@ -120,9 +118,7 @@ dsa_vrrsb_flceil <- dsa_vrrsb %>%
     n_gt90 = sum(VRS > 32 * .9)
   )
 
-################################################################################
-
-## MCDI ########################################################################
+# MCDI ====
 
 dsa_mcdi <- DSA %>%
   select(CandID, demographics.Sex, starts_with("mcdi."))

@@ -148,15 +148,19 @@ format.sentences <- function(sentences, s_dict_file) {
 format.gestures <- function(gestures, g_dict_file, inventory.only = TRUE) {
 
   words <- read_csv(g_dict_file) %>%
-    filter(type == "word")
+    filter(
+      type == "word"
+    )
 
   gest <- gestures %>%
-    select(data_id, age, sex,
+    select(data_id, gest.Candidate_Age, sex,
            gest.Administration,
            starts_with("gest.I")) %>%
-    filter(gest.Administration == "All") %>%
+    filter(
+      gest.Administration == "All"
+    ) %>%
     select(-gest.Administration) %>%
-    pivot_longer(-c(data_id, age, sex)) %>%
+    pivot_longer(-c(data_id, gest.Candidate_Age, sex)) %>%
     filter(
       !grepl("score", name),
       !grepl("status", name),
@@ -171,17 +175,24 @@ format.gestures <- function(gestures, g_dict_file, inventory.only = TRUE) {
 
   # Part I.D is the inventory
   gest.ID <- gest %>%
-    filter(part == "I", section == "D") %>%
+    filter(
+      part == "I",
+      section == "D"
+    ) %>%
     mutate(
       type = "word",
       item_id    = rep(words$item_id,    length.out = nrow(.)),
       category   = rep(words$category,   length.out = nrow(.)),
       definition = rep(words$definition, length.out = nrow(.))
     ) %>%
-    select(data_id, age, sex, value, item_id, type, category, definition) %>%
+    select(data_id, gest.Candidate_Age, sex, value, item_id, type, category,
+           definition) %>%
     mutate(
       value = replace(value, value == "not_answered", NA),
       value = replace(value, value == "says_and_understands", "produces")
+    ) %>%
+    rename(
+      age = gest.Candidate_Age
     )
 
   # If inventory only, return just section I.D,

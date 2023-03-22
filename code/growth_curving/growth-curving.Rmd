@@ -45,6 +45,8 @@ library(educate)
 
 select <- dplyr::select
 
+source("growth-curve-functions.R")
+
 ```
 
 Load the first person with five points
@@ -216,7 +218,7 @@ Through trial and error, I identified a form of the Gompertz equation that
 works well with `nls` and allows $A$ and $W_0$ as parameters. As a result, only
 $k_g$ has to converge for this model.
 
-For $A$, we use $680+1$, as otherwie, a kid who never learns the 680th word
+For $A$, we use $680+1$, as otherwise, a kid who never learns the 680th word
 on the MCDI would be modeled. Although, as a reminder, we are most interested
 in the shape of the first two-thirds of the model, since the greater asymptote
 is an artifact of the instrument.
@@ -689,12 +691,16 @@ three_or_more <- table(lexsyn$data_id)
 ID3 <- names(three_or_more)[three_or_more >= 3]
 
 lexsyn <- lexsyn %>%
-  filter(data_id %in% ID3) %>%
+  filter(
+    data_id %in% ID3
+  ) %>%
   arrange(data_id, age) %>%
-  select(-lex, -syn) %>%
+  select(-lex, -syn, -SUM) %>%
   group_by(data_id, age) %>%
   pivot_longer(-c(data_id, age)) %>%
-  filter(age > 0)
+  filter(
+    age > 0
+  )
 
 test <- filter(lexsyn, data_id == "116056")
 
@@ -850,25 +856,51 @@ syn.fits <- lapply(LS.vals$data_id,
 
 # Get values
 LS.vals <- LS.vals %>%
+  rowwise() %>%
   mutate(
     lex = sapply(lex.fits, coef),
     lex.se = sapply(lex.fits, function(x) coef(summary(x))[1, 2]),
     syn = sapply(syn.fits, function(x) ifelse(class(x) != "nls", NA, coef(x))),
     syn.se = sapply(syn.fits, 
                     function(x) ifelse(class(x) != "nls", NA,
-                                       coef(summary(x))[1, 2]))
+                                       coef(summary(x))[1, 2])),
+    
+    lex_age = solve.gomp2(y = 681 / exp(1), k_g = lex),
+    syn_age = solve.gomp2(y = 681 / exp(1), k_g = syn),
+    age_diff = syn_age - lex_age
   )
 
 LS.vals %>%
-  select(data_id, lex.m, syn.m) %>%
+  select(data_id, lex, syn) %>%
   pivot_longer(-data_id) %>%
   ggplot(aes(value, fill = name)) +
     geom_histogram(position = "dodge") +
     scale_y_continuous(breaks = 1:22) +
     theme_bw()
 
-ggplot(LS.vals, aes(x = lex.m, y = syn.m)) +
-  geom_point()
+ggplot(LS.vals, aes(x = age_diff)) +
+  geom_density() +
+  theme_bw()
+
+mean(LS.vals$age_diff, na.rm = TRUE)
+sd(LS.vals$age_diff, na.rm = TRUE)
+
+ggplot(LS.vals, aes(x = lex, y = syn)) +
+  geom_point() +
+  geom_smooth() +
+  geom_smooth(method = "lm", color = "red") +
+  theme_bw()
+
+ggplot(LS.vals, aes(x = lex_age, y = age_diff)) +
+  geom_point() +
+  geom_smooth() +
+  geom_smooth(method = "lm", color = "red") +
+  theme_bw()
+
+cor(LS.vals[, c("lex", "syn")], use = "c")
+cor(LS.vals[, c("lex_age", "syn_age")], use = "c")
+cor(LS.vals[, c("lex_age", "age_diff")], use = "c")
+cor(LS.vals[, c("syn_age", "age_diff")], use = "c")
 
 # Value at Wi 
 W_i.1 <- 1 / exp(1)
