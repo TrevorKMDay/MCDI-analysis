@@ -1,7 +1,3 @@
-WS_1A <- read_data("other/s_dict.csv") %>%
-  pull(category) %>%
-  unique()
-
 get_fit_stats <- function(g1_model = NA, list_of_models, extra = NULL) {
 
   if (length(g1_model) > 0) {

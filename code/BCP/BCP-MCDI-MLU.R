@@ -19,7 +19,7 @@ select <- dplyr::select
 
 source("../mcdi-setup.R")
 
-date <- "200609"
+date <- "220802"
 
 # Load data
 
@@ -31,8 +31,8 @@ BCP_WS_scored <- read_data(paste0("BCP/BCP_WS_scored-", date, ".rds"))[[1]] %>%
       household + outside + people + places + toys + vehicles + sounds,
 
     SYN = pronouns + quantifiers + question_words + time_words +
-      WORD_ENDINGS_NOUNS + WORD_ENDINGS_VERBS + WORD_FORMS_NOUNS +
-      WORD_FORMS_VERBS + COMPLEXITY + connecting_words + locations,
+      word_endings_nouns + word_endings_verbs + word_forms_nouns +
+      word_forms_verbs + complexity + connecting_words + locations,
 
     partI = action_words + animals + body_parts + clothing + descriptive_words +
       food_drink + furniture_rooms + games_routines + helping_verbs +
@@ -40,13 +40,13 @@ BCP_WS_scored <- read_data(paste0("BCP/BCP_WS_scored-", date, ".rds"))[[1]] %>%
       pronouns + quantifiers + question_words + time_words + connecting_words +
       locations,
 
-    partII = WORD_ENDINGS_NOUNS + WORD_ENDINGS_VERBS + WORD_FORMS_NOUNS +
-      WORD_FORMS_VERBS + COMPLEXITY
+    partII = word_endings_nouns + word_endings_verbs + word_forms_nouns +
+      word_forms_verbs + complexity
   )
 
 # Read demographics file (just mom ed)
-BCP.demographics <- read_data(paste0("BCP/BCP-demographics-", date, ".csv")) %>%
-  select(CandID, sex, educ_momed_n)
+# BCP.demographics <- read_data(paste0("BCP/BCP-demographics-", date, ".csv")) %>%
+#   select(CandID, sex, educ_momed_n)
 
 BCP_MLU <- read_data(paste0("BCP/BCP_WS_MLU3-", date, ".rds"))
 
