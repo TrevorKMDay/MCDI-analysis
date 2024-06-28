@@ -1,0 +1,348 @@
+---
+title: 'CDI: Paper vs. digital?'
+author: "Trevor K.M. Day"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
+
+library(tidyverse)
+library(lubridate)
+library(wordbankr)
+
+source("mcdi-setup.R")
+
+```
+
+# Introduction
+
+```{r load_data, include=FALSE}
+
+# Wordbank
+
+ws_dict <- read_data("other/s_dict.csv")
+
+wb_wg <- read_data("Wordbank/WG_as_WS-scored.rds")$n %>%
+  mutate(
+    inst = "WGasWS"
+  )
+wb_ws <- read_data("Wordbank/WS-scored.rds")$n %>%
+  mutate(
+    inst = "WS",
+    TOTAL = select(., all_of(unique(ws_dict$category))) %>%
+      rowSums()
+  )
+
+wb <- bind_rows(wb_wg, wb_ws) %>%
+  mutate(
+    project = "WB"
+  )
+
+rm(wb_wg, wb_ws)
+
+# BCP
+
+bcp_wg <- read_data("BCP/BCP_WG_asWS-220802.rds")
+bcp_ws <- read_data("BCP/BCP_WS_scored-220802.rds")$n
+
+bcp <- bind_rows(bcp_wg, bcp_ws) %>%
+  mutate(
+    project = "BCP"
+  )
+
+rm(bcp_wg, bcp_ws)
+
+
+```
+
+The problem is we note that BCP has a depressed trajectory that demographics
+cannot explain:
+
+```{r wb_vs_bcp, echo=FALSE, fig.height=4, message=FALSE}
+
+ggplot(NULL) + 
+  geom_point(data = wb, aes(x = jitter(age), y = TOTAL), alpha = 0.05) +
+  geom_point(data = bcp, aes(x = age, y = TOTAL), alpha = .75, 
+             color = "firebrick") +
+  geom_smooth(data = wb, aes(x = age, y = TOTAL)) +
+  geom_smooth(data = bcp, aes(x = age, y = TOTAL), color = "firebrick",
+              fill = "red") +
+  theme_minimal() +
+  labs(x = "Age (mo.)", y = "CDI inventory total", 
+       title = "Wordbank/BCP trajectories",
+       caption = "Red: BCP; blue/black: Wordbank")
+
+```
+
+I suggest that the radio-button Qualtrics method of selecting words leads to 
+greater fatigue on the (very long) CDI. 
+
+# Paper vs. pencil
+
+To test this, we examined whether there was a difference in CDI scores for 
+LR participants in IBIS1 (paper) and IBIS2 (digital). IBIS2 only completed
+the 12-month and 24-month visit. 
+
+## IBIS
+
+```{r load_ibis_data, echo=FALSE, fig.height=4, fig.width=5}
+
+ibis <- read_data("IBIS/agcc_ibis_mcdi.csv") %>%
+  pivot_longer(-Identifiers) %>%
+  separate(name, into = c("visit", "name"), sep = " ") %>%
+  separate(name, into = c("instrument", "name"), sep = ",")
+
+ibis_demo <- ibis %>%
+  filter(
+    instrument == "demographics",
+    name %in% c("Project", "Risk", "Sex")
+  ) %>%
+  pivot_wider(names_from = name) %>%
+  filter(
+    # Remove missing and Fragile X
+    str_detect(Project, "IBIS[12]"),
+  ) %>%
+  select(-visit) %>%
+  distinct()
+
+table(ibis_demo$Project, ibis_demo$Risk)
+
+ibis_cdi_all <- ibis %>%
+  filter(
+    instrument == "macarthur_words_gestures",
+  ) %>%
+  pivot_wider(names_from = name) %>%
+  filter(
+    Administration == "All",
+    Identifiers %in% ibis_demo$Identifiers,
+  ) %>%
+  select(-ends_with("percentile")) %>%
+  left_join(ibis_demo, by = "Identifiers") %>%
+  mutate(
+    across(ends_with("number"), as.numeric),
+    age = as.numeric(Candidate_Age)
+  ) %>%
+  select(-starts_with("instrument"))
+
+ibis_cdi_12mo <- ibis_cdi_all %>%
+  filter(
+    visit == "V12"
+  )
+
+ggplot(ibis_cdi_12mo, aes(x = Risk, y = words_produced_number, fill = Project)) +
+  geom_boxplot() +
+  scale_y_continuous(limits = c(0, 25)) +
+  theme_minimal() +
+  labs(x = "Risk status", y = "Words produced (count)",
+       title = "IBIS 12mo visit", 
+       caption = "Outliers > 25 words omitted")
+
+```
+
+I'm not going to run a *t*-test on 0-10 words.
+
+
+```{r ibis_24mo, echo=FALSE, fig.height=4, fig.width=5}
+
+ibis_cdi_24mo <- ibis_cdi_all %>%
+  filter(
+    visit == "V24",
+    # There are some participants with very low scores older than 30 months
+    # I am removing; in both HR and LR
+    age < 30
+  )
+
+ggplot(ibis_cdi_24mo, aes(x = Risk, y = words_produced_number, fill = Project)) +
+  geom_boxplot(notch = TRUE) +
+  scale_y_continuous(limits = c(0, NA)) +
+  theme_minimal() +
+  labs(x = "Risk status", y = "Words produced (count)",
+       title = "IBIS 24mo visit")
+
+
+```
+
+As you can see, there is *not* lower reported scores in IBIS2, but due to the 
+variance in age even at the "24-month" visit, I regressed words produced on age,
+risk, and project
+
+```{r ibis_24mo_LR_lm, echo=TRUE}
+
+table(ibis_cdi_24mo$Risk, ibis_cdi_24mo$Project)
+
+lm(words_produced_number ~ age + Risk*Project, data = ibis_cdi_24mo) %>%
+  summary()
+
+```
+
+
+### All data so far
+
+Here is IBIS data overlaid on the Wordbank and BCP data; with the caveat
+that IBIS seems to have collected WG at all ages (with a ceiling of about 400 
+words), rather than 680.
+
+```{r wb_bcp_ibis}
+
+ibis_cdi_24mo_LR <- ibis_cdi_24mo %>%
+  filter(
+    Risk == "LR",
+    age < 30
+  )
+
+ggplot(NULL) + 
+  geom_point(data = wb, aes(x = jitter(age), y = TOTAL), alpha = 0.05) +
+  geom_point(data = bcp, aes(x = age, y = TOTAL), alpha = .75, 
+             color = "firebrick") +
+  geom_point(data = ibis_cdi_24mo_LR, 
+             aes(x = age, y = words_produced_number, fill = Project),
+             shape = 21) +
+  scale_color_manual(values = c("green", "darkgreen")) +
+  scale_fill_manual(values = c("green", "darkgreen")) +
+  geom_smooth(data = wb, aes(x = age, y = TOTAL)) +
+  geom_smooth(data = bcp, aes(x = age, y = TOTAL), color = "firebrick",
+              fill = "red") +
+  geom_smooth(data = ibis_cdi_24mo_LR, 
+              aes(x = age, y = words_produced_number, color = Project),
+              method = "lm")+
+  scale_x_continuous(limits = c(18, NA)) +
+  theme_minimal() +
+  labs(x = "Age (mo.)", y = "CDI inventory total", 
+       title = "Wordbank/BCP/IBIS trajectories",
+       caption = "Red: BCP; blue/black: Wordbank; Green: IBIS LR")
+
+```
+
+## Phenoscreening
+
+```{r load_data_phe}
+
+phe_wg <- read_data("ELab/mcdi_loris_data_WG.csv") %>%
+  filter(
+    Visit_label == "pheSurvey1"
+  ) %>%
+  select(CandID, Sex, Candidate_Age, ends_with("_number"))
+
+phe_ws <- read_data("ELab/mcdi_loris_data_WS.csv") %>%
+  filter(
+    str_detect(Visit_label, "^phe")
+  ) %>%
+  select(CandID, Sex, Candidate_Age, ends_with("_number")) %>%
+  mutate(
+    across(ends_with("number"), as.numeric)
+  )
+
+phe <- bind_rows(phe_wg, phe_ws) %>%
+  rename(
+    age = Candidate_Age
+  ) %>%
+  filter(
+    # One with age ~10 months; mistake?
+    age > 15
+  )
+
+ggplot(phe, aes(x = age, y = words_produced_number)) +
+  geom_point() +
+  geom_smooth() +
+  theme_minimal() +
+  coord_cartesian(ylim = c(0, 680)) +
+  labs(x = "Age (mo.)", y = "CDI inventory total")
+
+```
+
+### All data so far
+
+In this plot, I am excluding IBIS because it was using WG in the WS range
+
+```{r wb_bcp_phe}
+
+ggplot(NULL) + 
+  geom_point(data = wb, aes(x = jitter(age), y = TOTAL), alpha = 0.05) +
+  geom_point(data = bcp, aes(x = age, y = TOTAL),  
+             color = "firebrick", alpha = 0.5) +
+  geom_point(data = phe, aes(x = age, y = words_produced_number),
+             color = "purple4", alpha = 0.5) +
+  geom_smooth(data = wb, aes(x = age, y = TOTAL)) +
+  geom_smooth(data = bcp, aes(x = age, y = TOTAL), color = "firebrick",
+              fill = "red") +
+  geom_smooth(data = phe, aes(x = age, y = words_produced_number),
+              color = "purple4", fill = "purple3") +
+  scale_x_continuous(limits = c(17, NA)) +
+  coord_cartesian(ylim = c(0, 680)) +
+  theme_minimal() +
+  labs(x = "Age (mo.)", y = "CDI inventory total", 
+       title = "Wordbank/BCP/IBIS trajectories",
+       caption = "Red: BCP; blue/black: Wordbank; purple: Phenoscreening")
+```
+
+# Wordbank by origin
+
+```{r wordbank}
+
+ws_admins <- get_administration_data("English (American)", "WS")
+wg_admins <- get_administration_data("English (American)", "WG")
+
+admins <- bind_rows(ws_admins, wg_admins) %>%
+  select(data_id, form, age, date_of_test, dataset_name, production) %>%
+  mutate(
+    data_id = as.character(data_id),
+    date_of_test = as_date(date_of_test),
+    year_of_test = year(date_of_test),
+    old = year_of_test < 2010,
+    
+    old = if_else(!is.na(old), old,
+                    case_when(
+                      # Between 2012-2015
+                      dataset_name == "Edgin" ~ FALSE,
+                      # Published 2017, no dates of collection in paper
+                      dataset_name == "Hoff" ~ FALSE,
+                      # Published 2016, no dates of collection in paper
+                      dataset_name == "Poulin-Dubois" ~ FALSE
+                   ))
+    
+  ) %>%
+  filter(
+    !is.na(old)
+  )
+
+```
+
+Below is table of contributors, and the origin of the data by date, older than
+2010 or newer.
+
+```{r old}
+
+table(admins$dataset_name, admins$old)
+
+```
+
+The following datasets do not mention the mode of delivery:  Byers (68, no 
+paper cited), Hoff (441), Edgin (435), Frank (37, no paper cited), 
+Poulin-Dubois (140, maybe on paper?), Smith (1419, no paper cited).
+
+```{r old_plots}
+
+ggplot(admins, aes(year_of_test)) +
+  geom_histogram(binwidth = 1) +
+  theme_bw() +
+  theme_minimal()
+
+ggplot(filter(admins, form == "WS"), 
+       aes(x = jitter(age), y = production, color = old)) +
+  geom_point(alpha = 0.1) +
+  geom_point(data = filter(bcp, !is.na(complexity)), 
+             aes(x = age, y = TOTAL), color = "red") +
+  geom_smooth(data = filter(bcp, !is.na(complexity)), 
+              aes(x = age, y = TOTAL), color = "red", method = "lm") +
+  geom_smooth(method = "lm") + 
+  scale_x_continuous(breaks = 0:60) +
+  theme_minimal() +
+  labs(x = "Age", y = "Production", 
+       title = "Wordbank WS, split by pre-2010 collection")
+
+lm(production ~ age*old, data = filter(admins, form == "WS")) %>%
+  summary()
+
+```

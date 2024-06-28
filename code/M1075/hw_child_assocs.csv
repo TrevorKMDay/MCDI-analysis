@@ -1,0 +1,762 @@
+CUE,RESPONSE,meaning,AoA_test,youngest_AoA,sense1,sense2,sense3,sense4,sense5
+hate,bad,in poor condition,4,2,naughty,wicked,NA,NA,NA
+hate,no,I won't,4,2,not at all,NA,NA,NA,NA
+hate,no,not any,4,2,not at all,NA,NA,NA,NA
+hate,mean,to intend to say,4,2,not nice,cruel,NA,NA,NA
+hate,mad,wild,4,2,angry,NA,NA,NA,NA
+hate,meanie,mean person,4,4,mean person,NA,NA,NA,NA
+hate,evil,sin and wrongdoing,4,2,bad or wrong,NA,NA,NA,NA
+hate,dislike,not to like,4,4,not to like,NA,NA,NA,NA
+hate,wrong,a sin,4,2,not right,NA,NA,NA,NA
+hate,rude,not polite,4,4,not polite,NA,NA,NA,NA
+hate,feeling,sense of touch,4,4,sense of touch,NA,NA,NA,NA
+hate,nasty,not clean,4,4,not clean,not pleasant,NA,NA,NA
+hate,nasty,not pleasant,4,4,not clean,not pleasant,NA,NA,NA
+hate,rage,act violently,4,4,act violently,NA,NA,NA,NA
+hate,suffering,hurting,4,4,hurting,NA,NA,NA,NA
+hate,avoid,keep away from,4,4,keep away from,NA,NA,NA,NA
+hate,green,part of golf course,4,2,not ripe,a plot of grassyland,the color of grass,NA,NA
+hate,speech,saying words,4,2,the power of talking,a talk,NA,NA,NA
+hate,speech,a language,4,2,the power of talking,a talk,NA,NA,NA
+hate,frown,wrinkle forehead,4,2,look angry,NA,NA,NA,NA
+hate,dark,with a brownish complexion,4,2,gloomy,without light,almost black,NA,NA
+hate,fire,guns going off,4,2,shoot a gun,a flame,a burning building,NA,NA
+hate,fire,to set aflame,4,2,shoot a gun,a flame,a burning building,NA,NA
+hate,fire,to remove from job,4,2,shoot a gun,a flame,a burning building,NA,NA
+hate,upset,to turn over,4,2,disturbed,NA,NA,NA,NA
+hate,disagree,to differ,4,4,to differ,to quarrel,NA,NA,NA
+hate,disagree,to quarrel,4,4,to differ,to quarrel,NA,NA,NA
+hate,enemy,anything harmful,4,2,unfriendly person,NA,NA,NA,NA
+hate,unfriendly,like an enemy,4,4,like an enemy,NA,NA,NA,NA
+hate,kind,sort,4,2,gentle and loving,good to others,NA,NA,NA
+hate,stop,a short distance,4,2,to prevent,to quit,to bring to a standstill,NA,NA
+hate,go,disappear,4,2,to run,to pass by,leave,to move from one place to another,NA
+hate,good,"honest, moral",4,2,well-behaved,NA,NA,NA,NA
+hate,good,"real, not false",4,2,well-behaved,NA,NA,NA,NA
+hate,good,has value,4,2,well-behaved,NA,NA,NA,NA
+hate,good,tastes nice,4,2,well-behaved,NA,NA,NA,NA
+hate,black,dark-skinned person,4,2,the darkest color,NA,NA,NA,NA
+hate,meal,when food is served,4,2,roughly ground grain,NA,NA,NA,NA
+hate,dirt,dust or mud,4,2,"loose earth, soil",NA,NA,NA,NA
+hate,hit,a success,6,2,to strike or slap,shot that reaches target,struck by storm,NA,NA
+hate,hit,a successful play,6,2,to strike or slap,shot that reaches target,struck by storm,NA,NA
+hate,yell,school cheer,6,2,to shout,"strong, loud cry",NA,NA,NA
+hate,bad,disagreeable,6,2,naughty,wicked,NA,NA,NA
+hate,bad,without worth,6,2,naughty,wicked,NA,NA,NA
+hate,no,a vote against,6,2,not at all,NA,NA,NA,NA
+hate,despise,hate,6,6,hate,NA,NA,NA,NA
+hate,wrong,to treat unfairly,6,2,not right,NA,NA,NA,NA
+hate,rude,"violent, rough",6,4,not polite,NA,NA,NA,NA
+hate,affection,fondness,6,6,fondness,NA,NA,NA,NA
+hate,despair,loss of hope,6,6,loss of hope,NA,NA,NA,NA
+hate,feeling,an opinion,6,4,sense of touch,NA,NA,NA,NA
+hate,feeling,a sensation,6,4,sense of touch,NA,NA,NA,NA
+hate,feeling,emotion,6,4,sense of touch,NA,NA,NA,NA
+hate,nasty,harmful,6,4,not clean,not pleasant,NA,NA,NA
+hate,rage,storm or burn violently,6,4,act violently,NA,NA,NA,NA
+hate,rage,anger,6,4,act violently,NA,NA,NA,NA
+hate,fury,great anger,6,6,great anger,NA,NA,NA,NA
+hate,like,about the same as,6,2,to be fond of,NA,NA,NA,NA
+hate,disgust,strong dislike,6,6,strong dislike,NA,NA,NA,NA
+hate,negative,no,6,6,no,not positive,made in camera,NA,NA
+hate,negative,not positive,6,6,no,not positive,made in camera,NA,NA
+hate,negative,made in camera,6,6,no,not positive,made in camera,NA,NA
+hate,dark,mysterious,6,2,gloomy,without light,almost black,NA,NA
+hate,unlike,different,6,6,different,NA,NA,NA,NA
+hate,skip,bounce over surface,6,2,leap and jump,"hop on one foot, then the other","a gay, dancing walk",NA,NA
+hate,skip,leave out,6,2,leap and jump,"hop on one foot, then the other","a gay, dancing walk",NA,NA
+hate,skip,run away,6,2,leap and jump,"hop on one foot, then the other","a gay, dancing walk",NA,NA
+hate,uncomfortable,uneasy,6,6,uneasy,NA,NA,NA,NA
+hate,kind,a sort or type of,6,2,gentle and loving,good to others,NA,NA,NA
+hate,stop,a cork or plug,6,2,to prevent,to quit,to bring to a standstill,NA,NA
+hate,go,pep,6,2,to run,to pass by,leave,to move from one place to another,NA
+hate,extreme,farthest possible,6,6,farthest possible,NA,NA,NA,NA
+hate,good,pleasant,6,2,well-behaved,NA,NA,NA,NA
+hate,good,at least,6,2,well-behaved,NA,NA,NA,NA
+hate,good,fits its purpose,6,2,well-behaved,NA,NA,NA,NA
+hate,mean,to signify,8,2,not nice,cruel,NA,NA,NA
+hate,ugly,nasty,8,2,unpleasant to look at,NA,NA,NA,NA
+hate,love,no score,8,2,sweetheart,to have deep feeling for,like very much,NA,NA
+hate,rude,roughly made,8,4,not polite,NA,NA,NA,NA
+hate,gross,"coarse, vulgar",8,8,"coarse, vulgar",twelve dozen,NA,NA,NA
+hate,gross,twelve dozen,8,8,"coarse, vulgar",twelve dozen,NA,NA,NA
+hate,fury,violence,8,6,great anger,NA,NA,NA,NA
+hate,broccoli,vegetable,8,8,vegetable,NA,NA,NA,NA
+hate,like,similar things,8,2,to be fond of,NA,NA,NA,NA
+hate,fear,respect,8,2,being afraid,NA,NA,NA,NA
+hate,green,without training,8,2,not ripe,a plot of grassyland,the color of grass,NA,NA
+hate,negative,less than zero,8,6,no,not positive,made in camera,NA,NA
+hate,upset,win by surprise,8,2,disturbed,NA,NA,NA,NA
+hate,loud,too flashy,8,2,very noisy,NA,NA,NA,NA
+hate,stop,a short visit,8,2,to prevent,to quit,to bring to a standstill,NA,NA
+hate,extreme,great in degree,8,6,farthest possible,NA,NA,NA,NA
+hate,good,respectable,8,2,well-behaved,NA,NA,NA,NA
+hate,strong,with a heavy smell,8,2,"healthy, sound",powerful,NA,NA,NA
+hate,black,the family rascal,8,2,the darkest color,NA,NA,NA,NA
+hold,carry,to support,4,2,take to next column,take from place to place,NA,NA,NA
+hold,hand,member of ship's crew,4,2,cards held by a player,from fingertips to wrist,on clock,NA,NA
+hold,hand,applause,4,2,cards held by a player,from fingertips to wrist,on clock,NA,NA
+hold,baby,treat gently,4,2,new-born child,NA,NA,NA,NA
+hold,close,an end,4,2,near each other,to shut,almost equal,bring to an end,NA
+hold,keep,wait,4,2,take care of,to hold back,to continue doing,NA,NA
+hold,keep,stay good,4,2,take care of,to hold back,to continue doing,NA,NA
+hold,take,to accept,4,2,to steal,to get or receive,"choose, select",get hold of,NA
+hold,take,pick up and carry,4,2,to steal,to get or receive,"choose, select",get hold of,NA
+hold,take,to write down,4,2,to steal,to get or receive,"choose, select",get hold of,NA
+hold,take,to capture,4,2,to steal,to get or receive,"choose, select",get hold of,NA
+hold,get,to obtain,4,2,receive,go and take,NA,NA,NA
+hold,get,to become,4,2,receive,go and take,NA,NA,NA
+hold,tight,fitting very closely,4,4,fitting very closely,not loose,NA,NA,NA
+hold,tight,not loose,4,4,fitting very closely,not loose,NA,NA,NA
+hold,arms,weapons,4,4,weapons,NA,NA,NA,NA
+hold,handle,manage,4,2,"to hold, move, with hands",the part to hold by,NA,NA,NA
+hold,suitcase,traveling bag,4,4,traveling bag,NA,NA,NA,NA
+hold,touch,lay hands on,4,2,to feel with the fingers,NA,NA,NA,NA
+hold,press,to bear down on,4,2,to push against,a printing machine,to iron,NA,NA
+hold,press,newspapers,4,2,to push against,a printing machine,to iron,NA,NA
+hold,press,to squeeze,4,2,to push against,a printing machine,to iron,NA,NA
+hold,drop,a small amount,4,2,leave the subject,length of a fall,a sudden fall,fall,NA
+hold,drop,a small amount of liquid,4,2,leave the subject,length of a fall,a sudden fall,fall,NA
+hold,drop,to make lower,4,2,leave the subject,length of a fall,a sudden fall,fall,NA
+hold,on,covering,4,2,upon,taking place,at,ahead,NA
+hold,on,touching,4,2,upon,taking place,at,ahead,NA
+hold,catch,to find in the act,4,2,to get tangled in,day's load of fish,get hold of,NA,NA
+hold,weight,units expressing heaviness,4,2,heaviness,NA,NA,NA,NA
+hold,invest,put money into,4,4,put money into,NA,NA,NA,NA
+hold,safe,for keeping money,4,2,under close guard,not hurt,without danger,NA,NA
+hold,snuggle,cuddle up to,4,4,cuddle up to,NA,NA,NA,NA
+hold,let go,turn loose,4,4,turn loose,NA,NA,NA,NA
+hold,mine,"to dig for coal, etc.",4,2,underground diggings,belongs to me,NA,NA,NA
+hold,cup,a prize,4,2,a measure,used to drink from,NA,NA,NA
+hold,release,let loose,4,4,let loose,NA,NA,NA,NA
+hold,gentle,mild-tempered,4,2,light and soft,NA,NA,NA,NA
+hold,pick,to pluck at,4,2,choice,to open without key,a digging tool,NA,NA
+hold,pick,to pull off fruit,4,2,choice,to open without key,a digging tool,NA,NA
+hold,pick,to choose,4,2,choice,to open without key,a digging tool,NA,NA
+hold,something,one thing or another,4,4,one thing or another,just anything,NA,NA,NA
+hold,something,just anything,4,4,one thing or another,just anything,NA,NA,NA
+hold,support,to help,4,4,to help,NA,NA,NA,NA
+hold,carry,send or transmit,6,2,take to next column,take from place to place,NA,NA,NA
+hold,carry,take,6,2,take to next column,take from place to place,NA,NA,NA
+hold,hand,a promise of marriage,6,2,cards held by a player,from fingertips to wrist,on clock,NA,NA
+hold,hand,help lent,6,2,cards held by a player,from fingertips to wrist,on clock,NA,NA
+hold,grasp,take hold of,6,6,take hold of,NA,NA,NA,NA
+hold,close,to block or stop up,6,2,near each other,to shut,almost equal,bring to an end,NA
+hold,cling,stick together,6,6,stick together,NA,NA,NA,NA
+hold,possess,own,6,6,own,NA,NA,NA,NA
+hold,tight,stingy,6,4,fitting very closely,not loose,NA,NA,NA
+hold,pull,effort or force,6,2,to draw something toward you,NA,NA,NA,NA
+hold,handle,to deal with,6,2,"to hold, move, with hands",the part to hold by,NA,NA,NA
+hold,touch,contact,6,2,to feel with the fingers,NA,NA,NA,NA
+hold,touch,one of the senses,6,2,to feel with the fingers,NA,NA,NA,NA
+hold,hit,a success,6,2,to strike or slap,shot that reaches target,struck by storm,NA,NA
+hold,hit,a successful play,6,2,to strike or slap,shot that reaches target,struck by storm,NA,NA
+hold,find,"to learn, discover",6,2,get what you lost,NA,NA,NA,NA
+hold,find,to come on by chance,6,2,get what you lost,NA,NA,NA,NA
+hold,find,valuable discovery,6,2,get what you lost,NA,NA,NA,NA
+hold,down,in the dumps,6,2,toward the ground,NA,NA,NA,NA
+hold,press,a squeezing machine,6,2,to push against,a printing machine,to iron,NA,NA
+hold,hug,keep close to,6,2,squeeze in arms,NA,NA,NA,NA
+hold,clutch,automobile part,6,6,automobile part,hold tightly,NA,NA,NA
+hold,clutch,hold tightly,6,6,automobile part,hold tightly,NA,NA,NA
+hold,pick up,to meet and take along,6,6,to meet and take along,NA,NA,NA,NA
+hold,on,shining,6,2,upon,taking place,at,ahead,NA
+hold,heavy,in large amounts,6,2,weighs a lot,NA,NA,NA,NA
+hold,weight,balance for a scale,6,2,heaviness,NA,NA,NA,NA
+hold,struggle,fight,6,6,fight,to make great efforts,NA,NA,NA
+hold,struggle,to make great efforts,6,6,fight,to make great efforts,NA,NA,NA
+hold,object,give reason against,6,2,a thing,NA,NA,NA,NA
+hold,look,to appear,6,2,try to see,NA,NA,NA,NA
+hold,item,thing,6,6,thing,a piece of news,NA,NA,NA
+hold,item,a piece of news,6,6,thing,a piece of news,NA,NA,NA
+hold,toy,thing of little value,6,2,a plaything,NA,NA,NA,NA
+hold,care,worry,6,2,be fond of,looking after,NA,NA,NA
+hold,snuggle,nestle,6,4,cuddle up to,NA,NA,NA,NA
+hold,cuddle,lie close and snug,6,6,lie close and snug,NA,NA,NA,NA
+hold,obtain,get,6,6,get,NA,NA,NA,NA
+hold,gentle,gradual,6,2,light and soft,NA,NA,NA,NA
+hold,held,kept with him,6,2,did hold,NA,NA,NA,NA
+hold,force,violence,6,2,to push or pull on something,to make someone do something,NA,NA,NA
+hold,force,"a group of soldiers, etc.",6,2,to push or pull on something,to make someone do something,NA,NA,NA
+hold,force,break open,6,2,to push or pull on something,to make someone do something,NA,NA,NA
+hold,force,power,6,2,to push or pull on something,to make someone do something,NA,NA,NA
+hold,pick,used to play guitar,6,2,choice,to open without key,a digging tool,NA,NA
+hold,something,a thing of importance,6,4,one thing or another,just anything,NA,NA,NA
+hold,elevate,lift up,6,6,lift up,NA,NA,NA,NA
+hold,support,provide for,6,4,to help,NA,NA,NA,NA
+hold,support,keep from falling,6,4,to help,NA,NA,NA,NA
+hold,doll,a pretty girl,6,2,girl's plaything,NA,NA,NA,NA
+hold,squeeze,to put pressure on,6,2,to hug tightly,to press hard,NA,NA,NA
+hold,push,big effort,6,2,to shove,NA,NA,NA,NA
+hold,hand,penmanship,8,2,cards held by a player,from fingertips to wrist,on clock,NA,NA
+hold,hand,worker,8,2,cards held by a player,from fingertips to wrist,on clock,NA,NA
+hold,grasp,a strong hold,8,6,take hold of,NA,NA,NA,NA
+hold,close,near and dear,8,2,near each other,to shut,almost equal,bring to an end,NA
+hold,close,fairly accurate,8,2,near each other,to shut,almost equal,bring to an end,NA
+hold,keep,to guard,8,2,take care of,to hold back,to continue doing,NA,NA
+hold,take,the money received,8,2,to steal,to get or receive,"choose, select",get hold of,NA
+hold,take,to enroll in a course,8,2,to steal,to get or receive,"choose, select",get hold of,NA
+hold,cradle,a holding frame,8,2,baby's bed,NA,NA,NA,NA
+hold,cradle,to hold in the arms,8,2,baby's bed,NA,NA,NA,NA
+hold,purse,a sum of money,8,2,a woman's money and bag,NA,NA,NA,NA
+hold,down,velvety fuzz,8,2,toward the ground,NA,NA,NA,NA
+hold,press,to push forward,8,2,to push against,a printing machine,to iron,NA,NA
+hold,drop,to knock or shoot down,8,2,leave the subject,length of a fall,a sudden fall,fall,NA
+hold,dog,a low person,8,2,four-legged animal,NA,NA,NA,NA
+hold,pick up,to learn,8,6,to meet and take along,NA,NA,NA,NA
+hold,catch,quite a prize,8,2,to get tangled in,day's load of fish,get hold of,NA,NA
+hold,catch,hidden trouble,8,2,to get tangled in,day's load of fish,get hold of,NA,NA
+hold,catch,fastener,8,2,to get tangled in,day's load of fish,get hold of,NA,NA
+hold,catch,get the disease,8,2,to get tangled in,day's load of fish,get hold of,NA,NA
+hold,catch,to attract,8,2,to get tangled in,day's load of fish,get hold of,NA,NA
+hold,object,gets action of verb,8,2,a thing,NA,NA,NA,NA
+hold,bear,have children,8,2,"big, shaggy animal",NA,NA,NA,NA
+hold,bear,to carry,8,2,"big, shaggy animal",NA,NA,NA,NA
+hold,toy,a miniature,8,2,a plaything,NA,NA,NA,NA
+hold,safe,"sure, certain",8,2,under close guard,not hurt,without danger,NA,NA
+hold,care,caution,8,2,be fond of,looking after,NA,NA,NA
+hold,love,no score,8,2,sweetheart,to have deep feeling for,like very much,NA,NA
+hold,embrace,a hug,8,8,a hug,NA,NA,NA,NA
+hold,mine,rich source,8,2,underground diggings,belongs to me,NA,NA,NA
+hold,mine,floating bomb,8,2,underground diggings,belongs to me,NA,NA,NA
+hold,cuddle,to hold and pet,8,6,lie close and snug,NA,NA,NA,NA
+hold,something,at least a little,8,4,one thing or another,just anything,NA,NA,NA
+hold,support,to approve,8,4,to help,NA,NA,NA,NA
+hold,push,energy,8,2,to shove,NA,NA,NA,NA
+kick,ball,big dance,4,2,round toy,round object,kind of game,NA,NA
+kick,ball,bad pitch,4,2,round toy,round object,kind of game,NA,NA
+kick,ball,cannon shot,4,2,round toy,round object,kind of game,NA,NA
+kick,drop,a small amount,4,2,leave the subject,length of a fall,a sudden fall,fall,NA
+kick,drop,a small amount of liquid,4,2,leave the subject,length of a fall,a sudden fall,fall,NA
+kick,drop,to make lower,4,2,leave the subject,length of a fall,a sudden fall,fall,NA
+kick,strike,bowling term,4,2,miss the ball,to hit,to attack,light a match,NA
+kick,shin,front part of lower leg,4,4,front part of lower leg,NA,NA,NA,NA
+kick,stop,a short distance,4,2,to prevent,to quit,to bring to a standstill,NA,NA
+kick,ouch,cry when hurt,4,4,cry when hurt,NA,NA,NA,NA
+kick,punch,makes holes,4,2,sock with the fist,NA,NA,NA,NA
+kick,punch,mixed fruit juice,4,2,sock with the fist,NA,NA,NA,NA
+kick,bad,in poor condition,4,2,naughty,wicked,NA,NA,NA
+kick,swat,to hit,4,4,to hit,NA,NA,NA,NA
+kick,no,I won't,4,2,not at all,NA,NA,NA,NA
+kick,no,not any,4,2,not at all,NA,NA,NA,NA
+kick,bleed,"take out blood, air, etc.",4,2,drip blood,NA,NA,NA,NA
+kick,break,rest period,4,2,to tear apart,NA,NA,NA,NA
+kick,move,a turn at a game,4,2,to change houses,to be in motion,to change places,NA,NA
+kick,ground,"the past of ""grind""",4,2,to hit bottom or shore,the earth's surface,soil or earth,NA,NA
+kick,attack,strike with force,4,4,strike with force,sudden sickness,NA,NA,NA
+kick,attack,sudden sickness,4,4,strike with force,sudden sickness,NA,NA,NA
+kick,stomp,to stamp with the foot,4,4,to stamp with the foot,NA,NA,NA,NA
+kick,cry,to weep,4,2,to shed tears,yell,NA,NA,NA
+kick,injure,hurt,4,4,hurt,NA,NA,NA,NA
+kick,sport,good loser,4,4,good loser,NA,NA,NA,NA
+kick,air,to ventilate,4,2,what you breathe,NA,NA,NA,NA
+kick,mean,to intend to say,4,2,not nice,cruel,NA,NA,NA
+kick,action,doing something,4,2,movement,NA,NA,NA,NA
+kick,stand,a place for sales,4,2,to be on your feet,to place upright,NA,NA,NA
+kick,stand,to stay,4,2,to be on your feet,to place upright,NA,NA,NA
+kick,mad,wild,4,2,angry,NA,NA,NA,NA
+kick,drum,part of ear,4,2,a musical instrument,beats rhythm,NA,NA,NA
+kick,drum,to tap with fingers,4,2,a musical instrument,beats rhythm,NA,NA,NA
+kick,box,"place for coach, batter, pitcher",4,2,wood or paper container,NA,NA,NA,NA
+kick,can,a metal container,4,2,is able,NA,NA,NA,NA
+kick,can,to preserve food,4,2,is able,NA,NA,NA,NA
+kick,curb,concrete edge,4,4,concrete edge,next to sidewalk,NA,NA,NA
+kick,curb,next to sidewalk,4,4,concrete edge,next to sidewalk,NA,NA,NA
+kick,ball,part of the foot,6,2,round toy,round object,kind of game,NA,NA
+kick,ball,kind of bullet,6,2,round toy,round object,kind of game,NA,NA
+kick,ball,make a wad of,6,2,round toy,round object,kind of game,NA,NA
+kick,bust,broke,6,6,broke,NA,NA,NA,NA
+kick,foot,the bottom,6,2,the bottom end of a bed,twelve inches,the lowest part,part of leg,NA
+kick,strike,stop work,6,2,miss the ball,to hit,to attack,light a match,NA
+kick,strike,work stoppage,6,2,miss the ball,to hit,to attack,light a match,NA
+kick,strike,chime the hour,6,2,miss the ball,to hit,to attack,light a match,NA
+kick,punt,kick football,6,6,kick football,NA,NA,NA,NA
+kick,throw,"to cast, as a light",6,2,toss,NA,NA,NA,NA
+kick,throw,a pitch,6,2,toss,NA,NA,NA,NA
+kick,push,big effort,6,2,to shove,NA,NA,NA,NA
+kick,swing,to hang down freely,6,2,strike at ball,to move back and forth,"to move loosely, freely",a seat which moves back and forth,NA
+kick,stop,a cork or plug,6,2,to prevent,to quit,to bring to a standstill,NA,NA
+kick,horse,to play around,6,2,a work animal,NA,NA,NA,NA
+kick,bad,disagreeable,6,2,naughty,wicked,NA,NA,NA
+kick,bad,without worth,6,2,naughty,wicked,NA,NA,NA
+kick,hit,a success,6,2,to strike or slap,shot that reaches target,struck by storm,NA,NA
+kick,hit,a successful play,6,2,to strike or slap,shot that reaches target,struck by storm,NA,NA
+kick,no,a vote against,6,2,not at all,NA,NA,NA,NA
+kick,break,an interruption,6,2,to tear apart,NA,NA,NA,NA
+kick,break,tame a bronco,6,2,to tear apart,NA,NA,NA,NA
+kick,break,stop suddenly,6,2,to tear apart,NA,NA,NA,NA
+kick,break,make an escape,6,2,to tear apart,NA,NA,NA,NA
+kick,move,cause to act,6,2,to change houses,to be in motion,to change places,NA,NA
+kick,violent,showing great force,6,6,showing great force,NA,NA,NA,NA
+kick,fight,the spirit of struggle,6,2,a battle,to hit and hurt each other,to go to war against,NA,NA
+kick,stand,a piece of furniture,6,2,to be on your feet,to place upright,NA,NA,NA
+kick,stand,to put up with,6,2,to be on your feet,to place upright,NA,NA,NA
+kick,kick,complain,6,2,hit with foot,NA,NA,NA,NA
+kick,violence,rough force,6,6,rough force,NA,NA,NA,NA
+kick,drum,a barrel,6,2,a musical instrument,beats rhythm,NA,NA,NA
+kick,duck,dip  into water,6,2,to dodge,swimming bird,NA,NA,NA
+kick,force,violence,6,2,to push or pull on something,to make someone do something,NA,NA,NA
+kick,force,"a group of soldiers, etc.",6,2,to push or pull on something,to make someone do something,NA,NA,NA
+kick,force,break open,6,2,to push or pull on something,to make someone do something,NA,NA,NA
+kick,force,power,6,2,to push or pull on something,to make someone do something,NA,NA,NA
+kick,box,fight,6,2,wood or paper container,NA,NA,NA,NA
+kick,click,"a short, sharp sound",6,6,"a short, sharp sound",NA,NA,NA,NA
+kick,jump,to rise suddenly in price,6,2,a move in checkers,a sudden rise,a leap,to hop up and down,NA
+kick,swim,to move as if by gliding,6,2,to move in the water,NA,NA,NA,NA
+kick,ball,good time,8,2,round toy,round object,kind of game,NA,NA
+kick,bust,bosom,8,6,broke,NA,NA,NA,NA
+kick,drop,to knock or shoot down,8,2,leave the subject,length of a fall,a sudden fall,fall,NA
+kick,strike,take from list,8,2,miss the ball,to hit,to attack,light a match,NA
+kick,strike,discover,8,2,miss the ball,to hit,to attack,light a match,NA
+kick,strike,a discovery,8,2,miss the ball,to hit,to attack,light a match,NA
+kick,boot,big kick,8,2,high-top shoe,NA,NA,NA,NA
+kick,throw,"give, as a party",8,2,toss,NA,NA,NA,NA
+kick,push,energy,8,2,to shove,NA,NA,NA,NA
+kick,swing,to hang down from above,8,2,strike at ball,to move back and forth,"to move loosely, freely",a seat which moves back and forth,NA
+kick,stop,a short visit,8,2,to prevent,to quit,to bring to a standstill,NA,NA
+kick,punch,drive,8,2,sock with the fist,NA,NA,NA,NA
+kick,harm,mischief,8,2,damage,NA,NA,NA,NA
+kick,bleed,feel sympathy,8,2,drip blood,NA,NA,NA,NA
+kick,break,take place suddenly,8,2,to tear apart,NA,NA,NA,NA
+kick,break,stroke of luck,8,2,to tear apart,NA,NA,NA,NA
+kick,high,a transmission gear,8,2,tall,costs a lot,above others,way up,NA
+kick,ground,electrical connection,8,2,to hit bottom or shore,the earth's surface,soil or earth,NA,NA
+kick,lift,to steal,8,2,helping hand,a free ride,to pick up,NA,NA
+kick,lift,refreshing moment,8,2,helping hand,a free ride,to pick up,NA,NA
+kick,attack,start work on,8,4,strike with force,sudden sickness,NA,NA,NA
+kick,mean,to signify,8,2,not nice,cruel,NA,NA,NA
+kick,stand,to stay in force,8,2,to be on your feet,to place upright,NA,NA,NA
+kick,stand,the witness box,8,2,to be on your feet,to place upright,NA,NA,NA
+kick,drum,repeat constantly,8,2,a musical instrument,beats rhythm,NA,NA,NA
+kick,box,theater seats,8,2,wood or paper container,NA,NA,NA,NA
+kick,click,be a success,8,6,"a short, sharp sound",NA,NA,NA,NA
+kick,jump,to leave gaps,8,2,a move in checkers,a sudden rise,a leap,to hop up and down,NA
+kick,curb,to hold back,8,4,concrete edge,next to sidewalk,NA,NA,NA
+kick,swim,to be flooded,8,2,to move in the water,NA,NA,NA,NA
+kiss,mouth,where river empties,4,2,part of face,NA,NA,NA,NA
+kiss,tongue,part of shoe,4,2,part of mouth,NA,NA,NA,NA
+kiss,sweet,pleasant-sounding,4,2,has the taste of sugar,not spoiled or sour,NA,NA,NA
+kiss,wave,hair curl,4,2,a ripple on water,NA,NA,NA,NA
+kiss,wave,make hand signals,4,2,a ripple on water,NA,NA,NA,NA
+kiss,peck,to hit with the beak,4,4,to hit with the beak,NA,NA,NA,NA
+kiss,smack,a lip sound showing pleasure,4,2,to slap,"big, loud kiss",NA,NA,NA
+kiss,smack,a slap,4,2,to slap,"big, loud kiss",NA,NA,NA
+kiss,heart,feeling for others,4,2,body's blood pump,NA,NA,NA,NA
+kiss,heart,central part,4,2,body's blood pump,NA,NA,NA,NA
+kiss,no,I won't,4,2,not at all,NA,NA,NA,NA
+kiss,no,not any,4,2,not at all,NA,NA,NA,NA
+kiss,too,part of foot,4,2,more than enough,NA,NA,NA,NA
+kiss,too,also,4,2,more than enough,NA,NA,NA,NA
+kiss,young,in an early stage,4,2,newborn babies or animals,in early life,not old,NA,NA
+kiss,young,new at it,4,2,newborn babies or animals,in early life,not old,NA,NA
+kiss,close,an end,4,2,near each other,to shut,almost equal,bring to an end,NA
+kiss,good,"honest, moral",4,2,well-behaved,NA,NA,NA,NA
+kiss,good,"real, not false",4,2,well-behaved,NA,NA,NA,NA
+kiss,good,has value,4,2,well-behaved,NA,NA,NA,NA
+kiss,good,tastes nice,4,2,well-behaved,NA,NA,NA,NA
+kiss,mummy,ancient Egyptial body,4,4,ancient Egyptial body,NA,NA,NA,NA
+kiss,me,myself,4,2,I,NA,NA,NA,NA
+kiss,stick,a long object,4,2,a piece of wood,NA,NA,NA,NA
+kiss,stick,to stay in place,4,2,a piece of wood,NA,NA,NA,NA
+kiss,stick,walking cane,4,2,a piece of wood,NA,NA,NA,NA
+kiss,stick,to be glued to,4,2,a piece of wood,NA,NA,NA,NA
+kiss,kind,sort,4,2,gentle and loving,good to others,NA,NA,NA
+kiss,blow,a hard hit,4,2,puff and pant,strong wind,push out air,NA,NA
+kiss,blow,cause heavy wind,4,2,puff and pant,strong wind,push out air,NA,NA
+kiss,touch,lay hands on,4,2,to feel with the fingers,NA,NA,NA,NA
+kiss,share,take part in,4,2,divide with others,NA,NA,NA,NA
+kiss,share,a part,4,2,divide with others,NA,NA,NA,NA
+kiss,romance,love story,4,2,a love affair,NA,NA,NA,NA
+kiss,lick,to whip,4,2,pass tongue over,NA,NA,NA,NA
+kiss,lick,a quick stroke,4,2,pass tongue over,NA,NA,NA,NA
+kiss,tongue,power of speech,6,2,part of mouth,NA,NA,NA,NA
+kiss,sweet,"gentle, kind",6,2,has the taste of sugar,not spoiled or sour,NA,NA,NA
+kiss,hug,keep close to,6,2,squeeze in arms,NA,NA,NA,NA
+kiss,wave,a rush of emotion,6,2,a ripple on water,NA,NA,NA,NA
+kiss,affection,fondness,6,6,fondness,NA,NA,NA,NA
+kiss,soft,calm or gentle,6,2,not hard,"smooth, pleasing to touch",NA,NA,NA
+kiss,friend,a supporter,6,2,person one likes,NA,NA,NA,NA
+kiss,peck,to strike with quick jabs,6,4,to hit with the beak,NA,NA,NA,NA
+kiss,peck,part of a bushel,6,4,to hit with the beak,NA,NA,NA,NA
+kiss,no,a vote against,6,2,not at all,NA,NA,NA,NA
+kiss,family,things of same kind,6,2,persons related by birth,"father, mother, child",NA,NA,NA
+kiss,close,to block or stop up,6,2,near each other,to shut,almost equal,bring to an end,NA
+kiss,chin,pull up on bar,6,2,part of face,NA,NA,NA,NA
+kiss,good,pleasant,6,2,well-behaved,NA,NA,NA,NA
+kiss,good,at least,6,2,well-behaved,NA,NA,NA,NA
+kiss,good,fits its purpose,6,2,well-behaved,NA,NA,NA,NA
+kiss,stick,an airplane's control,6,2,a piece of wood,NA,NA,NA,NA
+kiss,stick,piece of gum,6,2,a piece of wood,NA,NA,NA,NA
+kiss,kind,a sort or type of,6,2,gentle and loving,good to others,NA,NA,NA
+kiss,care,worry,6,2,be fond of,looking after,NA,NA,NA
+kiss,blow,make a sound,6,2,puff and pant,strong wind,push out air,NA,NA
+kiss,blow,to explode,6,2,puff and pant,strong wind,push out air,NA,NA
+kiss,touch,contact,6,2,to feel with the fingers,NA,NA,NA,NA
+kiss,touch,one of the senses,6,2,to feel with the fingers,NA,NA,NA,NA
+kiss,cute,clever,6,2,"pretty, pleasing",NA,NA,NA,NA
+kiss,lick,to defeat,6,2,pass tongue over,NA,NA,NA,NA
+kiss,love,no score,8,2,sweetheart,to have deep feeling for,like very much,NA,NA
+kiss,soft,"weak, unmanly",8,2,not hard,"smooth, pleasing to touch",NA,NA,NA
+kiss,soft,c in face,8,2,not hard,"smooth, pleasing to touch",NA,NA,NA
+kiss,couple,hook together,8,2,two persons,husband and wife,NA,NA,NA
+kiss,happy,fortunate,8,2,glad,NA,NA,NA,NA
+kiss,heart,"love, affection",8,2,body's blood pump,NA,NA,NA,NA
+kiss,adore,worship,8,2,love very much,NA,NA,NA,NA
+kiss,young,not having experience,8,2,newborn babies or animals,in early life,not old,NA,NA
+kiss,close,near and dear,8,2,near each other,to shut,almost equal,bring to an end,NA
+kiss,close,fairly accurate,8,2,near each other,to shut,almost equal,bring to an end,NA
+kiss,good,respectable,8,2,well-behaved,NA,NA,NA,NA
+kiss,mummy,mother,8,4,ancient Egyptial body,NA,NA,NA,NA
+kiss,stick,to place,8,2,a piece of wood,NA,NA,NA,NA
+kiss,care,caution,8,2,be fond of,looking after,NA,NA,NA
+kiss,blow,to brag,8,2,puff and pant,strong wind,push out air,NA,NA
+kiss,blow,make a mistake,8,2,puff and pant,strong wind,push out air,NA,NA
+kiss,blow,spend money freely,8,2,puff and pant,strong wind,push out air,NA,NA
+kiss,lick,a small amount,8,2,pass tongue over,NA,NA,NA,NA
+kiss,pucker,draw into wrinkles,8,8,draw into wrinkles,NA,NA,NA,NA
+love,feeling,sense of touch,4,4,sense of touch,NA,NA,NA,NA
+love,heart,feeling for others,4,2,body's blood pump,NA,NA,NA,NA
+love,heart,central part,4,2,body's blood pump,NA,NA,NA,NA
+love,kind,sort,4,2,gentle and loving,good to others,NA,NA,NA
+love,hold,inside of ship,4,2,to keep back,to grasp,NA,NA,NA
+love,hold,to keep possession,4,2,to keep back,to grasp,NA,NA,NA
+love,spirit,the soul part of man,4,4,the soul part of man,NA,NA,NA,NA
+love,good,"honest, moral",4,2,well-behaved,NA,NA,NA,NA
+love,good,"real, not false",4,2,well-behaved,NA,NA,NA,NA
+love,good,has value,4,2,well-behaved,NA,NA,NA,NA
+love,good,tastes nice,4,2,well-behaved,NA,NA,NA,NA
+love,special,out of the ordinary,4,2,something extra,NA,NA,NA,NA
+love,treasure,thing of value,4,2,a lot of money,NA,NA,NA,NA
+love,fond,loving,4,4,loving,interested in,NA,NA,NA
+love,fond,interested in,4,4,loving,interested in,NA,NA,NA
+love,marry,to wed,4,4,to wed,NA,NA,NA,NA
+love,sweet,pleasant-sounding,4,2,has the taste of sugar,not spoiled or sour,NA,NA,NA
+love,desire,a thing wanted,4,4,a thing wanted,NA,NA,NA,NA
+love,want,a need or wish,4,4,a need or wish,"to need, wish for",NA,NA,NA
+love,want,"to need, wish for",4,4,a need or wish,"to need, wish for",NA,NA,NA
+love,me,myself,4,2,I,NA,NA,NA,NA
+love,favorite,best-liked,4,4,best-liked,NA,NA,NA,NA
+love,god,all-powerful being,4,4,all-powerful being,NA,NA,NA,NA
+love,comfort,feeling of ease,4,2,to make someone feel better,NA,NA,NA,NA
+love,dislike,not to like,4,4,not to like,NA,NA,NA,NA
+love,friendly,helpful,4,2,being kind,NA,NA,NA,NA
+love,beloved,dear to the heart,4,4,dear to the heart,NA,NA,NA,NA
+love,feel,to sense,4,2,to search by touch,to touch with hands,NA,NA,NA
+love,feel,have an emotion,4,2,to search by touch,to touch with hands,NA,NA,NA
+love,like,about the same as,6,2,to be fond of,NA,NA,NA,NA
+love,feeling,an opinion,6,4,sense of touch,NA,NA,NA,NA
+love,feeling,a sensation,6,4,sense of touch,NA,NA,NA,NA
+love,feeling,emotion,6,4,sense of touch,NA,NA,NA,NA
+love,warm,kindly,6,2,medium hot,NA,NA,NA,NA
+love,mother,head of convent,6,2,to treat as a parent would,has children,NA,NA,NA
+love,kind,a sort or type of,6,2,gentle and loving,good to others,NA,NA,NA
+love,you,person(s) spoken to,6,2,person reading this,NA,NA,NA,NA
+love,hug,keep close to,6,2,squeeze in arms,NA,NA,NA,NA
+love,hold,to conduct a meeting,6,2,to keep back,to grasp,NA,NA,NA
+love,hold,to stay the same,6,2,to keep back,to grasp,NA,NA,NA
+love,family,things of same kind,6,2,persons related by birth,"father, mother, child",NA,NA,NA
+love,enjoy,to have the advantage of,6,2,take pleasure in,NA,NA,NA,NA
+love,fondness,liking,6,6,liking,NA,NA,NA,NA
+love,care,worry,6,2,be fond of,looking after,NA,NA,NA
+love,cherish,to hold dear,6,6,to hold dear,NA,NA,NA,NA
+love,spirit,a non-natural being,6,4,the soul part of man,NA,NA,NA,NA
+love,spirit,the life force,6,4,the soul part of man,NA,NA,NA,NA
+love,spirit,"liveliness, courage",6,4,the soul part of man,NA,NA,NA,NA
+love,spirit,a godlike being,6,4,the soul part of man,NA,NA,NA,NA
+love,good,pleasant,6,2,well-behaved,NA,NA,NA,NA
+love,good,at least,6,2,well-behaved,NA,NA,NA,NA
+love,good,fits its purpose,6,2,well-behaved,NA,NA,NA,NA
+love,special,item on sale,6,2,something extra,NA,NA,NA,NA
+love,treasure,"to keep, store away",6,2,a lot of money,NA,NA,NA,NA
+love,treasure,value highly,6,2,a lot of money,NA,NA,NA,NA
+love,friend,a supporter,6,2,person one likes,NA,NA,NA,NA
+love,sweet,"gentle, kind",6,2,has the taste of sugar,not spoiled or sour,NA,NA,NA
+love,desire,request,6,4,a thing wanted,NA,NA,NA,NA
+love,desire,to wish for,6,4,a thing wanted,NA,NA,NA,NA
+love,prefer,like better,6,6,like better,NA,NA,NA,NA
+love,emotions,your feelings,6,6,your feelings,NA,NA,NA,NA
+love,favorite,likely to win,6,4,best-liked,NA,NA,NA,NA
+love,affection,fondness,6,6,fondness,NA,NA,NA,NA
+love,comfort,to lighten sorrow,6,2,to make someone feel better,NA,NA,NA,NA
+love,cuddle,lie close and snug,6,6,lie close and snug,NA,NA,NA,NA
+love,sink,shoot down,6,2,to go under water,go down,for washing dishes,NA,NA
+love,feel,have sympathy,6,2,to search by touch,to touch with hands,NA,NA,NA
+love,cute,clever,6,2,"pretty, pleasing",NA,NA,NA,NA
+love,sister,a nun,6,2,opposite of brother,NA,NA,NA,NA
+love,like,similar things,8,2,to be fond of,NA,NA,NA,NA
+love,warm,exciting,8,2,medium hot,NA,NA,NA,NA
+love,warm,getting close,8,2,medium hot,NA,NA,NA,NA
+love,heart,"love, affection",8,2,body's blood pump,NA,NA,NA,NA
+love,hold,interrupt countdown,8,2,to keep back,to grasp,NA,NA,NA
+love,happy,fortunate,8,2,glad,NA,NA,NA,NA
+love,care,caution,8,2,be fond of,looking after,NA,NA,NA
+love,spirit,the leading personality,8,4,the soul part of man,NA,NA,NA,NA
+love,good,respectable,8,2,well-behaved,NA,NA,NA,NA
+love,emotion,deep feeling,8,8,deep feeling,NA,NA,NA,NA
+love,adore,worship,8,2,love very much,NA,NA,NA,NA
+love,passion,strong feeling,8,8,strong feeling,NA,NA,NA,NA
+love,cuddle,to hold and pet,8,6,lie close and snug,NA,NA,NA,NA
+love,feel,to believe,8,2,to search by touch,to touch with hands,NA,NA,NA
+push,hand,member of ship's crew,4,2,cards held by a player,from fingertips to wrist,on clock,NA,NA
+push,hand,applause,4,2,cards held by a player,from fingertips to wrist,on clock,NA,NA
+push,go,disappear,4,2,to run,to pass by,leave,to move from one place to another,NA
+push,against,not in favor of,4,2,next to,NA,NA,NA,NA
+push,move,a turn at a game,4,2,to change houses,to be in motion,to change places,NA,NA
+push,press,to bear down on,4,2,to push against,a printing machine,to iron,NA,NA
+push,press,newspapers,4,2,to push against,a printing machine,to iron,NA,NA
+push,press,to squeeze,4,2,to push against,a printing machine,to iron,NA,NA
+push,muscle,part of body,4,4,part of body,NA,NA,NA,NA
+push,arms,weapons,4,4,weapons,NA,NA,NA,NA
+push,around,here and there,4,2,nearby,near,NA,NA,NA
+push,around,circling,4,2,nearby,near,NA,NA,NA
+push,stray,a lost animal,4,4,a lost animal,NA,NA,NA,NA
+push,mean,to intend to say,4,2,not nice,cruel,NA,NA,NA
+push,rude,not polite,4,4,not polite,NA,NA,NA,NA
+push,over,again,4,2,across,NA,NA,NA,NA
+push,over,too much,4,2,across,NA,NA,NA,NA
+push,over,clear across,4,2,across,NA,NA,NA,NA
+push,over,finished,4,2,across,NA,NA,NA,NA
+push,over,above,4,2,across,NA,NA,NA,NA
+push,over,more than,4,2,across,NA,NA,NA,NA
+push,up,from less to more,4,2,has risen,at a higher place,out of bed,to raise,from low to higher
+push,up,at bat,4,2,has risen,at a higher place,out of bed,to raise,from low to higher
+push,through,from start to end,4,2,finished,NA,NA,NA,NA
+push,fall,"to droop, hang down",4,2,autumn,to tumble,to come down,NA,NA
+push,fall,to get lower,4,2,autumn,to tumble,to come down,NA,NA
+push,ouch,cry when hurt,4,4,cry when hurt,NA,NA,NA,NA
+push,open,the public may enter,4,2,not shut,clear,NA,NA,NA
+push,reject,to turn down,4,4,to turn down,NA,NA,NA,NA
+push,injure,hurt,4,4,hurt,NA,NA,NA,NA
+push,locate,find,4,4,find,NA,NA,NA,NA
+push,handle,manage,4,2,"to hold, move, with hands",the part to hold by,NA,NA,NA
+push,touch,lay hands on,4,2,to feel with the fingers,NA,NA,NA,NA
+push,hold,inside of ship,4,2,to keep back,to grasp,NA,NA,NA
+push,hold,to keep possession,4,2,to keep back,to grasp,NA,NA,NA
+push,stop,a short distance,4,2,to prevent,to quit,to bring to a standstill,NA,NA
+push,carry,to support,4,2,take to next column,take from place to place,NA,NA,NA
+push,try,make effort,4,2,work at doing better,NA,NA,NA,NA
+push,try,test something,4,2,work at doing better,NA,NA,NA,NA
+push,hard,"solid, tough",4,2,not easy to break,not easy,NA,NA,NA
+push,bad,in poor condition,4,2,naughty,wicked,NA,NA,NA
+push,rope,to lasso,4,2,a cord,NA,NA,NA,NA
+push,train,to teach,4,2,railway cars,NA,NA,NA,NA
+push,body,the main part,4,2,all of you,large mass,NA,NA,NA
+push,jam,difficulty,4,2,jelly,NA,NA,NA,NA
+push,lean,without fat,4,2,slant to the side,NA,NA,NA,NA
+push,strike,bowling term,4,2,miss the ball,to hit,to attack,light a match,NA
+push,ball,big dance,4,2,round toy,round object,kind of game,NA,NA
+push,ball,bad pitch,4,2,round toy,round object,kind of game,NA,NA
+push,ball,cannon shot,4,2,round toy,round object,kind of game,NA,NA
+push,help,share the work,4,2,aid,NA,NA,NA,NA
+push,box,"place for coach, batter, pitcher",4,2,wood or paper container,NA,NA,NA,NA
+push,hand,a promise of marriage,6,2,cards held by a player,from fingertips to wrist,on clock,NA,NA
+push,hand,help lent,6,2,cards held by a player,from fingertips to wrist,on clock,NA,NA
+push,pull,effort or force,6,2,to draw something toward you,NA,NA,NA,NA
+push,slam,move hard with force,6,2,to bang shut,NA,NA,NA,NA
+push,go,pep,6,2,to run,to pass by,leave,to move from one place to another,NA
+push,move,cause to act,6,2,to change houses,to be in motion,to change places,NA,NA
+push,press,a squeezing machine,6,2,to push against,a printing machine,to iron,NA,NA
+push,force,violence,6,2,to push or pull on something,to make someone do something,NA,NA,NA
+push,force,"a group of soldiers, etc.",6,2,to push or pull on something,to make someone do something,NA,NA,NA
+push,force,break open,6,2,to push or pull on something,to make someone do something,NA,NA,NA
+push,force,power,6,2,to push or pull on something,to make someone do something,NA,NA,NA
+push,down,in the dumps,6,2,toward the ground,NA,NA,NA,NA
+push,stray,wander away,6,4,a lost animal,NA,NA,NA,NA
+push,throw,"to cast, as a light",6,2,toss,NA,NA,NA,NA
+push,throw,a pitch,6,2,toss,NA,NA,NA,NA
+push,rude,"violent, rough",6,4,not polite,NA,NA,NA,NA
+push,yank,jerk,6,6,jerk,NA,NA,NA,NA
+push,nudge,push slightly,6,6,push slightly,NA,NA,NA,NA
+push,fight,the spirit of struggle,6,2,a battle,to hit and hurt each other,to go to war against,NA,NA
+push,cart,to carry,6,2,two-wheeled carriage,NA,NA,NA,NA
+push,toy,thing of little value,6,2,a plaything,NA,NA,NA,NA
+push,over,during,6,2,across,NA,NA,NA,NA
+push,through,by means of,6,2,finished,NA,NA,NA,NA
+push,hit,a success,6,2,to strike or slap,shot that reaches target,struck by storm,NA,NA
+push,hit,a successful play,6,2,to strike or slap,shot that reaches target,struck by storm,NA,NA
+push,slide,fallen earth and rock,6,2,to skim over ice,to move smoothly,to slip,NA,NA
+push,slide,glass for a microscope,6,2,to skim over ice,to move smoothly,to slip,NA,NA
+push,slide,picture for projection,6,2,to skim over ice,to move smoothly,to slip,NA,NA
+push,open,not filled,6,2,not shut,clear,NA,NA,NA
+push,open,to begin,6,2,not shut,clear,NA,NA,NA
+push,open,out-of-doors,6,2,not shut,clear,NA,NA,NA
+push,locate,to settle down,6,4,find,NA,NA,NA,NA
+push,handle,to deal with,6,2,"to hold, move, with hands",the part to hold by,NA,NA,NA
+push,touch,contact,6,2,to feel with the fingers,NA,NA,NA,NA
+push,touch,one of the senses,6,2,to feel with the fingers,NA,NA,NA,NA
+push,hold,to conduct a meeting,6,2,to keep back,to grasp,NA,NA,NA
+push,hold,to stay the same,6,2,to keep back,to grasp,NA,NA,NA
+push,stop,a cork or plug,6,2,to prevent,to quit,to bring to a standstill,NA,NA
+push,carry,send or transmit,6,2,take to next column,take from place to place,NA,NA,NA
+push,carry,take,6,2,take to next column,take from place to place,NA,NA,NA
+push,try,"examine, judge",6,2,work at doing better,NA,NA,NA,NA
+push,button,a badge,6,2,round clothes fastener,a push-type switch,to fasten,NA,NA
+push,bad,disagreeable,6,2,naughty,wicked,NA,NA,NA
+push,bad,without worth,6,2,naughty,wicked,NA,NA,NA
+push,swing,to hang down freely,6,2,strike at ball,to move back and forth,"to move loosely, freely",a seat which moves back and forth,NA
+push,body,organized group,6,2,all of you,large mass,NA,NA,NA
+push,body,substance,6,2,all of you,large mass,NA,NA,NA
+push,kick,complain,6,2,hit with foot,NA,NA,NA,NA
+push,jam,to get stuck,6,2,jelly,NA,NA,NA,NA
+push,jam,pack in,6,2,jelly,NA,NA,NA,NA
+push,jam,a packing-in,6,2,jelly,NA,NA,NA,NA
+push,lean,thin,6,2,slant to the side,NA,NA,NA,NA
+push,strike,stop work,6,2,miss the ball,to hit,to attack,light a match,NA
+push,strike,work stoppage,6,2,miss the ball,to hit,to attack,light a match,NA
+push,strike,chime the hour,6,2,miss the ball,to hit,to attack,light a match,NA
+push,accelerate,go faster,6,6,go faster,NA,NA,NA,NA
+push,ball,part of the foot,6,2,round toy,round object,kind of game,NA,NA
+push,ball,kind of bullet,6,2,round toy,round object,kind of game,NA,NA
+push,ball,make a wad of,6,2,round toy,round object,kind of game,NA,NA
+push,tap,a water valve,6,2,hit gently,NA,NA,NA,NA
+push,tap,faucet,6,2,hit gently,NA,NA,NA,NA
+push,act,law passed,6,2,the process of doing,behave in a certain way,what you do,part of a play,perform
+push,box,fight,6,2,wood or paper container,NA,NA,NA,NA
+push,heavy,in large amounts,6,2,weighs a lot,NA,NA,NA,NA
+push,pit,fruit seed,6,2,a hole or hollow place,NA,NA,NA,NA
+push,hand,penmanship,8,2,cards held by a player,from fingertips to wrist,on clock,NA,NA
+push,hand,worker,8,2,cards held by a player,from fingertips to wrist,on clock,NA,NA
+push,slam,to criticize roughly,8,2,to bang shut,NA,NA,NA,NA
+push,press,to push forward,8,2,to push against,a printing machine,to iron,NA,NA
+push,down,velvety fuzz,8,2,toward the ground,NA,NA,NA,NA
+push,around,in the neighborhood of,8,2,nearby,near,NA,NA,NA
+push,around,about,8,2,nearby,near,NA,NA,NA
+push,stray,scattered,8,4,a lost animal,NA,NA,NA,NA
+push,throw,"give, as a party",8,2,toss,NA,NA,NA,NA
+push,mean,to signify,8,2,not nice,cruel,NA,NA,NA
+push,rude,roughly made,8,4,not polite,NA,NA,NA,NA
+push,toy,a miniature,8,2,a plaything,NA,NA,NA,NA
+push,strong,with a heavy smell,8,2,"healthy, sound",powerful,NA,NA,NA
+push,up,away from center of earth,8,2,has risen,at a higher place,out of bed,to raise,from low to higher
+push,up,bringing into notice,8,2,has risen,at a higher place,out of bed,to raise,from low to higher
+push,through,because of,8,2,finished,NA,NA,NA,NA
+push,fall,ruin and defeat,8,2,autumn,to tumble,to come down,NA,NA
+push,slide,part of a trombone,8,2,to skim over ice,to move smoothly,to slip,NA,NA
+push,thrust,push with force,8,8,push with force,engine power,NA,NA,NA
+push,thrust,engine power,8,8,push with force,engine power,NA,NA,NA
+push,locate,put somewhere,8,4,find,NA,NA,NA,NA
+push,forward,basketball player,8,2,to send on,toward the front,NA,NA,NA
+push,forward,very bold,8,2,to send on,toward the front,NA,NA,NA
+push,hold,interrupt countdown,8,2,to keep back,to grasp,NA,NA,NA
+push,stop,a short visit,8,2,to prevent,to quit,to bring to a standstill,NA,NA
+push,hard,without sympathy,8,2,not easy to break,not easy,NA,NA,NA
+push,hard,"c and g in ""cargo""",8,2,not easy to break,not easy,NA,NA,NA
+push,swing,to hang down from above,8,2,strike at ball,to move back and forth,"to move loosely, freely",a seat which moves back and forth,NA
+push,train,number of followers,8,2,railway cars,NA,NA,NA,NA
+push,train,a line of things,8,2,railway cars,NA,NA,NA,NA
+push,train,trailing part of dress,8,2,railway cars,NA,NA,NA,NA
+push,propel,drive forward,8,8,drive forward,NA,NA,NA,NA
+push,knock,an engine noise,8,2,hit with hand,to hit together,a rap on the door,NA,NA
+push,pang,NA,8,8,NA,NA,NA,NA,NA
+push,strike,take from list,8,2,miss the ball,to hit,to attack,light a match,NA
+push,strike,discover,8,2,miss the ball,to hit,to attack,light a match,NA
+push,strike,a discovery,8,2,miss the ball,to hit,to attack,light a match,NA
+push,lift,to steal,8,2,helping hand,a free ride,to pick up,NA,NA
+push,lift,refreshing moment,8,2,helping hand,a free ride,to pick up,NA,NA
+push,ball,good time,8,2,round toy,round object,kind of game,NA,NA
+push,tap,make added connections,8,2,hit gently,NA,NA,NA,NA
+push,tap,to get liquid from,8,2,hit gently,NA,NA,NA,NA
+push,help,hired servants,8,2,aid,NA,NA,NA,NA
+push,box,theater seats,8,2,wood or paper container,NA,NA,NA,NA
+see,hear,to learn through the ears,4,2,listen through ears,NA,NA,NA,NA
+see,sense,understanding,4,4,understanding,NA,NA,NA,NA
+see,vision,sense of sight,4,4,sense of sight,thing seen in imagination,NA,NA,NA
+see,vision,thing seen in imagination,4,4,sense of sight,thing seen in imagination,NA,NA,NA
+see,sight,helps aim gun,4,2,power to see,what is seen,catch a view of,NA,NA
+see,wow,said when surprised,4,4,said when surprised,NA,NA,NA,NA
+see,later,more late,4,2,afterwards,NA,NA,NA,NA
+see,things,personal belongings,4,4,personal belongings,NA,NA,NA,NA
+see,watch,a guard,4,2,guard's duty period,keep a look,NA,NA,NA
+see,watch,timekeeping device,4,2,guard's duty period,keep a look,NA,NA,NA
+see,horizon,where earth and sky meet,4,4,where earth and sky meet,NA,NA,NA,NA
+see,saw,stitch together,4,2,tool for cutting,cut with tool,looked at,NA,NA
+see,gaze,look at,4,4,look at,NA,NA,NA,NA
+see,notice,a warning,4,2,see and remember,NA,NA,NA,NA
+see,sights,for aiming,4,2,things worth seeing,NA,NA,NA,NA
+see,learn,to memorize,4,2,to find out,NA,NA,NA,NA
+see,locate,find,4,4,find,NA,NA,NA,NA
+see,peek,look quickly,4,4,look quickly,NA,NA,NA,NA
+see,follow,to obey,4,2,to keep your eyes on,to go along,NA,NA,NA
+see,follow,to go along behind,4,2,to keep your eyes on,to go along,NA,NA,NA
+see,smell,to catch traces of,4,2,a stink,to sniff,NA,NA,NA
+see,smell,an odor,4,2,a stink,to sniff,NA,NA,NA
+see,smell,to sense,4,2,a stink,to sniff,NA,NA,NA
+see,touch,lay hands on,4,2,to feel with the fingers,NA,NA,NA,NA
+see,picture,a movie,4,2,make a drawing,NA,NA,NA,NA
+see,image,picture,4,4,picture,NA,NA,NA,NA
+see,up,from less to more,4,2,has risen,at a higher place,out of bed,to raise,from low to higher
+see,up,at bat,4,2,has risen,at a higher place,out of bed,to raise,from low to higher
+see,feel,to sense,4,2,to search by touch,to touch with hands,NA,NA,NA
+see,feel,have an emotion,4,2,to search by touch,to touch with hands,NA,NA,NA
+see,stare,to look fixedly,4,2,fixed look,NA,NA,NA,NA
+see,point,to show with finger,4,2,a place,a mark or dot,NA,NA,NA
+see,point,a compass direction,4,2,a place,a mark or dot,NA,NA,NA
+see,point,to aim,4,2,a place,a mark or dot,NA,NA,NA
+see,imagine,make-believe,4,2,picture in mind,NA,NA,NA,NA
+see,clear,easy to see through,4,4,easy to see through,NA,NA,NA,NA
+see,spot,a dirty stain,4,4,a dirty stain,a little bit,NA,NA,NA
+see,spot,a little bit,4,4,a dirty stain,a little bit,NA,NA,NA
+see,me,myself,4,2,I,NA,NA,NA,NA
+see,eyes,spots on potatoes,6,6,spots on potatoes,NA,NA,NA,NA
+see,observe,to follow,6,6,to follow,to watch,NA,NA,NA
+see,observe,to watch,6,6,to follow,to watch,NA,NA,NA
+see,look,to appear,6,2,try to see,NA,NA,NA,NA
+see,sense,be aware of,6,4,understanding,NA,NA,NA,NA
+see,sense,feeling,6,4,understanding,NA,NA,NA,NA
+see,sense,"seeing or hearing, etc.",6,4,understanding,NA,NA,NA,NA
+see,vision,seeing ahead,6,4,sense of sight,thing seen in imagination,NA,NA,NA
+see,remark,to say,6,6,to say,NA,NA,NA,NA
+see,taste,just a little,6,2,to get the flavor,the flavor of food,NA,NA,NA
+see,see,to understand,6,2,to have power of sight,look at,go find out,NA,NA
+see,that,who,6,2,"not this, the other",NA,NA,NA,NA
+see,you,person(s) spoken to,6,2,person reading this,NA,NA,NA,NA
+see,things,"clothes, belongings",6,4,personal belongings,NA,NA,NA,NA
+see,world,all the people,6,6,all the people,the earth,NA,NA,NA
+see,world,the earth,6,6,all the people,the earth,NA,NA,NA
+see,color,complexion,6,2,"red, blue, etc.",NA,NA,NA,NA
+see,eye,private detective,6,2,hole in a needle,what you see with,to watch closely,NA,NA
+see,investigate,search into,6,6,search into,NA,NA,NA,NA
+see,notice,an announcement,6,2,see and remember,NA,NA,NA,NA
+see,face,turn toward,6,2,to look straight at,"eyes, nose and mouth",NA,NA,NA
+see,face,to meet with courage,6,2,to look straight at,"eyes, nose and mouth",NA,NA,NA
+see,find,"to learn, discover",6,2,get what you lost,NA,NA,NA,NA
+see,find,to come on by chance,6,2,get what you lost,NA,NA,NA,NA
+see,find,valuable discovery,6,2,get what you lost,NA,NA,NA,NA
+see,locate,to settle down,6,4,find,NA,NA,NA,NA
+see,say,right to decide,6,2,to tell or speak,NA,NA,NA,NA
+see,touch,contact,6,2,to feel with the fingers,NA,NA,NA,NA
+see,touch,one of the senses,6,2,to feel with the fingers,NA,NA,NA,NA
+see,image,a reflection of the real object,6,4,picture,NA,NA,NA,NA
+see,down,in the dumps,6,2,toward the ground,NA,NA,NA,NA
+see,there,toward that place,6,2,in that place,NA,NA,NA,NA
+see,regard,respect,6,6,respect,NA,NA,NA,NA
+see,feel,have sympathy,6,2,to search by touch,to touch with hands,NA,NA,NA
+see,point,a unit of scoring,6,2,a place,a mark or dot,NA,NA,NA
+see,point,important idea,6,2,a place,a mark or dot,NA,NA,NA
+see,clear,not mixed up,6,4,easy to see through,NA,NA,NA,NA
+see,clear,make plain,6,4,easy to see through,NA,NA,NA,NA
+see,spot,catch sight of,6,4,a dirty stain,a little bit,NA,NA,NA
+see,sense,the meaning,8,4,understanding,NA,NA,NA,NA
+see,remark,to notice,8,6,to say,NA,NA,NA,NA
+see,taste,good judgment,8,2,to get the flavor,the flavor of food,NA,NA,NA
+see,taste,llikes and dislikes,8,2,to get the flavor,the flavor of food,NA,NA,NA
+see,that,singular of those,8,2,"not this, the other",NA,NA,NA,NA
+see,that,when,8,2,"not this, the other",NA,NA,NA,NA
+see,world,things forming a large whole,8,6,all the people,the earth,NA,NA,NA
+see,world,the universe,8,6,all the people,the earth,NA,NA,NA
+see,color,to blush,8,2,"red, blue, etc.",NA,NA,NA,NA
+see,eye,loop to fasten hook,8,2,hole in a needle,what you see with,to watch closely,NA,NA
+see,face,"surface, front",8,2,to look straight at,"eyes, nose and mouth",NA,NA,NA
+see,browse,glance through,8,8,glance through,NA,NA,NA,NA
+see,locate,put somewhere,8,4,find,NA,NA,NA,NA
+see,image,a physical likeness,8,4,picture,NA,NA,NA,NA
+see,up,away from center of earth,8,2,has risen,at a higher place,out of bed,to raise,from low to higher
+see,up,bringing into notice,8,2,has risen,at a higher place,out of bed,to raise,from low to higher
+see,down,velvety fuzz,8,2,toward the ground,NA,NA,NA,NA
+see,regard,consider,8,6,respect,NA,NA,NA,NA
+see,regard,to look upon,8,6,respect,NA,NA,NA,NA
+see,regard,think highly of,8,6,respect,NA,NA,NA,NA
+see,feel,to believe,8,2,to search by touch,to touch with hands,NA,NA,NA
+see,point,a certain stage,8,2,a place,a mark or dot,NA,NA,NA
+see,clear,to pass without touching,8,4,easy to see through,NA,NA,NA,NA
+see,spot,a place,8,4,a dirty stain,a little bit,NA,NA,NA
