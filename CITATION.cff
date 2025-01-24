@@ -1,0 +1,20 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: MCDI-analysis
+message: >-
+  A suite of analyses related to the MacArthur-Bates CDI,
+  including some unpublished analyses.
+type: software
+authors:
+  - given-names: Trevor
+    family-names: Day
+    email: trevor.day@georgetown.edu
+    affiliation: Georgetown University
+    orcid: 'https://orcid.org/0000-0003-2911-8312'
+identifiers:
+  - type: doi
+    value: 10.1017/S0305000921000283
+    description: 'Day and Elison (2021), J. Child Language'
+license: CC-BY-4.0
