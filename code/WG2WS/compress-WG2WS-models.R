@@ -45,3 +45,7 @@ save(cat_models_stripped, file = "rda_files/cat_models_stripped.rda")
 cw <- readRDS("cwords_model.rds")
 cw_stripped <- strip(cw, keep = "predict")
 save(cw_stripped, file = "rda_files/cw_stripped.rda")
+
+cw_noage <- readRDS("cwords_noage_model.rds")
+cw_noage_stripped <- strip(cw, keep = "predict")
+save(cw_noage_stripped, file = "rda_files/cw_noage_stripped.rda")

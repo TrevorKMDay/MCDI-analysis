@@ -66,6 +66,8 @@ WG2WS <- WS %>%
 lm0_total <- lm(connecting_words ~ WG_total + I(WG_total^2) + I(WG_total^3),
                 data = WG2WS)
 
+saveRDS(lm0_total, "cwords_noage_model.rds")
+
 AIC(lm0_total) # 17937
 summary(lm0_total)$r.squared
 

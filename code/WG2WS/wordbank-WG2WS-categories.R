@@ -7,6 +7,7 @@ for (i in locs)
     setwd(paste0(i, path))
 
 library(tidyverse)
+
 source("../mcdi-setup.R")
 source("wordbank-WG2WS-funcs.R")
 
@@ -59,7 +60,7 @@ models_by_category <- WS_words2 %>%
 
 range(models_by_category$R2)
 
-#           load this guy
+# load this guy
 WS_cats <- read_data("Wordbank/WS-230215.rds") %>%
   select(-understands, -language, -form, -english_gloss, -uni_lemma,
          -ends_with("_category")) %>%
@@ -240,7 +241,7 @@ for (i in 1:4) {
 
 WS_training_R2_sums <- WS_training_R2 %>%
   group_by(data_id, age) %>%
-  summarize(
+  dplyr::summarize(
     WS = sum(cat_total_WS),
     WS_hat1_sum = sum(WS_hat1),
     WS_hat2_sum = sum(WS_hat2),
@@ -253,8 +254,6 @@ round((WS_training_R2_sums %>%
         select(starts_with("WS")) %>%
         cor()) ** 2,
       3)
-
-
 
 ## Trim models ====
 
@@ -282,13 +281,41 @@ AIC <- WS_cats_lms %>%
     lm3_AIC = AIC(lm3),
     lm4_AIC = AIC(lm4),
   ) %>%
-  select(category, ends_with("AIC")) %>%
-  pivot_longer(ends_with("AIC"))
+  select(category, ends_with("AIC"))
 
-ggplot(AIC, aes(x = name, y = value)) +
-  geom_line(aes(group = category)) +
-  facet_wrap(vars(category), scales = "free") +
-  theme_bw()
+AIC_long <- AIC %>%
+  pivot_longer(ends_with("AIC")) %>%
+  arrange(category, name) %>%
+  left_join(leg_cats_tbl, join_by(category)) %>%
+  group_by(category, legible_cat) %>%
+  mutate(
+    diff = c(NA, diff(value))
+  )
+
+ggplot(AIC_long, aes(x = name, y = value)) +
+  geom_line(aes(group = legible_cat)) +
+  scale_x_discrete(labels = c(1:3, "3t", 4)) +
+  facet_wrap(vars(legible_cat), scales = "free") +
+  theme_bw() +
+  labs(x = "Model",  y = "AIC")
+
+AIC_delta <- AIC_long %>%
+  ungroup() %>%
+  dplyr::summarize(
+    diff = round(mean(diff)),
+    .by = name
+  )
+
+AIC_delta2 <- AIC_long %>%
+  ungroup() %>%
+  filter(
+    category != "games_routines"
+  ) %>%
+  dplyr::summarize(
+    diff = round(mean(diff)),
+    .by = name
+  )
+
 
 # Test
 # WG_to_WS("body_parts", wg = 28, wg_total = 1, age = 30)
@@ -338,9 +365,10 @@ if (!file.exists(hat_file)) {
 
 WS_cats_test_models <- left_join(WS_cats_test_models, leg_cats_tbl)
 
-category_plots <- ggplot(WS_cats_test_models, aes(x = cat_total_WS, y = WS_hat1)) +
+category_plots <- ggplot(WS_cats_test_models,
+                         aes(x = cat_total_WS, y = WS_hat1)) +
   geom_point(alpha = 0.1, shape = 20) +
-  geom_smooth() +
+  scale_x_continuous(n.breaks = 3) +
   scale_y_continuous(n.breaks = 3) +
   facet_wrap(vars(legible_cat), scales = "free") +
   theme_bw() +
@@ -359,7 +387,7 @@ category_plots <- ggplot(WS_cats_test_models, aes(x = cat_total_WS, y = WS_hat1)
 
 WS_cats_test_models2 <- WS_cats_test_models %>%
   group_by(data_id, age) %>%
-  summarize(
+  dplyr::summarize(
     WG_total = sum(cat_total_WG),
     WS_total = sum(cat_total_WS),
     WS_hat1 = sum(WS_hat1),
@@ -380,7 +408,7 @@ WS_cats_test_models2 <- WS_cats_test_models %>%
 WS_cats_test_models2 %>%
   pivot_longer(ends_with("err"), values_to = "error") %>%
   group_by(name) %>%
-  summarize(
+  dplyr::summarize(
     mse = mean(error ** 2)
   ) %>%
   mutate(
@@ -391,7 +419,7 @@ WS_cats_err_age <- WS_cats_test_models2 %>%
   select(data_id, age, ends_with("_err")) %>%
   pivot_longer(cols = ends_with("_err")) %>%
   group_by(name, age) %>%
-  summarize(
+  dplyr::summarize(
     m = mean(value),
     sd = sd(value)
   ) %>%
@@ -406,7 +434,7 @@ WS_cats_err_total <- WS_cats_test_models2 %>%
   select(data_id, total_group, ends_with("_err")) %>%
   pivot_longer(cols = ends_with("_err")) %>%
   group_by(name, total_group) %>%
-  summarize(
+  dplyr::summarize(
     m = mean(value),
     sd = sd(value)
   ) %>%
