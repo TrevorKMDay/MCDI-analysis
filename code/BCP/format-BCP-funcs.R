@@ -158,9 +158,17 @@ format.sentences <- function(sentences, s_dict_file) {
 format.gestures <- function(gestures, g_dict_file, inventory.only = TRUE) {
 
   words <- read_csv(g_dict_file, show_col_types = FALSE) %>%
-    filter(
-      item_kind == "word"
+    group_by(category) %>%
+    mutate(
+      # Question number in category
+      question = row_number()
     )
+
+  category_order <- ordered(unique(words$category))
+  item_order <- ordered(words$item_id)
+
+  if (inventory.only)
+    words <- filter(words, item_kind == "word")
 
   gest <- gestures %>%
     select(data_id, gest.Candidate_Age, sex, gest.Administration,
@@ -182,8 +190,6 @@ format.gestures <- function(gestures, g_dict_file, inventory.only = TRUE) {
     separate(x, into = c("subsection", "question"), fill = "left",
              convert = TRUE)
 
-  # words <- g_dict
-
   # Part I.D is the inventory
   gest.ID <- gest %>%
     filter(
@@ -203,14 +209,53 @@ format.gestures <- function(gestures, g_dict_file, inventory.only = TRUE) {
       value = replace(value, value == "says_and_understands", "produces")
     ) %>%
     rename(
-      age = gest.Candidate_Age
+      age = gest.Candidate_Age,
+      item_definition = definition
     )
 
   # If inventory only, return just section I.D,
   # haven't written full section yet
   if (inventory.only)
     return(gest.ID)
-  else
-    return(NA)
+
+  # I.A: first signs; I.B: phrases; I.C: starting to talk; I.D: inventory
+  # II.A: first comm gestures; II.B: games and routines; II.C: actions w/ objs
+  #    II.D: pretending parent; II.E: imitating adult
+  gest2 <- gest %>%
+    filter_out(
+      # This was handled previously
+      part == "I" & section == "D"
+    ) %>%
+    arrange(data_id, gest.Candidate_Age, part, section, question) %>%
+    mutate(
+
+      category = case_when(
+        part == "I" & section == "A" ~ "first_signs",
+        part == "I" & section == "B" ~ "phrases",
+        part == "I" & section == "C" ~ "starting_to_talk",
+        part == "II" & section == "A" ~ "gestures_first",
+        part == "II" & section == "B" ~ "gestures_games",
+        part == "II" & section == "C" ~ "gestures_objects",
+        part == "II" & section == "D" ~ "gestures_parent",
+        part == "II" & section == "E" ~ "gestures_adult",
+      ),
+
+      value = replace_values(value, c("NULL", "not_answered") ~ NA_character_)
+
+    ) %>%
+    left_join(words, by = join_by(category, question)) %>%
+    rename(
+      age = gest.Candidate_Age,
+    ) %>%
+    select(all_of(colnames(gest.ID)))
+
+  gest_all <- bind_rows(gest.ID, gest2) %>%
+    mutate(
+      category = factor(category, levels = category_order),
+      item_id = factor(item_id, levels = item_order)
+    ) %>%
+    arrange(data_id, age, category, item_id)
+
+  return(gest_all)
 
 }

@@ -4,6 +4,13 @@ if(.Platform$OS.type == "unix") {
   setwd("G:/My Drive/Research/MCDI/MCDI-analysis/code/Wordbank")
 }
 
+# New backend for wordbankr
+# install.packages("redivis", repos = c("https://langcog.r-universe.dev",
+#                                       "https://cloud.r-project.org"))
+
+# wordbankr has been taken off CRAN
+remotes::install_github("langcog/wordbankr")
+
 library(readr)
 library(dplyr)
 # Get additional demographics
@@ -26,7 +33,6 @@ WS <- left_join(ws_data, ws_items) %>%
   mutate(
     data_id = as.character(data_id)
   )
-
 
 WG <- left_join(wg_data, wg_items) %>%
   select(-form_type) %>%
@@ -84,3 +90,18 @@ g_dict <- WG %>%
 
 write_csv(s_dict, .data("other/s_dict.csv"))
 write_csv(g_dict, .data("other/g_dict.csv"))
+
+g_dict_all <- WG %>%
+  select(category, item_definition, item_id, item_kind) %>%
+  distinct() %>%
+  arrange(
+    # Order in numeric order, since item_id isn't 0-padded
+    as.numeric(str_remove(item_id, "item_"))
+  ) %>%
+  mutate(
+    # If no category (i.e., not a word), replace with item_kind, e.g., "phrases"
+    # or "gestures_adult"
+    category = if_else(is.na(category), item_kind, category)
+  )
+
+write_csv(g_dict_all, .data("other/g_dict_all.csv"))

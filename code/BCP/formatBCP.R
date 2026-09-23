@@ -38,6 +38,7 @@ mcdi_all1 <- left_join(sent_all1, gest_all1)
 
 s_dict_file <- .data("other/s_dict.csv")
 g_dict_file <- .data("other/g_dict.csv")
+gall_dict_file <- .data("other/g_dict_all.csv")
 
 s_dict <- read_csv(s_dict_file, show_col_types = FALSE)
 WS_1A <- sort(unique(s_dict$category))
@@ -118,6 +119,14 @@ BCP_WS <- mcdi_all %>%
          -ends_with("words")) %>%
   format.sentences(s_dict_file = s_dict_file)
 
+ws_subs <- length(unique(BCP_WS$data_id))
+ws_visits <- BCP_WS %>%
+  select(data_id, age) %>%
+  distinct() %>%
+  nrow()
+
+write_csv(BCP_WS, "BCP_WS.csv")
+
 # Score WS based on Wordbank
 BCP_WS_scored <- score.WS(BCP_WS)
 
@@ -163,6 +172,9 @@ ggplot(BCP_WS_scored[[1]], aes(x = age, y = TOTAL)) +
 ## Words and Gestures ====
 
 BCP_WG <- format.gestures(mcdi_all, g_dict_file, inventory.only = TRUE)
+
+BCP_WG_all <- format.gestures(mcdi_all, gall_dict_file, inventory.only = FALSE)
+write_csv(BCP_WG_all, "BCP_WG_all-260923.csv")
 
 BCP_WG_scored <- score.WG(BCP_WG, produces_value = "produces")
 
