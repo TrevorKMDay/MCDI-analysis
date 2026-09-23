@@ -10,9 +10,9 @@ for (i in locs)
 
 # Libraries ====
 
+library(tidyverse)
 library(readxl)
 library(Hmisc)
-library(tidyverse)
 library(ggExtra)
 
 summarise <- dplyr::summarise
@@ -27,9 +27,9 @@ source("../mcdi-setup.R")
 # Read data =====
 
 # mcdi.date <- "200609"
-mcdi.date <- "220802"
+# mcdi_all1_old <- read_csv(.data("BCP/bcp-UMNUNC-mcdi-200609.csv"))
 
-mcdi_all1_old <- read_csv(.data("BCP/bcp-UMNUNC-mcdi-200609.csv"))
+mcdi.date <- "220802"
 
 sent_all1 <- read_data("BCP/bcp-UMNUNC-mcdiS-220802.csv")
 gest_all1 <- read_data("BCP/bcp-UMNUNC-mcdiG-220802.csv")
@@ -39,7 +39,7 @@ mcdi_all1 <- left_join(sent_all1, gest_all1)
 s_dict_file <- .data("other/s_dict.csv")
 g_dict_file <- .data("other/g_dict.csv")
 
-s_dict <- read_csv(s_dict_file)
+s_dict <- read_csv(s_dict_file, show_col_types = FALSE)
 WS_1A <- sort(unique(s_dict$category))
 
 # Clean up mcdi_all
@@ -80,7 +80,10 @@ mcdi_all <- mcdi_all1 %>%
   ) %>%
   mutate_at(vars(ends_with("morphemes")), as.numeric) %>%
   mutate_at(vars(ends_with("words")), as.numeric) %>%
-  mutate(sent.Candidate_Age = as.numeric(sent.Candidate_Age))
+  mutate(
+    sent.Candidate_Age = as.numeric(sent.Candidate_Age),
+    data_id = as.character(data_id)
+  )
 
 age_lut <- mcdi_all %>%
   select(data_id, contains("age")) %>%
@@ -111,8 +114,9 @@ write_csv(age_lut, .data("BCP/mcdi-age-lut.csv"))
 
 # Format BCP data as Wordbank
 BCP_WS <- mcdi_all %>%
-  select(-starts_with("gest"), -ends_with("morphemes"), -ends_with("words")) %>%
-  format.sentences(s_dict_file)
+  select(-starts_with("gest"), -ends_with("morphemes"),
+         -ends_with("words")) %>%
+  format.sentences(s_dict_file = s_dict_file)
 
 # Score WS based on Wordbank
 BCP_WS_scored <- score.WS(BCP_WS)
