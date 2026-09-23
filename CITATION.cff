@@ -1,0 +1,30 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: MCDI-Analysis
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Trevor K. M.
+    family-names: Day
+    email: trevor.day@georgetown.edu
+    affiliation: Georgetown University
+    orcid: 'https://orcid.org/0000-0003-2911-8312'
+identifiers:
+  - type: doi
+    value: 10.1111/desc.70036
+    description: 'Day et al. (2025), Dev Sci'
+  - type: doi
+    value: 10.1017/S0305000921000283
+    description: 'Day & Elison (2021), JCL'
+abstract: >-
+  A repository of a number of analysis of MacArthur Bates
+  CDI data, including Wordbank, and data collected at the
+  University of Minnesota.
+keywords:
+  - CDI
+  - lexical development
+license: CC-BY-4.0
