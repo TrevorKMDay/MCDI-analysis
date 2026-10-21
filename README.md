@@ -67,13 +67,15 @@ correspond to a code directory.
 
 # Papers from this analyses:
 
- 2. Day, T. K. M., & Elison, J. T. (2021). A broadened estimate of syntactic
+ 1. Day, T. K. M., & Elison, J. T. (2021). A broadened estimate of syntactic
     and lexical ability from the MB-CDI. *Journal of Child Language*, 1–18.
     https://doi.org/10.1017/S0305000921000283
 
- 1. Day, T. K. M., Borovsky, A., Thal, D., & Elison, J. (2024).
-    The CDI in two longitudinal datasets: Methods and differences across
-    decades. *OSF*. https://doi.org/10.31234/osf.io/rwhcy
+ 2. Day, T. K. M., Borovsky, A., Thal, D., & Elison, J. T. (2025).
+    Modeling longitudinal trajectories of word production with the CDI.
+    _Developmental Science_, 28(4), e70036.
+    https://doi.org/10.1111/desc.70036
+
 
 # References
 
