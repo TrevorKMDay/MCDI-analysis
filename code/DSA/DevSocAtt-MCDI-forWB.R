@@ -18,16 +18,46 @@ source("../Wordbank/wordbank-functions.R")
 
 ## Load data ====
 
+dsa0 <- read_csv(.data("DSA/DevSocAtt-MCDI-vrRSB.csv"),
+                show_col_types = FALSE)
+
+table(dsa0$`demographics,Site`, useNA = "ifany")
+
 # DevSocAtt == DSA
-DSA <- read_csv(.data("DSA/DevSocAtt-MCDI-vrRSB.csv")) %>%
+DSA <- dsa0 %>%
   select_all(~str_replace(., ",", ".")) %>%
   select(Identifiers, demographics.CandID, demographics.Sex,
          starts_with("mcdi.")) %>%
   mutate(
+    demographics.CandID = as.character(demographics.CandID),
     across(ends_with(".Candidate_Age"), as.numeric)
   ) %>%
   rename(
     CandID = demographics.CandID
+  )
+
+DSA_cols <- tibble(col = str_subset(colnames(DSA), "mcdi")) %>%
+  mutate(
+    col = str_remove(col, "mcdi.")
+  ) %>%
+  filter(
+    str_detect(col, "^I")
+  ) %>%
+  separate_wider_delim(col, delim = "_",
+                        names = c("sec", "letter", "subsec", "q"),
+                        too_few = "align_start", too_many = "merge") %>%
+  mutate(
+    across(c(subsec, q), as.numeric)
+  ) %>%
+  arrange(sec, letter, subsec, q)
+
+DSA_D <- DSA_cols %>%
+  filter(
+    letter == "D"
+  ) %>%
+  group_by(sec, letter, subsec) %>%
+  summarize(
+    n = max(q)
   )
 
 # CDI ====
@@ -42,20 +72,23 @@ dsa_mcdi <- DSA %>%
   )
 
 # Convert to Wordbank format, renaming for function
-dsa_mcdi_WB <- dsa_mcdi %>%
+dsa_mcdi_WB_unformatted <- dsa_mcdi %>%
   select_all(~str_replace(., "mcdi.", "gest.")) %>%
   rename(
     data_id = CandID,
     # age = gest.Candidate_Age,
     sex = demographics.Sex,
-  ) %>%
-  format.gestures(g_dict_file = .data("WG-example.csv"))
+  )
+
+dsa_mcdi_WB <- format.gestures(dsa_mcdi_WB_unformatted,
+                                g_dict_file = .data("other/g_dict_all.csv"))
 
 ## Demographics ====
 
-dsa_GAB <- read_csv(.data("DSA/DevSocAtt-demo-230111.csv")) %>%
-  separate(Identifiers, into = c("ID", "visit"), sep = ",") %>%
-  select_all(~str_replace(., "demographics,", "")) %>% 
+dsa_GAB <- read_csv(.data("DSA/DevSocAtt-demo-230111.csv"),
+                    show_col_types = FALSE) %>%
+  separate_wider_delim(Identifiers, delim = ",", names = c("ID", "visit")) %>%
+  select_all(~str_replace(., "demographics,", "")) %>%
   filter(
     str_detect(visit, "babar")
   ) %>%
@@ -65,26 +98,30 @@ dsa_GAB <- read_csv(.data("DSA/DevSocAtt-demo-230111.csv")) %>%
   ) %>%
   mutate(
     # Remove bad values
-    gest_age_d = replace(gest_age_d, 
-                         gest_age_d > 1000 | gest_age_d < 160, 
+    gest_age_d = replace(gest_age_d,
+                         gest_age_d > 1000 | gest_age_d < 160,
                          NA)
   )
 
-ggplot(dsa_demo_a, aes(gest_age_d)) +
-  geom_histogram()
+# ggplot(dsa_demo_a, aes(gest_age_d)) +
+#   geom_histogram()
 
 educ_lut = tibble(
-  value = c("jr_high", "some_high", "high", "some_college", "college",
-            "some_grad", "grad"),
-  years = seq(8, 20, 2)
-)
+    value = c("jr_high", "some_high", "high", "some_college", "college",
+              "some_grad", "grad"),
+    years = seq(8, 20, 2)
+  )
 
-# Want: Age, sex, mom years of education, birth order, other lgs, birth wt, 
+# Want: Age, sex, mom years of education, birth order, other lgs, birth wt,
 #       gestational age (not available)
-dsa_demo0 <- read_csv(.data("DSA/DevSocAtt-demoeligb-230111.csv")) %>%
+dsa_demo0 <- read_csv(.data("DSA/DevSocAtt-demoeligb-230111.csv"),
+                        show_col_types = FALSE) %>%
   select_all(~str_replace(., "demographics_eligibility,", "")) %>%
   purrr::discard(~all(is.na(.))) %>%
-  left_join(select(DSA, Identifiers, CandID)) %>%
+  left_join(
+    select(DSA, Identifiers, CandID),
+    by = join_by(Identifiers)
+  ) %>%
   select(CandID, everything()) %>%
   separate(Identifiers, into = c("ID", "visit"), sep = ",") %>%
   filter(
@@ -96,34 +133,34 @@ dsa_demo0 <- read_csv(.data("DSA/DevSocAtt-demoeligb-230111.csv")) %>%
 dsa_birth_wt <- dsa_demo0 %>%
   select(CandID, birth_weight) %>%
   mutate(
-    
+
     # Clean up birth weight
     birth_weight = str_replace(birth_weight, "(DK|N/A|Not Answered)",
                                NA_character_)
-    
+
   ) %>%
-  separate(birth_weight, sep = "lb.", 
+  separate(birth_weight, sep = "lb.",
            into = c("birth_wt_lbs", "birth_wt_oz")) %>%
   mutate(
-    
+
     birth_wt_lbs = str_remove_all(birth_wt_lbs, "[^0-9.]") %>%
       as.numeric(),
-    
+
     # Correct grams values
-    birth_wt_lbs = if_else(birth_wt_lbs > 1000, birth_wt_lbs * 0.002205, 
+    birth_wt_lbs = if_else(birth_wt_lbs > 1000, birth_wt_lbs * 0.002205,
                            birth_wt_lbs),
-    
+
     # Remove oz/0z, spaces, and there's some external periods
     birth_wt_oz = str_remove_all(birth_wt_oz, "( |.z|^[.]|[.]$)") %>%
       as.numeric() %>%
       replace_na(0),
-    
+
     # Sum
     birth_wt_lbs = round(birth_wt_lbs + birth_wt_oz / 16, 4)
-    
+
   ) %>%
   select(-birth_wt_oz)
-  
+
 dsa_educ <- dsa_demo0  %>%
   select(CandID, parent1_education) %>%
   mutate_all(
@@ -132,13 +169,13 @@ dsa_educ <- dsa_demo0  %>%
   left_join(educ_lut, by = c("parent1_education" = "value")) %>%
   rename(
     parent1_educ_yr = years
-  ) 
+  )
 
 ## Siblings ====
 
 dsa_sibs <- dsa_demo0 %>%
   select(CandID, Candidate_Age, Date_taken, matches("sibling._age")) %>%
-  rowwise() 
+  rowwise()
 
 dsa_nosibs <- dsa_sibs %>%
   filter(
@@ -166,9 +203,9 @@ dsa_sibs_excel <- dsa_sibs %>%
     str_detect(sibling1_age, "[0-9]{5}")
   ) %>%
   mutate(
-    # Convert ages from Excel representation (presumably of DOB), 
+    # Convert ages from Excel representation (presumably of DOB),
     #   assuming origin of Jan. 1, 1900
-    across(matches("sibling._age"), 
+    across(matches("sibling._age"),
            ~as_date(as.numeric(.x), origin = ymd("1900-01-01"))),
     across(matches("sibling._age"), ~interval(.x, Date_taken) / years(1))
   )
@@ -226,19 +263,19 @@ dsa_lg <- dsa_demo0 %>%
     lang_secondary = other_home_lang1
   ) %>%
   mutate(
-    
+
     # Manual clean up of these fields
-    
+
     lang_primary = lang_primary %>%
       tolower() %>%
       replace(.,
               . %in% c("emglish", "engliah", "englist", "englsish", "enlish",
                        "ennglish"),
               "english"),
-    
+
     lang_secondary = lang_secondary %>%
       tolower() %>%
-      replace(., . %in% c("no", "no secondary language", "non", "none", "nonw", 
+      replace(., . %in% c("no", "no secondary language", "non", "none", "nonw",
                           "not applicable", "n/a", "n/s", "-", "---"),
               NA_character_) %>%
       str_replace("langauge", "language")
@@ -252,12 +289,33 @@ dsa_demo1 <- dsa_mcdi %>%
     sex = demographics.Sex,
     age_mo = mcdi.Candidate_Age
   ) %>%
-  left_join(dsa_GAB) %>%
-  left_join(dsa_birth_wt) %>%
-  left_join(dsa_educ) %>%
-  left_join(dsa_lg)
+  left_join(dsa_GAB, by = join_by(CandID)) %>%
+  left_join(dsa_birth_wt, by = join_by(CandID)) %>%
+  left_join(dsa_educ, by = join_by(CandID)) %>%
+  left_join(dsa_lg, by = join_by(CandID))
 
 # Save data ====
 
 write_csv(dsa_demo1, "dsa_demo-230111.csv")
 write_csv(dsa_mcdi_WB, "dsa_CDI-230111.csv")
+
+# Sanity check ====
+
+known_rate_words <- dsa_mcdi_WB %>%
+  group_by(item_definition) %>%
+  summarize(
+    n = n(),
+    prod = sum(value == "produces", na.rm = TRUE),
+    und = sum(value == "understands", na.rm = TRUE)
+  ) %>%
+  mutate(
+    across(c(prod, und), ~ .x / n, .names = "{.col}_pct")
+  ) %>%
+  arrange(desc(prod), desc(und))
+
+kids_who_know_star <- dsa_mcdi_WB %>%
+  filter(
+    item_definition == "star",
+    value == "produces"
+  ) %>%
+  arrange(age)

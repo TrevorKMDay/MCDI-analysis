@@ -155,20 +155,24 @@ format.sentences <- function(sentences, s_dict_file) {
 
 }
 
-format.gestures <- function(gestures, g_dict_file, inventory.only = TRUE) {
+format.gestures <- function(gestures, g_dict_file, inventory.only = TRUE,
+                            debug = FALSE) {
 
-  words <- read_csv(g_dict_file, show_col_types = FALSE) %>%
+  g_dict <- read_csv(g_dict_file, show_col_types = FALSE) %>%
     group_by(category) %>%
     mutate(
       # Question number in category
       question = row_number()
     )
 
-  category_order <- ordered(unique(words$category))
-  item_order <- ordered(words$item_id)
+  only_words <- filter(g_dict, item_kind == "word")
+  not_words <- filter_out(g_dict, item_kind == "word")
 
-  if (inventory.only)
-    words <- filter(words, item_kind == "word")
+  part_order <- ordered(c("I", "II"))
+  category_order <- ordered(unique(g_dict$category))
+  item_order <- ordered(g_dict$item_id)
+
+  message("Working on words ...")
 
   gest <- gestures %>%
     select(data_id, gest.Candidate_Age, sex, gest.Administration,
@@ -184,11 +188,20 @@ format.gestures <- function(gestures, g_dict_file, inventory.only = TRUE) {
       !grepl("F_replacement", name)
     ) %>%
     mutate(
-      name = gsub("gest.", "", name)
+      name = str_remove(name, "^gest."),
     ) %>%
-    separate(name, into = c("part", "section", "x"), extra = "merge") %>%
-    separate(x, into = c("subsection", "question"), fill = "left",
-             convert = TRUE)
+    separate_wider_delim(name, delim = "_",
+                          names = c("part", "section", "sec_ques"),
+                          too_many = "merge", cols_remove = !debug) %>%
+    separate_wider_delim(sec_ques, delim = "_",
+                          names = c("subsection", "question"),
+                          too_few = "align_end") %>%
+    mutate(
+      across(c(subsection, question), as.integer),
+      gest.Candidate_Age = as.numeric(gest.Candidate_Age),
+      part = factor(part, levels = part_order, ordered = TRUE)
+    ) %>%
+    arrange(data_id, gest.Candidate_Age, part, section, subsection, question)
 
   # Part I.D is the inventory
   gest.ID <- gest %>%
@@ -198,12 +211,12 @@ format.gestures <- function(gestures, g_dict_file, inventory.only = TRUE) {
     ) %>%
     mutate(
       item_kind = "word",
-      item_id    = rep(words$item_id,    length.out = nrow(.)),
-      category   = rep(words$category,   length.out = nrow(.)),
-      definition = rep(words$item_definition, length.out = nrow(.))
+      item_id    = rep(only_words$item_id,    length.out = nrow(.)),
+      category   = rep(only_words$category,   length.out = nrow(.)),
+      definition = rep(only_words$item_definition, length.out = nrow(.))
     ) %>%
     select(data_id, gest.Candidate_Age, sex, value, item_id, item_kind,
-           category, definition) %>%
+           category, definition, any_of("name")) %>%
     mutate(
       value = replace(value, value == "not_answered", NA),
       value = replace(value, value == "says_and_understands", "produces")
@@ -217,6 +230,8 @@ format.gestures <- function(gestures, g_dict_file, inventory.only = TRUE) {
   # haven't written full section yet
   if (inventory.only)
     return(gest.ID)
+
+  message("Working on gestures+ ...")
 
   # I.A: first signs; I.B: phrases; I.C: starting to talk; I.D: inventory
   # II.A: first comm gestures; II.B: games and routines; II.C: actions w/ objs
@@ -243,7 +258,7 @@ format.gestures <- function(gestures, g_dict_file, inventory.only = TRUE) {
       value = replace_values(value, c("NULL", "not_answered") ~ NA_character_)
 
     ) %>%
-    left_join(words, by = join_by(category, question)) %>%
+    left_join(not_words, by = join_by(category, question)) %>%
     rename(
       age = gest.Candidate_Age,
     ) %>%
@@ -254,7 +269,7 @@ format.gestures <- function(gestures, g_dict_file, inventory.only = TRUE) {
       category = factor(category, levels = category_order),
       item_id = factor(item_id, levels = item_order)
     ) %>%
-    arrange(data_id, age, category, item_id)
+    arrange(data_id, age, item_id)
 
   return(gest_all)
 

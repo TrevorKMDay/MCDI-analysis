@@ -173,8 +173,11 @@ ggplot(BCP_WS_scored[[1]], aes(x = age, y = TOTAL)) +
 
 BCP_WG <- format.gestures(mcdi_all, g_dict_file, inventory.only = TRUE)
 
-BCP_WG_all <- format.gestures(mcdi_all, gall_dict_file, inventory.only = FALSE)
-write_csv(BCP_WG_all, "BCP_WG_all-260923.csv")
+BCP_WG_all <- format.gestures(mcdi_all, gall_dict_file, inventory.only = FALSE,
+                                debug = TRUE)
+
+write_csv(BCP_WG_all, "BCP_WG_all-261021.csv")
+# write_csv(BCP_WG_all, "BCP_WG_all-260923.csv")
 
 BCP_WG_scored <- score.WG(BCP_WG, produces_value = "produces")
 
@@ -277,12 +280,12 @@ mcdi_index <- mcdi_all %>%
   filter(
     gest.Administration == "All" | sent.Administration == "All"
   ) %>%
-  select(data_id, age) %>%
+  select(data_id, ideal_age) %>%
   arrange(data_id) %>%
   group_by(data_id) %>%
   summarise(
-    min_age = min(age, na.rm = TRUE),
-    max_age = max(age, na.rm = TRUE)
+    min_age = min(ideal_age, na.rm = TRUE),
+    max_age = max(ideal_age, na.rm = TRUE)
   ) %>%
   arrange(
     min_age, max_age, data_id
@@ -295,27 +298,24 @@ spag_plot <- mcdi_all %>%
   filter(
     gest.Administration == "All" | sent.Administration == "All"
   ) %>%
-  select(data_id, age, sex) %>%
+  select(data_id, ideal_age, sex) %>%
   filter(
-    !is.na(age)
+    !is.na(ideal_age)
   ) %>%
   left_join(mcdi_index) %>%
   arrange(index) %>%
   na.omit()
 
-spaghetti <- ggplot(spag_plot, aes(x = age, y = index, color = sex)) +
+spaghetti <- ggplot(spag_plot, aes(x = ideal_age, y = index, color = sex)) +
   geom_point(alpha = 0.5) +
   geom_line(aes(group = index), alpha = 0.5) +
   scale_y_discrete(labels = NULL) +
   labs(x = "Age (mo)", y = "Individual") +
   theme_bw()
 
-png("marginal_spaghetti_plot.png", width = 6, height = 3, units = "in",
-    res = 300)
-
 ggMarginal(spaghetti, type = "histogram", margins = "x")
 
-dev.off()
+ggsave("marginal_spaghetti_plot.png", width = 6, height = 3)
 
 ################################################################################
 
